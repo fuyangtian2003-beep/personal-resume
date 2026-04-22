@@ -1,9 +1,9 @@
 /**
- * Interactivity & Rendering Logic for Personal Resume
+ * Interactivity & Rendering & Slider Logic for Personal Resume
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    
+
     // 1. Render Data
     renderHero();
     renderAbout();
@@ -11,29 +11,67 @@ document.addEventListener('DOMContentLoaded', () => {
     renderProjects();
     renderContact();
 
-    // 1.5 Cursor Glow Movement
+    // 1.5 高性能鼠标跟随光效 (使用 rAF 和 transform)
     const glow = document.getElementById('cursor-glow');
-    window.addEventListener('mousemove', (e) => {
-        glow.style.left = e.clientX + 'px';
-        glow.style.top = e.clientY + 'px';
+    let mouseX = 0;
+    let mouseY = 0;
+    let currentX = 0;
+    let currentY = 0;
 
-        // 探测是否悬浮在交互元素上
+    window.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+
+        // 悬浮交互逻辑 (保持不变但优化触发)
         const target = e.target;
-        if (target.closest('a, .btn-primary, .btn-secondary, .glass, .stat-card, .project-card')) {
-            glow.style.width = '800px';
-            glow.style.height = '800px';
-            glow.style.background = 'radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, transparent 70%)';
+        if (target.closest('a, .btn-primary, .btn-secondary, .glass, .stat-card, .project-card, .slide-btn')) {
+            glow.classList.add('glow-expand');
         } else {
-            glow.style.width = '600px';
-            glow.style.height = '600px';
-            glow.style.background = 'radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%)';
+            glow.classList.remove('glow-expand');
         }
     });
 
-    // 2. Navbar Scroll Effect
+    function updateGlow() {
+        // 平滑插值 (Lerp) 让跟随更柔和，同时使用 translate3d 开启硬件加速
+        currentX += (mouseX - currentX) * 0.15;
+        currentY += (mouseY - currentY) * 0.15;
+        glow.style.transform = `translate3d(${currentX}px, ${currentY}px, 0) translate(-50%, -50%)`;
+        requestAnimationFrame(updateGlow);
+    }
+    updateGlow();
+
+    // 2. Page Slider Logic
+    const slider = document.getElementById('page-slider');
+    const arrowRight = document.getElementById('slide-arrow-right');
+    const arrowLeft = document.getElementById('slide-arrow-left');
+
+    arrowRight.addEventListener('click', () => {
+        slider.style.transform = 'translateX(-100vw)';
+        arrowRight.classList.add('hidden');
+        arrowLeft.classList.remove('hidden');
+        // 性能优化：隐藏不显示的页面
+        setTimeout(() => {
+            document.getElementById('resume-page').style.visibility = 'hidden';
+            document.getElementById('showcase-page').style.visibility = 'visible';
+        }, 800);
+    });
+
+    arrowLeft.addEventListener('click', () => {
+        document.getElementById('resume-page').style.visibility = 'visible';
+        slider.style.transform = 'translateX(0)';
+        arrowLeft.classList.add('hidden');
+        arrowRight.classList.remove('hidden');
+        setTimeout(() => {
+            document.getElementById('showcase-page').style.visibility = 'hidden';
+        }, 800);
+    });
+
+    // 3. Navbar & Scroll Logic (Target internal page)
+    const resumePage = document.getElementById('resume-page');
     const navbar = document.getElementById('navbar');
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 50) {
+
+    resumePage.addEventListener('scroll', () => {
+        if (resumePage.scrollTop > 50) {
             navbar.style.background = 'rgba(5, 7, 10, 0.9)';
             navbar.style.height = '70px';
             navbar.style.borderBottom = '1px solid rgba(255, 255, 255, 0.1)';
@@ -44,13 +82,77 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 3. Reveal Sections on Scroll
-    initRevealAnimations();
+    // 4. Reveal Sections on Scroll
+    initRevealAnimations(resumePage);
 
-    // 4. Smooth Scroll
-    initSmoothScroll();
+    // 5. Smooth Scroll
+    initSmoothScroll(resumePage);
+
+    // 6. 初始化粒子背景 (实现 CPU/GPU 负载均衡)
+    initParticles();
 
     // --- Helper Functions ---
+
+    function initParticles() {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const bg = document.querySelector('.bg-gradient');
+        if (!bg) return;
+
+        bg.appendChild(canvas);
+        canvas.style.position = 'absolute';
+        canvas.style.top = '0';
+        canvas.style.left = '0';
+        canvas.style.opacity = '0.3';
+
+        let particles = [];
+        const count = 50;
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        class Particle {
+            constructor() {
+                this.init();
+            }
+            init() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.size = Math.random() * 2;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+            draw() {
+                ctx.fillStyle = 'rgba(99, 102, 241, 0.5)';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < count; i++) particles.push(new Particle());
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+        animate();
+    }
 
     function renderHero() {
         const container = document.getElementById('hero-container');
@@ -167,7 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     }
 
-    function initRevealAnimations() {
+    function initRevealAnimations(scrollContainer) {
         const revealCallback = (entries, observer) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -176,20 +278,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         };
-        const revealObserver = new IntersectionObserver(revealCallback, { threshold: 0.1 });
-        document.querySelectorAll('section, .glass, .stat-card, .project-card').forEach(el => {
+        const revealObserver = new IntersectionObserver(revealCallback, {
+            root: scrollContainer,
+            threshold: 0.1
+        });
+        // 排除 footer，防止底部跳动
+        document.querySelectorAll('section, .glass:not(footer), .stat-card, .project-card').forEach(el => {
             el.classList.add('reveal-hidden');
             revealObserver.observe(el);
         });
     }
 
-    function initSmoothScroll() {
+    function initSmoothScroll(scrollContainer) {
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
                 const target = document.querySelector(this.getAttribute('href'));
                 if (target) {
-                    window.scrollTo({
+                    scrollContainer.scrollTo({
                         top: target.offsetTop - 70,
                         behavior: 'smooth'
                     });
@@ -198,5 +304,5 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    console.log("%c🚀 Resume Data Driven Engine Active", "color: #6366f1; font-weight: bold;");
+    console.log("%c🚀 Page Slider Engine Active", "color: #0ea5e9; font-weight: bold;");
 });

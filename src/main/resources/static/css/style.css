@@ -13,10 +13,10 @@
     --text-muted: #94a3b8;
     --glass-border: rgba(255, 255, 255, 0.1);
     --accent: #f43f5e;
-    
+
     --font-heading: 'Outfit', sans-serif;
     --font-body: 'Inter', sans-serif;
-    
+
     --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -27,22 +27,183 @@
     box-sizing: border-box;
 }
 
-html {
-    scroll-behavior: smooth;
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #000;
 }
 
 body {
-    background-color: var(--bg-dark);
     color: var(--text-main);
     font-family: var(--font-body);
     line-height: 1.6;
-    overflow-x: hidden;
 }
 
 .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 2rem;
+    position: relative;
+    width: 100%;
+}
+
+#app-container {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+    z-index: 5;
+    /* 内容层 */
+}
+
+#page-slider {
+    display: flex;
+    width: 200vw;
+    height: 100vh;
+    transition: transform 1s cubic-bezier(0.7, 0, 0.3, 1);
+    background: transparent;
+    will-change: transform; /* 开启 GPU 加速 */
+}
+
+.page {
+    width: 100vw;
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+    background: transparent;
+}
+
+/* 隐藏滚动条但保留功能 (Chrome/Safari) */
+.page::-webkit-scrollbar {
+    width: 6px;
+}
+
+.page::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.2);
+    border-radius: 10px;
+}
+
+/* Slide Buttons */
+.slide-btn {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2000;
+    cursor: pointer;
+    transition: var(--transition);
+    width: fit-content; /* 核心修复：防止容器撑满全屏遮挡交互 */
+}
+
+#slide-arrow-right {
+    right: 2rem;
+}
+
+#slide-arrow-left {
+    left: 2rem;
+}
+
+.btn-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 50%;
+    color: var(--text-main);
+    transition: width 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), background 0.3s;
+    overflow: hidden;
+    position: relative;
+    padding: 0;
+}
+
+.slide-btn:hover .btn-inner {
+    width: 140px;
+    border-radius: 100px;
+    background: var(--primary);
+    border-color: var(--primary);
+    box-shadow: 0 0 20px var(--primary-glow);
+}
+
+.slide-btn .hint {
+    font-size: 0.75rem;
+    font-weight: 600;
+    opacity: 0;
+    position: absolute;
+    white-space: nowrap;
+    transition: var(--transition);
+    pointer-events: none;
+}
+
+#slide-arrow-right .hint {
+    right: 45px;
+}
+
+#slide-arrow-left .hint {
+    left: 45px;
+}
+
+.slide-btn:hover .hint {
+    opacity: 1;
+}
+
+.slide-btn i {
+    font-size: 1.5rem;
+}
+
+.hidden {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden;
+}
+
+/* Showcase Page Styling */
+#showcase-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at 70% 30%, #1e1b4b 0%, #05070a 100%);
+}
+
+.coming-soon {
+    text-align: center;
+}
+
+.coming-soon h2 {
+    font-size: 4rem;
+    font-family: var(--font-heading);
+    margin-bottom: 1.5rem;
+}
+
+.loading-bar {
+    width: 300px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 2rem auto;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.loading-progress {
+    width: 60%;
+    height: 100%;
+    background: var(--primary);
+    animation: loading 2s ease-in-out infinite alternate;
+}
+
+@keyframes loading {
+    from {
+        transform: translateX(-100%);
+    }
+
+    to {
+        transform: translateX(100%);
+    }
 }
 
 /* Cursor Glow Effect */
@@ -55,10 +216,14 @@ body {
     background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
     border-radius: 50%;
     pointer-events: none;
-    transform: translate(-50%, -50%);
-    z-index: -1;
+    z-index: 2;
+    will-change: transform;
     transition: width 0.3s, height 0.3s;
-    filter: blur(30px);
+}
+
+#cursor-glow.glow-expand {
+    width: 800px;
+    height: 800px;
 }
 
 /* Background Magic */
@@ -69,7 +234,8 @@ body {
     width: 100%;
     height: 100%;
     background: radial-gradient(circle at 50% 50%, #1e1b4b 0%, #05070a 100%);
-    z-index: -2;
+    z-index: 1;
+    /* 最底层 */
 }
 
 .bg-gradient::after {
@@ -80,27 +246,41 @@ body {
     width: 200%;
     height: 200%;
     background: radial-gradient(circle at 30% 30%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 70% 70%, rgba(14, 165, 233, 0.1) 0%, transparent 50%);
-    animation: rotate 20s linear infinite;
+        radial-gradient(circle at 70% 70%, rgba(14, 165, 233, 0.1) 0%, transparent 50%);
+    animation: pulse 15s ease-in-out infinite alternate; /* 改为呼吸动画 */
     z-index: -1;
+    will-change: transform;
 }
 
-@keyframes rotate {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+@keyframes pulse {
+    from {
+        transform: scale(1);
+    }
+
+    to {
+        transform: scale(1.1);
+    }
 }
 
-/* Glassmorphism Utility */
+/* Glassmorphism Utility - 性能优化版 */
 .glass {
-    background: var(--bg-card);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba(15, 18, 25, 0.95); /* 提高不透明度，移除模糊，彻底解放 GPU */
     border: 1px solid var(--glass-border);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+/* 仅在导航栏保留毛玻璃效果，作为视觉核心 */
+#navbar.glass {
+    background: rgba(15, 18, 25, 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 /* Navbar */
 nav {
-    position: fixed;
+    position: sticky;
+    /* 关键：相对于 .page 滚动容器固定 */
     top: 0;
     left: 0;
     width: 100%;
@@ -109,6 +289,8 @@ nav {
     display: flex;
     align-items: center;
     transition: var(--transition);
+    margin-bottom: -80px;
+    /* 让出高度，不占位 */
 }
 
 nav .container {
@@ -150,10 +332,11 @@ nav .container {
 
 /* Hero Section */
 .hero {
-    height: 100vh;
+    min-height: 100vh;
     display: flex;
     align-items: center;
-    padding-top: 80px;
+    padding-top: 100px;
+    /* 增加顶部间距给导航栏 */
     position: relative;
 }
 
@@ -187,6 +370,7 @@ h1 {
 .text-gradient {
     background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -255,10 +439,26 @@ h1 {
     font-size: 0.9rem;
 }
 
-.c-1 { color: #c678dd; } /* const */
-.c-2 { color: #e5c07b; } /* var name */
-.c-3 { color: #61afef; } /* property */
-.c-4 { color: #98c379; } /* string */
+.c-1 {
+    color: #c678dd;
+}
+
+/* const */
+.c-2 {
+    color: #e5c07b;
+}
+
+/* var name */
+.c-3 {
+    color: #61afef;
+}
+
+/* property */
+.c-4 {
+    color: #98c379;
+}
+
+/* string */
 
 /* Scroll Indicator */
 .scroll-indicator {
@@ -290,8 +490,15 @@ h1 {
 }
 
 @keyframes scroll {
-    0% { opacity: 1; transform: translate(-50%, 0); }
-    100% { opacity: 0; transform: translate(-50%, 20px); }
+    0% {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(-50%, 20px);
+    }
 }
 
 /* Sections */
@@ -546,19 +753,32 @@ h1 {
         grid-template-columns: 1fr;
         text-align: center;
     }
+
     .hero-content {
         order: 2;
     }
+
     .hero-visual {
         order: 1;
         max-width: 400px;
         margin: 0 auto;
     }
-    h1 { font-size: 3rem; }
-    .lead { margin: 0 auto 2.5rem; }
-    .nav-links { display: none; }
 
-    .about-grid, .skills-grid, .about-stats {
+    h1 {
+        font-size: 3rem;
+    }
+
+    .lead {
+        margin: 0 auto 2.5rem;
+    }
+
+    .nav-links {
+        display: none;
+    }
+
+    .about-grid,
+    .skills-grid,
+    .about-stats {
         grid-template-columns: 1fr;
         gap: 2rem;
     }
@@ -588,6 +808,10 @@ h1 {
 }
 
 /* Delay for Hero Content */
-#home .hero-content { transition-delay: 0.2s; }
-#home .hero-visual { transition-delay: 0.4s; }
+#home .hero-content {
+    transition-delay: 0.2s;
+}
 
+#home .hero-visual {
+    transition-delay: 0.4s;
+}

@@ -1,114 +1,156 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>个人简历 | 顶级 AI 队友 Antigravity 打造</title>
     <meta name="description" content="一个充满科技感、极致视觉冲击力的顶级个人简历网站。">
-    
+
     <!-- 现代字体: Outfit & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@300;400;600&display=swap"
+        rel="stylesheet">
+
     <!-- 图标库: Remix Icon -->
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
-    
+
     <!-- 核心样式 -->
     <link rel="stylesheet" href="css/style.css">
-    
+
     <!-- 预留 Favicon -->
     <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
 </head>
+
 <body>
     <!-- 鼠标跟随光效 -->
     <div id="cursor-glow"></div>
 
-    <!-- 动态背景背景 -->
+    <!-- 全局背景 -->
     <div class="bg-gradient"></div>
     <div class="bg-overlay"></div>
 
-    <!-- 导航栏 -->
-    <nav id="navbar" class="glass">
-        <div class="container">
-            <a href="#" class="logo">RESUME<span>.</span></a>
-            <ul class="nav-links">
-                <li><a href="#home">首页</a></li>
-                <li><a href="#about">关于</a></li>
-                <li><a href="#skills">技能</a></li>
-                <li><a href="#projects">项目</a></li>
-                <li><a href="#contact" class="btn-primary">联系我</a></li>
-            </ul>
-            <div class="menu-btn"><i class="ri-menu-line"></i></div>
+    <!-- 左右导航箭头 -->
+    <div id="slide-arrow-right" class="slide-btn">
+        <div class="btn-inner">
+            <span class="hint">炫技空间</span>
+            <i class="ri-arrow-right-s-line"></i>
         </div>
-    </nav>
-
-    <main>
-        <!-- Hero Section -->
-        <section id="home" class="hero">
-            <div class="container" id="hero-container">
-                <!-- 由 main.js 渲染 -->
-            </div>
-            <div class="scroll-indicator">
-                <div class="mouse"></div>
-            </div>
-        </section>
-
-        <!-- About Section -->
-        <section id="about" class="section">
-            <div class="container">
-                <div class="section-title">
-                    <h2>关于我<span>.</span></h2>
-                    <div class="line"></div>
-                </div>
-                <div class="about-grid" id="about-container">
-                    <!-- 由 main.js 渲染 -->
-                </div>
-            </div>
-        </section>
-
-        <!-- Skills Section -->
-        <section id="skills" class="section">
-            <div class="container">
-                <div class="section-title">
-                    <h2>核心技能<span>.</span></h2>
-                    <div class="line"></div>
-                </div>
-                <div class="skills-grid" id="skills-container">
-                    <!-- 由 main.js 渲染 -->
-                </div>
-            </div>
-        </section>
-
-        <!-- Projects Section -->
-        <section id="projects" class="section">
-            <div class="container">
-                <div class="section-title">
-                    <h2>精选作品<span>.</span></h2>
-                    <div class="line"></div>
-                </div>
-                <div class="projects-grid" id="projects-container">
-                    <!-- 由 main.js 渲染 -->
-                </div>
-            </div>
-        </section>
-
-        <!-- Contact Section -->
-        <section id="contact" class="section">
-            <div class="container" id="contact-container">
-                <!-- 由 main.js 渲染 -->
-            </div>
-        </section>
-    </main>
-
-    <footer class="glass">
-        <div class="container">
-            <p>&copy; 2026 Bob. Built with ❤️ and Antigravity.</p>
+    </div>
+    <div id="slide-arrow-left" class="slide-btn hidden">
+        <div class="btn-inner">
+            <i class="ri-arrow-left-s-line"></i>
+            <span class="hint">返回简历</span>
         </div>
-    </footer>
+    </div>
+
+    <!-- 主容器：控制水平滑动 -->
+    <div id="app-container">
+        <div id="page-slider">
+            <!-- 页面 1: 简历主页 -->
+            <div id="resume-page" class="page">
+                <!-- 导航栏 -->
+                <nav id="navbar" class="glass">
+                    <div class="container">
+                        <a href="#" class="logo">RESUME<span>.</span></a>
+                        <ul class="nav-links">
+                            <li><a href="#home">首页</a></li>
+                            <li><a href="#about">关于</a></li>
+                            <li><a href="#skills">技能</a></li>
+                            <li><a href="#projects">项目</a></li>
+                            <li><a href="#contact" class="btn-primary">联系我</a></li>
+                        </ul>
+                        <div class="menu-btn"><i class="ri-menu-line"></i></div>
+                    </div>
+                </nav>
+
+                <main>
+                    <!-- Hero Section -->
+                    <section id="home" class="hero">
+                        <div class="container" id="hero-container">
+                            <!-- 由 main.js 渲染 -->
+                        </div>
+                        <div class="scroll-indicator">
+                            <div class="mouse"></div>
+                        </div>
+                    </section>
+
+                    <!-- About Section -->
+                    <section id="about" class="section">
+                        <div class="container">
+                            <div class="section-title">
+                                <h2>关于我<span>.</span></h2>
+                                <div class="line"></div>
+                            </div>
+                            <div class="about-grid" id="about-container">
+                                <!-- 由 main.js 渲染 -->
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Skills Section -->
+                    <section id="skills" class="section">
+                        <div class="container">
+                            <div class="section-title">
+                                <h2>核心技能<span>.</span></h2>
+                                <div class="line"></div>
+                            </div>
+                            <div class="skills-grid" id="skills-container">
+                                <!-- 由 main.js 渲染 -->
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Projects Section -->
+                    <section id="projects" class="section">
+                        <div class="container">
+                            <div class="section-title">
+                                <h2>精选作品<span>.</span></h2>
+                                <div class="line"></div>
+                            </div>
+                            <div class="projects-grid" id="projects-container">
+                                <!-- 由 main.js 渲染 -->
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Contact Section -->
+                    <section id="contact" class="section">
+                        <div class="container" id="contact-container">
+                            <!-- 由 main.js 渲染 -->
+                        </div>
+                    </section>
+                </main>
+
+                <footer class="glass">
+                    <div class="container">
+                        <p>&copy; 2026 Bob. Built with ❤️ and Antigravity.</p>
+                    </div>
+                </footer>
+            </div>
+
+            <!-- 页面 2: 炫技展示页 -->
+            <div id="showcase-page" class="page">
+                <div class="showcase-content">
+                    <div class="container">
+                        <div class="coming-soon">
+                            <h2 class="text-gradient">炫技空间 · 敬请期待</h2>
+                            <p>在这里，我将展示更多硬核的技术实现与视觉特效。</p>
+                            <div class="loading-bar">
+                                <div class="loading-progress"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- 核心逻辑 -->
     <script src="js/data.js"></script>
     <script src="js/main.js"></script>
 </body>
+
 </html>
