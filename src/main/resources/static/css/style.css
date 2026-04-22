@@ -64,7 +64,8 @@ body {
     height: 100vh;
     transition: transform 1s cubic-bezier(0.7, 0, 0.3, 1);
     background: transparent;
-    will-change: transform; /* 开启 GPU 加速 */
+    will-change: transform;
+    /* 开启 GPU 加速 */
 }
 
 .page {
@@ -94,7 +95,8 @@ body {
     z-index: 2000;
     cursor: pointer;
     transition: var(--transition);
-    width: fit-content; /* 核心修复：防止容器撑满全屏遮挡交互 */
+    width: fit-content;
+    /* 核心修复：防止容器撑满全屏遮挡交互 */
 }
 
 #slide-arrow-right {
@@ -165,7 +167,8 @@ body {
 /* Showcase Page Styling */
 #showcase-page {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
+    /* 关键修复：从 center 改为 flex-start，防止内容在手机端被推离视口 */
     justify-content: center;
     background: radial-gradient(circle at 70% 30%, #1e1b4b 0%, #05070a 100%);
 }
@@ -247,7 +250,8 @@ body {
     height: 200%;
     background: radial-gradient(circle at 30% 30%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
         radial-gradient(circle at 70% 70%, rgba(14, 165, 233, 0.1) 0%, transparent 50%);
-    animation: pulse 15s ease-in-out infinite alternate; /* 改为呼吸动画 */
+    animation: pulse 15s ease-in-out infinite alternate;
+    /* 改为呼吸动画 */
     z-index: -1;
     will-change: transform;
 }
@@ -264,7 +268,8 @@ body {
 
 /* Glassmorphism Utility - 性能优化版 */
 .glass {
-    background: rgba(15, 18, 25, 0.95); /* 提高不透明度，移除模糊，彻底解放 GPU */
+    background: rgba(15, 18, 25, 0.95);
+    /* 提高不透明度，移除模糊，彻底解放 GPU */
     border: 1px solid var(--glass-border);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
@@ -814,4 +819,218 @@ h1 {
 
 #home .hero-visual {
     transition-delay: 0.4s;
+}
+
+/* ============================================================
+   Showcase Page (炫技空间) - 实验室风格
+   ============================================================ */
+
+.showcase-wrapper {
+    padding: 120px 5% 60px;
+    min-height: 100vh;
+}
+
+.showcase-header {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    text-align: center;
+    width: 100%;
+}
+
+.showcase-header h2 {
+    font-size: clamp(2.5rem, 8vw, 4.5rem);
+    letter-spacing: -2px;
+    margin-bottom: 1rem;
+    text-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
+}
+
+.showcase-header .subtitle {
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    max-width: 600px;
+    margin: 0 auto;
+    letter-spacing: 2px;
+}
+
+/* 地球英雄区 - 炫技页的门面 */
+.galaxy-container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    /* 占满首屏 */
+    overflow: hidden;
+    background: transparent;
+    /* 彻底透明 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 120px;
+    /* 增加底部留白，防止遮挡下方内容 */
+}
+
+.galaxy-container canvas {
+    display: block;
+}
+
+/* 炫技页包裹层 */
+.showcase-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+/* 展厅布局 */
+.showcase-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 3rem;
+    perspective: 1200px;
+}
+
+/* 实验室卡片 (3D 悬浮效果) */
+.lab-card {
+    position: relative;
+    height: 450px;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    cursor: pointer;
+    transform-style: preserve-3d;
+    transition: transform 0.1s ease-out, border-color 0.3s;
+}
+
+.lab-card:hover {
+    border-color: rgba(99, 102, 241, 0.5);
+}
+
+.lab-card .card-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.6;
+    transition: transform 0.5s, opacity 0.5s;
+    z-index: 0;
+}
+
+.lab-card:hover .card-image {
+    opacity: 0.8;
+    transform: scale(1.1);
+}
+
+.lab-card .card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, #05070a 10%, transparent 60%);
+    z-index: 1;
+}
+
+.lab-card .card-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 2.5rem;
+    z-index: 2;
+    transform: translateZ(50px);
+    /* 关键：文字悬浮在卡片上方 */
+}
+
+.lab-card .card-info h3 {
+    font-size: 1.8rem;
+    margin-bottom: 0.8rem;
+    color: #fff;
+}
+
+.lab-card .card-info p {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* 加载状态指示器 */
+.loading-state {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 100px 0;
+    color: var(--text-secondary);
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-top: 3px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1.5rem;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 768px) {
+    .showcase-wrapper {
+        padding: 80px 20px;
+    }
+
+    .showcase-header h2 {
+        font-size: 2.5rem;
+    }
+}
+
+/* --- 炫技页专用样式 (已隔离) --- */
+/* --- 炫技页专用样式 (优化响应式) --- */
+body .galaxy-container .showcase-header {
+    position: absolute;
+    top: 5%;
+    /* 从 25% 调优至 15%，提升视觉重心 */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    text-align: center;
+    color: white;
+    pointer-events: none;
+    width: 90%;
+    /* 手机端宽度适配 */
+}
+
+body .galaxy-container .showcase-header h2 {
+    font-size: clamp(2rem, 10vw, 4.5rem);
+    /* 使用响应式字号 */
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    letter-spacing: 4px;
+    background: linear-gradient(to bottom, #ffffff, #6366f1);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 50px rgba(99, 102, 241, 0.3);
+    white-space: normal;
+    /* 手机端允许换行 */
+}
+
+body .galaxy-container .showcase-header .subtitle {
+    font-size: clamp(0.9rem, 4vw, 1.4rem);
+    color: rgba(255, 255, 255, 0.8);
+    letter-spacing: clamp(4px, 2vw, 12px);
+    font-weight: 300;
+    display: block;
+    margin-top: 10px;
+    white-space: normal;
+    /* 手机端允许换行 */
 }

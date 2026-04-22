@@ -45,7 +45,7 @@ const RESUME_DATA = {
             link: "#"
         },
         {
-            title: "顶级个人简历",
+            title: "个人简历",
             desc: "极致视觉冲击力的静态简历系统，支持毛玻璃特效与流光动画。",
             img: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=800",
             tags: ["HTML5", "CSS3", "Vanilla JS"],

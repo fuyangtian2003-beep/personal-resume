@@ -40,34 +40,395 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     updateGlow();
 
-    // 2. Page Slider Logic
+    // 2. Page Slider Logic (原味视觉 + 性能冷冻 + 懒加载 + Three.js 3D 引擎)
     const slider = document.getElementById('page-slider');
     const arrowRight = document.getElementById('slide-arrow-right');
     const arrowLeft = document.getElementById('slide-arrow-left');
+    const resumePage = document.getElementById('resume-page');
+    const showcasePage = document.getElementById('showcase-page');
+    let isShowcaseRendered = false;
+    let threeEngine = {
+        scene: null,
+        camera: null,
+        renderer: null,
+        earth: null,
+        animationID: null
+    };
+
+    // 动态加载 Three.js 引擎
+    function loadThreeJS(callback) {
+        if (window.THREE) {
+            callback();
+            return;
+        }
+        console.log("%c📦 Summoning Three.js Engine...", "color: #3b82f6; font-weight: bold;");
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js';
+        script.onload = callback;
+        document.head.appendChild(script);
+    }
 
     arrowRight.addEventListener('click', () => {
+        showcasePage.style.visibility = 'visible';
         slider.style.transform = 'translateX(-100vw)';
         arrowRight.classList.add('hidden');
         arrowLeft.classList.remove('hidden');
-        // 性能优化：隐藏不显示的页面
+
+        loadThreeJS(() => {
+            if (!isShowcaseRendered) {
+                setTimeout(() => {
+                    renderShowcase();
+                    isShowcaseRendered = true;
+                }, 400);
+            } else {
+                setTimeout(() => {
+                    initEarth();
+                    // 手动触发一次 Resize 校准，确保尺寸正确
+                    window.dispatchEvent(new Event('resize'));
+                }, 800);
+            }
+        });
+
         setTimeout(() => {
-            document.getElementById('resume-page').style.visibility = 'hidden';
-            document.getElementById('showcase-page').style.visibility = 'visible';
-        }, 800);
+            resumePage.style.visibility = 'hidden';
+        }, 850);
     });
 
     arrowLeft.addEventListener('click', () => {
-        document.getElementById('resume-page').style.visibility = 'visible';
+        resumePage.style.visibility = 'visible';
         slider.style.transform = 'translateX(0)';
         arrowLeft.classList.add('hidden');
         arrowRight.classList.remove('hidden');
+
+        // 性能冷冻：彻底停止 WebGL 渲染循环
+        if (threeEngine.animationID) {
+            cancelAnimationFrame(threeEngine.animationID);
+            threeEngine.animationID = null;
+            console.log("%c🌍 3D Earth Engine Hibernated", "color: #f43f5e; font-weight: bold;");
+        }
+
         setTimeout(() => {
-            document.getElementById('showcase-page').style.visibility = 'hidden';
-        }, 800);
+            showcasePage.style.visibility = 'hidden';
+        }, 850);
     });
 
+    // --- Showcase Engine (Three.js Edition) ---
+
+    function renderShowcase() {
+        initEarth();
+
+        const gallery = document.getElementById('showcase-gallery');
+        if (!gallery) return;
+
+        const labs = [
+            { title: "三维全息投影", desc: "基于 WebGL 的全息交互系统", img: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&q=80" },
+            { title: "神经网络可视化", desc: "实时呈现 AI 决策链条的拓扑结构", img: "https://images.unsplash.com/photo-1558494949-ef010cbdcc51?w=800&q=80" },
+            { title: "量子加密通信", desc: "端到端非对称加密安全实验台", img: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&q=80" }
+        ];
+
+        gallery.innerHTML = labs.map(lab => `
+            <div class="lab-card">
+                <img src="${lab.img}" class="card-image" alt="${lab.title}" loading="lazy">
+                <div class="card-overlay"></div>
+                <div class="card-info">
+                    <h2 class="badge">Experimental</h2>
+                    <h3>${lab.title}</h3>
+                    <p>${lab.desc}</p>
+                </div>
+            </div>
+        `).join('');
+
+        init3DInteraction();
+        initMouseTrail(); // 初始化粒子拖尾
+    }
+
+    function initMouseTrail() {
+        const wrapper = document.querySelector('.showcase-wrapper');
+        if (!wrapper || document.getElementById('trail-canvas')) return;
+
+        const canvas = document.createElement('canvas');
+        canvas.id = 'trail-canvas';
+        canvas.style.position = 'absolute';
+        canvas.style.top = '0';
+        canvas.style.left = '0';
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+        canvas.style.pointerEvents = 'none'; // 不干扰交互
+        canvas.style.zIndex = '1';
+        wrapper.appendChild(canvas);
+
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        const maxParticles = 1200; // 硬上限
+        const softCap = 500;      // 软上限，开始限流
+        let lastX = 0, lastY = 0;
+        let isVisible = true; // 2D 粒子可见性状态
+
+        // 监听可见性
+        const observer = new IntersectionObserver((entries) => {
+            isVisible = entries[0].isIntersecting;
+        }, { threshold: 0.1 });
+        observer.observe(wrapper);
+
+        function resize() {
+            canvas.width = wrapper.offsetWidth;
+            canvas.height = wrapper.offsetHeight;
+        }
+
+        class Particle {
+            constructor(x, y, vx, vy) {
+                this.x = x;
+                this.y = y;
+                this.vx = vx * 0.3; // 动量缩放
+                this.vy = vy * 0.3;
+                this.alpha = 1;
+                this.originalSize = Math.random() * 3 + 1;
+                this.size = this.originalSize;
+                this.color = '#ffffff';
+                this.life = 1.0;
+
+                // 环境星属性
+                this.isAmbient = false;
+                this.maxAlpha = 1;
+                this.phase = 'in'; // 'in' 为淡入, 'out' 为淡出
+            }
+            update(currentCount) {
+                if (this.isAmbient) {
+                    // 环境星逻辑：极慢的呼吸感
+                    if (this.phase === 'in') {
+                        this.alpha += 0.003;
+                        if (this.alpha >= this.maxAlpha) this.phase = 'out';
+                    } else {
+                        this.alpha -= 0.0015;
+                    }
+                    this.life = this.alpha;
+
+                    // 极微弱的漂移
+                    this.x += this.vx;
+                    this.y += this.vy;
+                } else {
+                    // 鼠标拖尾逻辑
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    this.vx *= 0.98;
+                    this.vy *= 0.98;
+
+                    let decayRate = 0.005;
+                    if (currentCount > softCap) {
+                        const factor = (currentCount - softCap) / (maxParticles - softCap);
+                        decayRate += factor * 0.02;
+                    }
+                    this.alpha -= decayRate;
+                    this.life = this.alpha;
+                }
+
+                // 同步缩小尺寸
+                this.size = this.originalSize * Math.max(0, this.alpha);
+
+                // 边缘检测：碰边即逝 (增加 10px 缓冲，避免边缘闪烁)
+                if (this.x < -10 || this.x > canvas.width + 10 || this.y < -10 || this.y > canvas.height + 10) {
+                    this.life = 0;
+                }
+            }
+            draw() {
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        window.addEventListener('mousemove', (e) => {
+            // 鲁棒性可见性检查
+            if (showcasePage.classList.contains('hidden') || showcasePage.style.visibility === 'hidden') return;
+
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            // 计算速度
+            const dx = x - lastX;
+            const dy = y - lastY;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            // 反瞬移保护：如果位移距离过大（如 > 150px），判定为滚动或瞬移，不产生粒子
+            if (distance < 150 && (Math.abs(dx) > 1 || Math.abs(dy) > 1)) {
+                // 动态产生概率：超过软上限后，产生新粒子的几率线性下降
+                let spawnChance = 1.0;
+                if (particles.length > softCap) {
+                    spawnChance = 1.0 - (particles.length - softCap) / (maxParticles - softCap);
+                }
+
+                if (Math.random() < spawnChance) {
+                    particles.push(new Particle(x, y, dx, dy));
+                }
+
+                // 兜底：如果意外超过硬上限，移除最老的
+                if (particles.length > maxParticles) {
+                    particles.shift();
+                }
+            }
+
+            lastX = x;
+            lastY = y;
+        });
+
+        let frameCount = 0;
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const currentCount = particles.length;
+
+            // 背景星阶梯控制逻辑
+            const ambientCount = particles.filter(p => p.isAmbient).length;
+            const ambientMax = 200;
+            const ambientSoftCap = 100;
+
+            let spawnInterval = 40; // 默认减速生产 (超过 100 颗后)
+            if (ambientCount < ambientSoftCap) {
+                spawnInterval = 5; // 加速生产 (不足 100 颗时)
+            }
+
+            frameCount++;
+            if (frameCount % spawnInterval === 0 && ambientCount < ambientMax) {
+                const rx = Math.random() * canvas.width;
+                const ry = Math.random() * canvas.height;
+
+                const p = new Particle(rx, ry, (Math.random() - 0.5) * 0.1, (Math.random() - 0.5) * 0.1);
+                p.isAmbient = true;
+                p.alpha = 0.01;
+                p.maxAlpha = Math.random() * 0.7 + 0.1;
+                p.originalSize = Math.random() * 2 + 0.5;
+                particles.push(p);
+            }
+
+            particles = particles.filter(p => p.life > 0 && p.alpha > 0);
+            if (isVisible) {
+                particles.forEach(p => {
+                    p.update(currentCount);
+                    p.draw();
+                });
+            }
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', resize);
+        resize();
+        animate();
+    }
+
+    function initEarth() {
+        const container = document.getElementById('earth-container');
+        if (!container || !window.THREE) return;
+        
+        threeEngine.isVisible = true; // 3D 可见性
+        const observer = new IntersectionObserver((entries) => {
+            threeEngine.isVisible = entries[0].isIntersecting;
+        }, { threshold: 0.1 });
+        observer.observe(container);
+
+        // 如果已经初始化过渲染器，只需重启动画循环
+        if (threeEngine.renderer) {
+            animate();
+            console.log("%c🌍 3D Earth Engine Resumed", "color: #10b981; font-weight: bold;");
+            return;
+        }
+
+        const width = container.offsetWidth;
+        const height = container.offsetHeight;
+
+        // 1. Scene & Camera
+        threeEngine.scene = new THREE.Scene();
+        threeEngine.camera = new THREE.PerspectiveCamera(45, width / height, 1, 4000);
+        threeEngine.camera.position.z = 1100; // 配合极致沉降
+
+        // 2. Renderer
+        threeEngine.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        threeEngine.renderer.setSize(width, height);
+        threeEngine.renderer.setPixelRatio(window.devicePixelRatio);
+        container.appendChild(threeEngine.renderer.domElement);
+
+        // 3. Earth Geometry & Texture
+        const loader = new THREE.TextureLoader();
+        // 换回鲜艳的高饱和度贴图
+        const texture = loader.load('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg');
+
+        const geometry = new THREE.SphereGeometry(200, 64, 64);
+        // 使用 MeshBasicMaterial，不需要光照也能保持最高亮度
+        const material = new THREE.MeshBasicMaterial({
+            map: texture,
+            transparent: true,
+            opacity: 0.98
+        });
+        threeEngine.earth = new THREE.Mesh(geometry, material);
+        threeEngine.earth.rotation.y = Math.PI * 0.6; // 初始朝向：亚洲/中国方向
+
+        // 响应式下沉高度处理 (已上移优化)
+        const isMobile = window.innerWidth <= 768;
+        threeEngine.earth.position.y = isMobile ? -50 : -100;
+
+        threeEngine.scene.add(threeEngine.earth);
+
+        // 4. Atmosphere Glow (调亮大气层)
+        const atmoGeo = new THREE.SphereGeometry(208, 64, 64);
+        const atmoMat = new THREE.MeshBasicMaterial({
+            color: 0x6366f1,
+            transparent: true,
+            opacity: 0.25,
+            side: THREE.BackSide
+        });
+        const atmosphere = new THREE.Mesh(atmoGeo, atmoMat);
+        atmosphere.position.y = isMobile ? -50 : -100;
+        threeEngine.scene.add(atmosphere);
+
+        function animate() {
+            threeEngine.animationID = requestAnimationFrame(animate);
+            if (threeEngine.isVisible) {
+                if (threeEngine.earth) {
+                    threeEngine.earth.rotation.y += 0.0002; // 极致优雅的慢速自转
+                }
+                threeEngine.renderer.render(threeEngine.scene, threeEngine.camera);
+            }
+        }
+
+        function onWindowResize() {
+            const w = container.offsetWidth;
+            const h = container.offsetHeight;
+            threeEngine.camera.aspect = w / h;
+            threeEngine.camera.updateProjectionMatrix();
+            threeEngine.renderer.setSize(w, h);
+        }
+
+        window.addEventListener('resize', onWindowResize);
+        animate();
+        console.log("%c🌍 3D Earth Engine Online (Three.js Mode)", "color: #10b981; font-weight: bold;");
+    }
+
+    function init3DInteraction() {
+        const cards = document.querySelectorAll('.lab-card');
+        cards.forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+
+                // 计算旋转角度 (最大 10 度)
+                const rotateX = ((y - centerY) / centerY) * -10;
+                const rotateY = ((x - centerX) / centerX) * 10;
+
+                card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            });
+
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'rotateX(0) rotateY(0)';
+            });
+        });
+    }
+
     // 3. Navbar & Scroll Logic (Target internal page)
-    const resumePage = document.getElementById('resume-page');
     const navbar = document.getElementById('navbar');
 
     resumePage.addEventListener('scroll', () => {
