@@ -148,6 +148,29 @@
                         <div id="showcase-gallery" class="showcase-gallery">
                             <!-- 由 JS 渲染 -->
                         </div>
+
+                        <!-- 游戏区域：星际防线 -->
+                        <div id="game-section" class="game-container">
+                            <div class="game-header">
+                                <div class="game-title">DEFEND THE CORE // 代码保卫战</div>
+                                <div class="game-stats">
+                                    <span id="game-score">SCORE: 0000</span>
+                                    <button id="quit-game-btn" class="btn-quit" title="TERMINATE SYSTEM">QUIT</button>
+                                </div>
+                            </div>
+                            <canvas id="game-canvas"></canvas>
+                            <div id="game-overlay" class="game-overlay">
+                                <div class="overlay-content">
+                                    <h2 class="glitch" data-text="SYSTEM BREACH">SYSTEM BREACH</h2>
+                                    <p>清除所有入侵的 BUG，保卫你的代码库</p>
+                                    <button id="start-game-btn" class="btn-game">INITIALIZE DEFENSE</button>
+                                    <div class="controls-hint">
+                                        <span>[MOUSE] 移动</span>
+                                        <span>[CLICK] 发射脉冲</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

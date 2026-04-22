@@ -1034,3 +1034,210 @@ body .galaxy-container .showcase-header .subtitle {
     white-space: normal;
     /* 手机端允许换行 */
 }
+
+/* --- Game Section: Starship Defender --- */
+.game-container {
+    position: relative;
+    width: 100%;
+    height: 600px;
+    background: rgba(10, 12, 18, 0.8);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: 16px;
+    margin-top: 40px;
+    overflow: hidden;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes shake {
+    0% { transform: translate(0, 0); }
+    25% { transform: translate(5px, 5px); }
+    50% { transform: translate(-5px, -5px); }
+    75% { transform: translate(5px, -5px); }
+    100% { transform: translate(0, 0); }
+}
+
+.game-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(to bottom, rgba(5, 7, 10, 0.8), transparent);
+    z-index: 10;
+    pointer-events: none;
+}
+
+.game-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    letter-spacing: 2px;
+    color: var(--primary-color);
+    text-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+}
+
+.game-stats {
+    font-family: 'Fira Code', monospace;
+    font-size: 18px;
+    color: #fff;
+    display: flex;
+    gap: 30px;
+}
+
+#game-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: crosshair;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    outline: none !important;
+}
+
+.btn-quit {
+    background: rgba(255, 45, 85, 0.1);
+    border: 1px solid rgba(255, 45, 85, 0.4);
+    color: #ff2d55;
+    padding: 2px 12px;
+    font-size: 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Fira Code', monospace;
+    transition: all 0.3s ease;
+    pointer-events: auto;
+}
+
+.btn-quit:hover {
+    background: #ff2d55;
+    color: #fff;
+    box-shadow: 0 0 15px #ff2d55;
+}
+
+.game-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(5, 7, 10, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 20;
+    transition: opacity 0.5s ease;
+}
+
+.game-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.overlay-content {
+    text-align: center;
+    padding: 40px;
+}
+
+.overlay-content h2 {
+    font-size: clamp(32px, 5vw, 48px);
+    margin-bottom: 10px;
+    color: #ff2d55;
+    text-shadow: 0 0 20px rgba(255, 45, 85, 0.5);
+    font-weight: 800;
+}
+
+.overlay-content p {
+    color: #94a3b8;
+    margin-bottom: 30px;
+}
+
+.btn-game {
+    background: transparent;
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    padding: 15px 40px;
+    font-size: 16px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+}
+
+.btn-game:hover {
+    background: var(--primary-color);
+    color: #fff;
+    box-shadow: 0 0 30px var(--primary-color);
+}
+
+.controls-hint {
+    margin-top: 30px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    font-size: 12px;
+    color: #64748b;
+}
+
+/* Glitch Effect */
+.glitch {
+    position: relative;
+    display: inline-block;
+}
+
+.glitch::before,
+.glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+}
+
+.glitch::before {
+    left: 2px;
+    text-shadow: -2px 0 #ff00c1;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim 5s infinite linear alternate-reverse;
+}
+
+.glitch::after {
+    left: -2px;
+    text-shadow: -2px 0 #00fff9, 2px 2px #ff00c1;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitch-anim2 1s infinite linear alternate-reverse;
+}
+
+@keyframes glitch-anim {
+    0% { clip: rect(31px, 9999px, 94px, 0); }
+    20% { clip: rect(62px, 9999px, 42px, 0); }
+    40% { clip: rect(10px, 9999px, 78px, 0); }
+    60% { clip: rect(85px, 9999px, 13px, 0); }
+    80% { clip: rect(54px, 9999px, 22px, 0); }
+    100% { clip: rect(91px, 9999px, 3px, 0); }
+}
+
+@keyframes glitch-anim2 {
+    0% { clip: rect(65px, 9999px, 100px, 0); }
+    20% { clip: rect(12px, 9999px, 55px, 0); }
+    40% { clip: rect(78px, 9999px, 21px, 0); }
+    60% { clip: rect(33px, 9999px, 89px, 0); }
+    80% { clip: rect(5px, 9999px, 47px, 0); }
+    100% { clip: rect(98px, 9999px, 14px, 0); }
+}
+
+@media (max-width: 768px) {
+    .game-container {
+        height: 400px;
+    }
+    .game-stats {
+        font-size: 14px;
+        gap: 15px;
+    }
+}

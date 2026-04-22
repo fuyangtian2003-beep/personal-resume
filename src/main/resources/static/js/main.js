@@ -163,12 +163,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const softCap = 500;      // 软上限，开始限流
         let lastX = 0, lastY = 0;
         let isVisible = true; // 2D 粒子可见性状态
+        let isMouseInGame = false; // 是否在游戏区域
 
         // 监听可见性
         const observer = new IntersectionObserver((entries) => {
             isVisible = entries[0].isIntersecting;
         }, { threshold: 0.1 });
         observer.observe(wrapper);
+
+        // 监听是否进入游戏区域，用来屏蔽全局拖尾
+        container.addEventListener('mouseenter', () => isMouseInGame = true);
+        container.addEventListener('mouseleave', () => isMouseInGame = false);
 
         function resize() {
             canvas.width = wrapper.offsetWidth;
@@ -248,6 +253,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const y = e.clientY - rect.top;
 
             // 计算速度
+            // 游戏区域不产生全局拖尾
+            if (isMouseInGame) return;
+
             const dx = x - lastX;
             const dy = y - lastY;
             const distance = Math.sqrt(dx * dx + dy * dy);
@@ -320,7 +328,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function initEarth() {
         const container = document.getElementById('earth-container');
         if (!container || !window.THREE) return;
-        
+
         threeEngine.isVisible = true; // 3D 可见性
         const observer = new IntersectionObserver((entries) => {
             threeEngine.isVisible = entries[0].isIntersecting;
@@ -666,4 +674,311 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     console.log("%c🚀 Page Slider Engine Active", "color: #0ea5e9; font-weight: bold;");
+
+    // 延迟初始化游戏
+    setTimeout(initStarshipGame, 1000);
 });
+
+/**
+ * --- Starship Defender Game Engine ---
+ * 基于 Canvas 的高性能 2D 射击游戏逻辑
+ */
+function initStarshipGame() {
+    const canvas = document.getElementById('game-canvas');
+    const container = document.getElementById('game-section');
+    const startBtn = document.getElementById('start-game-btn');
+    const quitBtn = document.getElementById('quit-game-btn');
+    const overlay = document.getElementById('game-overlay');
+    const scoreEl = document.getElementById('game-score');
+
+    if (!canvas || !container) return;
+
+    const ctx = canvas.getContext('2d');
+    let isPlaying = false;
+    let isPaused = false;
+    let score = 0;
+    let frameCount = 0;
+
+    // 游戏视口可见性监听
+    let isVisible = false;
+    const observer = new IntersectionObserver((entries) => {
+        isVisible = entries[0].isIntersecting;
+    }, { threshold: 0.1 });
+    observer.observe(container);
+
+    // 实体容器
+    let ship = null;
+    let bullets = [];
+    let enemies = [];
+    let particles = [];
+
+    class Ship {
+        constructor() {
+            this.w = 40;
+            this.h = 40;
+            this.x = canvas.width / 2;
+            this.y = canvas.height - 80;
+            this.targetX = this.x;
+            this.targetY = this.y;
+            this.color = '#6366f1';
+        }
+
+        update(mx, my) {
+            this.targetX = mx;
+            this.targetY = my;
+            this.x += (this.targetX - this.x) * 0.15;
+            this.y += (this.targetY - this.y) * 0.15;
+            this.x = Math.max(this.w, Math.min(canvas.width - this.w, this.x));
+            this.y = Math.max(canvas.height / 2, Math.min(canvas.height - this.h, this.y));
+        }
+
+        draw() {
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.strokeStyle = this.color;
+            ctx.lineWidth = 2;
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = this.color;
+            ctx.beginPath();
+            ctx.moveTo(0, -20);
+            ctx.lineTo(15, 15);
+            ctx.lineTo(0, 8);
+            ctx.lineTo(-15, 15);
+            ctx.closePath();
+            ctx.stroke();
+            ctx.fillStyle = '#f43f5e';
+            ctx.beginPath();
+            ctx.arc(0, 15 + Math.random() * 5, 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+    }
+
+    class Bullet {
+        constructor(x, y) {
+            this.x = x;
+            this.y = y;
+            this.vy = -12;
+            this.alive = true;
+        }
+        update() {
+            this.y += this.vy;
+            if (this.y < -10) this.alive = false;
+        }
+        draw() {
+            ctx.fillStyle = '#00fff9';
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = '#00fff9';
+            ctx.fillRect(this.x - 1, this.y, 2, 10);
+        }
+    }
+
+    class Enemy {
+        constructor() {
+            this.w = 60;
+            this.h = 30;
+            this.x = Math.random() * (canvas.width - this.w) + this.w / 2;
+            this.y = -50;
+            this.vy = 2 + Math.random() * 2;
+            this.alive = true;
+            const labels = ['BUG', 'NULL', '404', 'ERROR', 'CRASH', 'XSS', 'DDOS'];
+            this.text = labels[Math.floor(Math.random() * labels.length)];
+            this.color = '#ff2d55';
+        }
+        update() {
+            this.y += this.vy;
+            if (this.y > canvas.height + 50) this.alive = false;
+        }
+        draw() {
+            ctx.save();
+            ctx.strokeStyle = this.color;
+            ctx.lineWidth = 2;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = this.color;
+            ctx.strokeRect(this.x - this.w / 2, this.y - this.h / 2, this.w, this.h);
+            ctx.fillStyle = this.color;
+            ctx.font = 'bold 12px Fira Code, monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText(this.text, this.x, this.y + 4);
+            ctx.restore();
+        }
+    }
+
+    class ExplosionParticle {
+        constructor(x, y, color) {
+            this.x = x;
+            this.y = y;
+            this.vx = (Math.random() - 0.5) * 6;
+            this.vy = (Math.random() - 0.5) * 6;
+            this.alpha = 1;
+            this.color = color;
+            this.size = Math.random() * 3;
+        }
+        update() {
+            this.x += this.vx;
+            this.y += this.vy;
+            this.alpha -= 0.02;
+        }
+        draw() {
+            ctx.save();
+            ctx.globalAlpha = this.alpha;
+            ctx.fillStyle = this.color;
+            ctx.fillRect(this.x, this.y, this.size, this.size);
+            ctx.restore();
+        }
+    }
+
+    function createExplosion(x, y, color) {
+        for (let i = 0; i < 15; i++) {
+            particles.push(new ExplosionParticle(x, y, color));
+        }
+    }
+
+    function handleCollisions() {
+        bullets.forEach(b => {
+            enemies.forEach(e => {
+                if (b.alive && e.alive) {
+                    const dist = Math.hypot(b.x - e.x, b.y - e.y);
+                    if (dist < 30) {
+                        b.alive = false;
+                        e.alive = false;
+                        score += 100;
+                        scoreEl.innerText = `SCORE: ${score.toString().padStart(4, '0')}`;
+                        createExplosion(e.x, e.y, '#ff2d55');
+                    }
+                }
+            });
+        });
+
+        if (ship) {
+            enemies.forEach(e => {
+                if (e.alive) {
+                    const dist = Math.hypot(ship.x - e.x, ship.y - e.y);
+                    if (dist < 40) {
+                        e.alive = false;
+                        score = Math.max(0, score - 200);
+                        scoreEl.innerText = `SCORE: ${score.toString().padStart(4, '0')}`;
+                        createExplosion(ship.x, ship.y, '#ffffff');
+                        container.style.animation = 'shake 0.2s linear';
+                        setTimeout(() => container.style.animation = '', 200);
+                    }
+                }
+            });
+        }
+    }
+
+    function resize() {
+        const rect = container.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = 600;
+    }
+
+    window.addEventListener('resize', resize);
+    resize();
+
+    let mouseX = canvas.width / 2;
+    let mouseY = canvas.height - 80;
+
+    canvas.addEventListener('mousemove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        mouseX = e.clientX - rect.left;
+        mouseY = e.clientY - rect.top;
+    });
+
+    canvas.addEventListener('mousedown', () => {
+        if (isPlaying) {
+            bullets.push(new Bullet(ship.x, ship.y - 20));
+        }
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+        if (isPlaying) isPaused = true;
+    });
+
+    canvas.addEventListener('mouseenter', () => {
+        if (isPlaying) isPaused = false;
+    });
+
+    quitBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        isPlaying = false;
+        isPaused = false;
+        overlay.classList.remove('hidden');
+        
+        const h2 = overlay.querySelector('h2');
+        const p = overlay.querySelector('p');
+        const btn = overlay.querySelector('button');
+        
+        const text = 'SYSTEM TERMINATED';
+        h2.innerText = text;
+        h2.setAttribute('data-text', text);
+        p.innerText = `最终防御得分: ${score}`;
+        btn.innerText = 'REBOOT SYSTEM';
+    });
+
+    function gameLoop() {
+        if (!isVisible) {
+            requestAnimationFrame(gameLoop);
+            return;
+        }
+        
+        // 强力重置绘图状态，防止阴影残留扩散
+        ctx.shadowBlur = 0;
+        ctx.shadowColor = 'transparent';
+        
+        // 强制使用背景色填充，防止变色 BUG
+        ctx.fillStyle = isPaused ? 'rgba(10, 12, 18, 0.9)' : 'rgba(10, 12, 18, 0.2)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        if (isPaused) {
+            ctx.fillStyle = '#fff';
+            ctx.font = '30px Space Grotesk';
+            ctx.textAlign = 'center';
+            ctx.fillText('PAUSED', canvas.width / 2, canvas.height / 2);
+        }
+
+        if (isPlaying && !isPaused) {
+            frameCount++;
+            ship.update(mouseX, mouseY);
+            ship.draw();
+
+            if (frameCount % Math.max(10, 40 - Math.floor(score / 1000)) === 0) {
+                enemies.push(new Enemy());
+            }
+
+            bullets = bullets.filter(b => b.alive);
+            bullets.forEach(b => { b.update(); b.draw(); });
+
+            enemies = enemies.filter(e => e.alive);
+            enemies.forEach(e => { e.update(); e.draw(); });
+
+            particles = particles.filter(p => p.alpha > 0);
+            particles.forEach(p => { p.update(); p.draw(); });
+
+            handleCollisions();
+        }
+
+        requestAnimationFrame(gameLoop);
+    }
+
+    startBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const h2 = overlay.querySelector('h2');
+        const text = 'INITIALIZE DEFENSE';
+        h2.innerText = text;
+        h2.setAttribute('data-text', text);
+        
+        overlay.classList.add('hidden');
+        isPlaying = true;
+        isPaused = false;
+        ship = new Ship();
+        score = 0;
+        scoreEl.innerText = 'SCORE: 0000';
+        enemies = [];
+        bullets = [];
+        particles = [];
+        frameCount = 0;
+    });
+
+    gameLoop();
+}
