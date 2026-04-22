@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const labs = [
             { title: "三维全息投影", desc: "基于 WebGL 的全息交互系统", img: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&q=80" },
-            { title: "神经网络可视化", desc: "实时呈现 AI 决策链条的拓扑结构", img: "https://images.unsplash.com/photo-1558494949-ef010cbdcc51?w=800&q=80" },
+            { title: "神经网络可视化", desc: "实时呈现 AI 决策链条的拓扑结构", img: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80" },
             { title: "量子加密通信", desc: "端到端非对称加密安全实验台", img: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&q=80" }
         ];
 
@@ -710,35 +710,191 @@ function initStarshipGame() {
     let ship = null;
     let bullets = [];
     let enemies = [];
-    let particles = [];
+    let stars = []; // 星海粒子
+    let shockwaves = []; // EMP 冲击波
+    let screenShake = 0; // 屏幕震动强度
+
+    class Star {
+        constructor() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 2;
+            this.speed = this.size * 0.5; // 远景慢，近景快
+            this.alpha = 0.2 + Math.random() * 0.5;
+        }
+        update() {
+            this.y += this.speed;
+            if (this.y > canvas.height) {
+                this.y = -10;
+                this.x = Math.random() * canvas.width;
+            }
+        }
+        draw() {
+            ctx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
+            ctx.fillRect(this.x, this.y, this.size, this.size);
+        }
+    }
+
+    function initStars() {
+        stars = [];
+        for (let i = 0; i < 150; i++) stars.push(new Star());
+    }
+
+    // 游戏状态增强
+    let powerups = [];
+    const shieldBars = document.querySelectorAll('.bar.shield');
+    const hullBars = document.querySelectorAll('.bar.hull');
 
     class Ship {
         constructor() {
-            this.w = 40;
-            this.h = 40;
-            this.x = canvas.width / 2;
-            this.y = canvas.height - 80;
-            this.targetX = this.x;
-            this.targetY = this.y;
+            this.w = 40; this.h = 40;
+            this.x = canvas.width / 2; this.y = canvas.height - 80;
             this.color = '#6366f1';
+
+            // 生命系统
+            this.maxShield = 3; this.shield = 3;
+            this.maxHull = 2; this.hull = 2;
+            this.lastHitTime = 0;
+
+            // 强化系统
+            this.wingmen = [];
+            this.weaponLevel = 1;
+
+            // 超频系统
+            this.combo = 0;
+            this.comboTimer = 0;
+            this.isOverclocked = false;
+            this.overclockTimer = 0;
+            this.lastAutoShootTime = 0;
+        }
+
+        takeDamage() {
+            if (this.isOverclocked) return; // 超频模式免疫伤害
+
+            // 优先牺牲僚机抵挡伤害
+            if (this.wingmen.length > 0) {
+                const lostWingman = this.wingmen.pop();
+                createExplosion(lostWingman.x, lostWingman.y, lostWingman.color);
+                console.log("%c💥 Wingman Sacrificed!", "color: #ff2d55; font-weight: bold;");
+                return;
+            }
+
+            this.lastHitTime = Date.now();
+            if (this.shield > 0) {
+                this.shield--;
+                container.style.boxShadow = 'inset 0 0 30px rgba(0, 255, 249, 0.5)';
+            } else if (this.hull > 0) {
+                this.hull--;
+                container.style.boxShadow = 'inset 0 0 40px rgba(251, 191, 36, 0.6)';
+                container.style.animation = 'shake 0.2s linear';
+            }
+            this.updateUI();
+            if (this.hull <= 0) gameOver();
+        }
+
+        repair() {
+            if (this.hull < this.maxHull) {
+                this.hull++;
+                this.updateUI();
+                return true;
+            }
+            return false;
+        }
+
+        updateUI() {
+            shieldBars.forEach((bar, i) => {
+                if (i < this.shield) bar.classList.remove('depleted');
+                else bar.classList.add('depleted');
+            });
+            hullBars.forEach((bar, i) => {
+                if (i < this.hull) bar.classList.remove('depleted');
+                else bar.classList.add('depleted');
+            });
+        }
+
+        regenShield() {
+            if (this.shield < this.maxShield && Date.now() - this.lastHitTime > 10000) {
+                this.shield++;
+                this.lastHitTime = Date.now(); // 重置计时器，每10秒回一格
+                this.updateUI();
+                console.log("%c🛡️ Shield Recharged!", "color: #00fff9; font-weight: bold;");
+            }
         }
 
         update(mx, my) {
-            this.targetX = mx;
-            this.targetY = my;
-            this.x += (this.targetX - this.x) * 0.15;
-            this.y += (this.targetY - this.y) * 0.15;
+            this.x += (mx - this.x) * 0.15;
+            this.y += (my - this.y) * 0.15;
             this.x = Math.max(this.w, Math.min(canvas.width - this.w, this.x));
             this.y = Math.max(canvas.height / 2, Math.min(canvas.height - this.h, this.y));
+            this.regenShield();
+
+            // 超频与连击计时器
+            if (this.isOverclocked) {
+                this.overclockTimer--;
+                if (this.overclockTimer <= 0) this.isOverclocked = false;
+
+                // 暴走：全自动射击
+                if (Date.now() - this.lastAutoShootTime > 80) {
+                    this.autoShoot();
+                    this.lastAutoShootTime = Date.now();
+                    screenShake = Math.max(screenShake, 5); // 持续射击震动
+                }
+            }
+            if (this.comboTimer > 0) {
+                this.comboTimer -= 16;
+                if (this.comboTimer <= 0) this.combo = 0;
+            }
+
+            // 僚机跟随
+            this.wingmen.forEach((w, i) => {
+                const offset = i === 0 ? -50 : 50;
+                w.x += (this.x + offset - w.x) * 0.1;
+                w.y += (this.y + 20 - w.y) * 0.1;
+            });
+        }
+
+        autoShoot() {
+            const bulletXOffset = [0];
+            if (this.weaponLevel >= 2) bulletXOffset.push(-15, 15);
+            if (this.weaponLevel >= 3) bulletXOffset.push(-30, 30);
+
+            bulletXOffset.forEach(offset => {
+                const b = new Bullet(this.x + offset, this.y - 20);
+                b.vy = -18; // 暴走弹速更快
+                bullets.push(b);
+            });
         }
 
         draw() {
+            // 超频视觉特效：残影与闪烁
+            if (this.isOverclocked) {
+                ctx.save(); ctx.globalAlpha = 0.3;
+                ctx.translate(this.x + Math.random() * 10 - 5, this.y + Math.random() * 10 - 5);
+                ctx.strokeStyle = '#ff00c1'; ctx.stroke(); ctx.restore();
+            }
+
+            // 绘制僚机
+            this.wingmen.forEach(w => w.draw());
+
             ctx.save();
             ctx.translate(this.x, this.y);
-            ctx.strokeStyle = this.color;
+
+            // 超频颜色切换
+            const mainColor = this.isOverclocked ? '#ff00c1' : this.color;
+            ctx.strokeStyle = mainColor;
             ctx.lineWidth = 2;
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = this.color;
+            ctx.shadowBlur = this.isOverclocked ? 30 : 15;
+            ctx.shadowColor = mainColor;
+
+            // 护盾力场视觉
+            if (this.shield > 0 || this.isOverclocked) {
+                ctx.beginPath();
+                ctx.arc(0, 0, 35, 0, Math.PI * 2);
+                ctx.strokeStyle = this.isOverclocked ? `rgba(255, 0, 193, 0.4)` : `rgba(0, 255, 249, ${0.1 + Math.random() * 0.1})`;
+                ctx.stroke();
+            }
+            // ... (绘制本体逻辑保持不变)
+
             ctx.beginPath();
             ctx.moveTo(0, -20);
             ctx.lineTo(15, 15);
@@ -746,6 +902,7 @@ function initStarshipGame() {
             ctx.lineTo(-15, 15);
             ctx.closePath();
             ctx.stroke();
+
             ctx.fillStyle = '#f43f5e';
             ctx.beginPath();
             ctx.arc(0, 15 + Math.random() * 5, 3, 0, Math.PI * 2);
@@ -773,61 +930,302 @@ function initStarshipGame() {
         }
     }
 
+    class Wingman {
+        constructor(x, y) {
+            this.x = x; this.y = y; this.color = '#00fff9';
+        }
+        draw() {
+            ctx.save(); ctx.translate(this.x, this.y);
+            ctx.strokeStyle = this.color; ctx.lineWidth = 1; ctx.shadowBlur = 5; ctx.shadowColor = this.color;
+            ctx.beginPath(); ctx.moveTo(0, -10); ctx.lineTo(8, 8); ctx.lineTo(-8, 8); ctx.closePath(); ctx.stroke();
+            ctx.restore();
+        }
+        shoot() {
+            bullets.push(new Bullet(this.x, this.y - 10));
+        }
+    }
+
+    class PowerUp {
+        constructor(x, y, type) {
+            this.x = x; this.y = y; this.type = type; // 'HEAL', 'WINGMAN', 'WEAPON'
+            this.vy = 0.8 + Math.random() * 0.4; // 减慢下落速度
+            this.vx = (Math.random() - 0.5) * 2; // 增加水平飘移
+            this.alive = true;
+            this.life = 1800; // 约 30 秒寿命
+            this.colors = { 'HEAL': '#22c55e', 'WINGMAN': '#00fff9', 'WEAPON': '#fbbf24' };
+            this.labels = { 'HEAL': '✚', 'WINGMAN': '🛰️', 'WEAPON': '🚀' };
+        }
+        update() {
+            this.x += this.vx;
+            this.y += this.vy;
+            this.life--;
+
+            // 边缘反弹
+            if (this.x < 15 || this.x > canvas.width - 15) this.vx *= -1;
+            if (this.y > canvas.height - 15) this.vy *= -1;
+            if (this.y < 50) this.vy = Math.abs(this.vy); // 防止弹回顶部消失
+
+            if (this.life <= 0) this.alive = false;
+        }
+        draw() {
+            ctx.save(); ctx.translate(this.x, this.y);
+            // 闪烁效果（快到期时）
+            if (this.life < 300 && frameCount % 10 < 5) ctx.globalAlpha = 0.3;
+
+            ctx.shadowBlur = 10; ctx.shadowColor = this.colors[this.type];
+            ctx.fillStyle = this.colors[this.type];
+            ctx.beginPath(); ctx.arc(0, 0, 12, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#fff'; ctx.font = '12px Arial'; ctx.textAlign = 'center';
+            ctx.fillText(this.labels[this.type], 0, 4); ctx.restore();
+        }
+    }
+
+    class EnemyBullet {
+        constructor(x, y, vx = 0, vy = 5) {
+            this.x = x; this.y = y; this.vx = vx; this.vy = vy; this.alive = true;
+        }
+        update() {
+            this.x += this.vx;
+            this.y += this.vy;
+            if (this.y > canvas.height || this.y < -50 || this.x < -50 || this.x > canvas.width + 50) this.alive = false;
+        }
+        draw() {
+            ctx.fillStyle = '#ff2d55'; ctx.shadowBlur = 5; ctx.shadowColor = '#ff2d55';
+            ctx.beginPath(); ctx.arc(this.x, this.y, 3, 0, Math.PI * 2); ctx.fill();
+        }
+    }
+
+    let enemyBullets = [];
+
+    class Shockwave {
+        constructor(x, y, color) {
+            this.x = x; this.y = y; this.color = color;
+            this.r = 0; this.maxR = 800;
+            this.alive = true;
+            this.width = 20;
+        }
+        update() {
+            this.r += 15;
+            if (this.r > this.maxR) this.alive = false;
+        }
+        draw() {
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+            ctx.strokeStyle = this.color;
+            ctx.lineWidth = this.width * (1 - this.r / this.maxR);
+            ctx.shadowBlur = 20; ctx.shadowColor = this.color;
+            ctx.stroke();
+            ctx.restore();
+        }
+    }
+
     class Enemy {
         constructor() {
-            this.w = 60;
-            this.h = 30;
+            this.w = 60; this.h = 30;
             this.x = Math.random() * (canvas.width - this.w) + this.w / 2;
             this.y = -50;
             this.vy = 2 + Math.random() * 2;
             this.alive = true;
             const labels = ['BUG', 'NULL', '404', 'ERROR', 'CRASH', 'XSS', 'DDOS'];
             this.text = labels[Math.floor(Math.random() * labels.length)];
-            this.color = '#ff2d55';
+            this.isElite = ['XSS', 'CRASH', 'DDOS'].includes(this.text);
+            this.color = this.isElite ? '#ff00c1' : '#ff2d55';
+            this.lastShootTime = 0;
         }
         update() {
             this.y += this.vy;
+            if (this.isElite && Date.now() - this.lastShootTime > 2000 && Math.random() < 0.02) {
+                enemyBullets.push(new EnemyBullet(this.x, this.y + 15));
+                this.lastShootTime = Date.now();
+            }
             if (this.y > canvas.height + 50) this.alive = false;
         }
         draw() {
             ctx.save();
-            ctx.strokeStyle = this.color;
-            ctx.lineWidth = 2;
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = this.color;
+            ctx.strokeStyle = this.color; ctx.lineWidth = this.isElite ? 3 : 2;
+            ctx.shadowBlur = 10; ctx.shadowColor = this.color;
             ctx.strokeRect(this.x - this.w / 2, this.y - this.h / 2, this.w, this.h);
-            ctx.fillStyle = this.color;
-            ctx.font = 'bold 12px Fira Code, monospace';
-            ctx.textAlign = 'center';
-            ctx.fillText(this.text, this.x, this.y + 4);
+            ctx.fillStyle = this.color; ctx.font = 'bold 12px Fira Code, monospace';
+            ctx.textAlign = 'center'; ctx.fillText(this.text, this.x, this.y + 4);
             ctx.restore();
         }
     }
 
     class ExplosionParticle {
         constructor(x, y, color) {
-            this.x = x;
-            this.y = y;
+            this.x = x; this.y = y;
             this.vx = (Math.random() - 0.5) * 6;
             this.vy = (Math.random() - 0.5) * 6;
-            this.alpha = 1;
-            this.color = color;
+            this.alpha = 1; this.color = color;
             this.size = Math.random() * 3;
         }
-        update() {
-            this.x += this.vx;
-            this.y += this.vy;
-            this.alpha -= 0.02;
-        }
+        update() { this.x += this.vx; this.y += this.vy; this.alpha -= 0.02; }
         draw() {
-            ctx.save();
-            ctx.globalAlpha = this.alpha;
+            ctx.save(); ctx.globalAlpha = this.alpha;
             ctx.fillStyle = this.color;
             ctx.fillRect(this.x, this.y, this.size, this.size);
             ctx.restore();
         }
     }
 
+    let boss = null;
+    let isBossMode = false;
+    let spawnedBosses = new Set();
+
+    class Boss {
+        constructor(name, hp, color, dropCount) {
+            this.name = name;
+            this.hp = hp; this.maxHp = hp;
+            this.color = color;
+            this.dropCount = dropCount;
+            this.w = 200; this.h = 60;
+            this.x = canvas.width / 2; this.y = -100;
+            this.targetY = 100;
+            this.vx = name === 'SYSTEM_CRASHER' ? 4 : (name === 'ZERO_DAY_EXPLOIT' ? 2.5 : 2);
+            this.lastShootTime = 0;
+            this.alive = true;
+            this.laserTimer = 0;
+            this.laserActive = 0;
+            this.alpha = 1;
+            this.blinkTimer = 0;
+            this.blinkCooldown = 0;
+            this.healDropTimer = 0; // 新增：战斗中掉落药包计时器
+            this.wingmanDropTimer = 0; // 新增：战斗中掉落僚机计时器
+            this.laserCooldown = 0; // 新增：激光攻击冷却
+        }
+        update() {
+            if (!this.alive) return;
+            // 出场动画
+            if (this.y < this.targetY) this.y += 1.5;
+            else {
+                // 闪现逻辑
+                if (this.blinkTimer > 0) {
+                    this.blinkTimer--;
+                    if (this.blinkTimer > 20) this.alpha -= 0.05; // 前20帧淡出
+                    else if (this.blinkTimer === 20) {
+                        this.x = Math.random() * (canvas.width - this.w) + this.w / 2; // 跃迁
+                    } else this.alpha += 0.05; // 后20帧淡入
+                    this.alpha = Math.max(0, Math.min(1, this.alpha));
+                    return; // 跃迁期间不执行其他逻辑
+                }
+                if (this.blinkCooldown > 0) this.blinkCooldown--;
+                if (this.laserCooldown > 0) this.laserCooldown--;
+
+                // 战斗中掉落补给 (仅限超级 Boss)
+                if (this.name === 'ZERO_DAY_EXPLOIT' && this.blinkTimer === 0) {
+                    this.healDropTimer++;
+                    if (this.healDropTimer >= 300) { // 每5秒掉一个修复包
+                        powerups.push(new PowerUp(this.x, this.y, 'HEAL'));
+                        this.healDropTimer = 0;
+                    }
+                    this.wingmanDropTimer++;
+                    if (this.wingmanDropTimer >= 480) { // 每8秒掉一个僚机
+                        powerups.push(new PowerUp(this.x, this.y, 'WINGMAN'));
+                        this.wingmanDropTimer = 0;
+                    }
+                }
+
+                // 移动逻辑：激光蓄力或发射期间禁止移动
+                if (!(this.laserTimer > 0 || this.laserActive > 0)) {
+                    if (this.name === 'ZERO_DAY_EXPLOIT') {
+                        this.x += this.vx * 1.5;
+                        // 触发闪现判定 (冷却结束且非施法状态)
+                        if (this.blinkCooldown <= 0 && Math.random() < 0.01) {
+                            this.blinkTimer = 40;
+                            this.blinkCooldown = 300; // 5秒冷却
+                        }
+                    } else {
+                        this.x += this.vx;
+                    }
+
+                    if (this.x < this.w / 2 || this.x > canvas.width - this.w / 2) this.vx *= -1;
+                }
+
+                // 射击逻辑
+                const now = Date.now();
+                const interval = this.name === 'ZERO_DAY_EXPLOIT' ? 600 : (this.name === 'SYSTEM_CRASHER' ? 800 : 1500);
+
+                if (now - this.lastShootTime > interval) {
+                    if (this.name === 'ZERO_DAY_EXPLOIT') {
+                        // 1. 扩散式攻击 (360度)
+                        for (let a = 0; a < Math.PI * 2; a += Math.PI / 6) {
+                            enemyBullets.push(new EnemyBullet(this.x, this.y, Math.cos(a) * 4, Math.sin(a) * 4));
+                        }
+                        // 2. 蓄力激光触发判断 (概率 + 冷却判定)
+                        if (this.laserCooldown <= 0 && Math.random() < 0.3) this.laserTimer = 60; // 60帧蓄力
+                    } else {
+                        const bulletCount = this.name === 'PATCH_MINER' ? 3 : 5;
+                        for (let i = -Math.floor(bulletCount / 2); i <= Math.floor(bulletCount / 2); i++) {
+                            enemyBullets.push(new EnemyBullet(this.x + i * 40, this.y + 30, 0, this.name === 'SYSTEM_CRASHER' ? 6 : 4));
+                        }
+                    }
+                    this.lastShootTime = now;
+                }
+
+                // 激光逻辑
+                if (this.laserTimer > 0) {
+                    this.laserTimer--;
+                    if (this.laserTimer === 0) {
+                        this.laserActive = 20; // 持续20帧
+                        this.laserCooldown = 180; // 发射后进入3秒冷却
+                        screenShake = 15;
+                    }
+                }
+                if (this.laserActive > 0) {
+                    this.laserActive--;
+                    // 激光伤害判定
+                    if (ship && Math.abs(ship.x - this.x) < 50) ship.takeDamage();
+                }
+            }
+        }
+        draw() {
+            if (!this.alive) return;
+            ctx.save();
+            ctx.globalAlpha = this.alpha;
+            ctx.strokeStyle = this.color; ctx.lineWidth = 5;
+            ctx.shadowBlur = 20; ctx.shadowColor = this.color;
+            ctx.strokeRect(this.x - this.w / 2, this.y - this.h / 2, this.w, this.h);
+
+            ctx.fillStyle = `rgba(${this.hexToRgb(this.color)}, 0.2)`;
+            ctx.fillRect(this.x - this.w / 2, this.y - this.h / 2, this.w, this.h);
+
+            // 绘制激光蓄力提示
+            if (this.laserTimer > 0) {
+                ctx.fillStyle = `rgba(255, 45, 85, ${0.1 + (60 - this.laserTimer) / 60})`;
+                ctx.fillRect(this.x - 40, this.y + 30, 80, canvas.height);
+            }
+            // 绘制激活的激光
+            if (this.laserActive > 0) {
+                ctx.fillStyle = '#ff2d55';
+                ctx.shadowBlur = 40; ctx.shadowColor = '#ff2d55';
+                ctx.fillRect(this.x - 50, this.y + 30, 100, canvas.height);
+            }
+
+            // 血条
+            const hpWidth = (this.hp / this.maxHp) * this.w;
+            ctx.fillStyle = this.color;
+            ctx.fillRect(this.x - this.w / 2, this.y - this.h / 2 - 15, hpWidth, 5);
+
+            ctx.fillStyle = '#fff'; ctx.font = 'bold 20px Fira Code'; ctx.textAlign = 'center';
+            ctx.fillText(this.name, this.x, this.y + 10);
+            ctx.restore();
+        }
+        hexToRgb(hex) {
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            return `${r}, ${g}, ${b}`;
+        }
+        dropLoot() {
+            for (let i = 0; i < this.dropCount; i++) {
+                const types = ['HEAL', 'WINGMAN', 'WEAPON'];
+                const pX = this.x + (Math.random() - 0.5) * 150;
+                const pY = this.y + (Math.random() - 0.5) * 50;
+                powerups.push(new PowerUp(pX, pY, types[Math.floor(Math.random() * types.length)]));
+            }
+        }
+    }
     function createExplosion(x, y, color) {
         for (let i = 0; i < 15; i++) {
             particles.push(new ExplosionParticle(x, y, color));
@@ -835,42 +1233,119 @@ function initStarshipGame() {
     }
 
     function handleCollisions() {
+        // 子弹 vs 敌人
         bullets.forEach(b => {
+            // 子弹 vs 普通敌人
             enemies.forEach(e => {
-                if (b.alive && e.alive) {
-                    const dist = Math.hypot(b.x - e.x, b.y - e.y);
-                    if (dist < 30) {
-                        b.alive = false;
-                        e.alive = false;
-                        score += 100;
-                        scoreEl.innerText = `SCORE: ${score.toString().padStart(4, '0')}`;
-                        createExplosion(e.x, e.y, '#ff2d55');
+                if (b.alive && e.alive && Math.hypot(b.x - e.x, b.y - e.y) < 30) {
+                    b.alive = false; e.alive = false; score += 100;
+                    scoreEl.innerText = `SCORE: ${score.toString().padStart(4, '0')}`;
+                    createExplosion(e.x, e.y, '#ff2d55');
+
+                    // Combo 处理
+                    if (ship) {
+                        ship.combo++;
+                        ship.comboTimer = 2000;
+                        if (ship.combo >= 15 && !ship.isOverclocked) {
+                            ship.isOverclocked = true;
+                            ship.overclockTimer = 480; // 8秒无敌
+                            console.log("%c🔥 OVERCLOCK ACTIVATED!", "color: #ff00c1; font-weight: bold;");
+                        }
+                    }
+
+                    // 掉落逻辑 (下调至 8% 概率)
+                    if (Math.random() < 0.08) {
+                        const types = ['HEAL', 'WINGMAN', 'WEAPON'];
+                        powerups.push(new PowerUp(e.x, e.y, types[Math.floor(Math.random() * types.length)]));
                     }
                 }
             });
+
+            // 子弹 vs Boss (闪现期间无敌)
+            if (b.alive && isBossMode && boss && boss.alpha > 0.8 && Math.hypot(b.x - boss.x, b.y - boss.y) < 60) {
+                b.alive = false;
+                boss.hp--;
+                createExplosion(b.x, b.y, boss.color);
+                if (boss.hp <= 0) {
+                    isBossMode = false;
+                    score += (boss.maxHp * 100); // 奖励分
+                    createExplosion(boss.x, boss.y, boss.color);
+                    boss.dropLoot(); // 必掉物资包
+                    triggerEMP(); // 击败 Boss 奖励全屏清弹
+                    boss = null;
+                    console.log("%c🏆 BOSS ELIMINATED!", "color: #22c55e; font-weight: bold;");
+                }
+            }
         });
 
         if (ship) {
+            // 敌人 vs 玩家
             enemies.forEach(e => {
-                if (e.alive) {
-                    const dist = Math.hypot(ship.x - e.x, ship.y - e.y);
-                    if (dist < 40) {
-                        e.alive = false;
-                        score = Math.max(0, score - 200);
-                        scoreEl.innerText = `SCORE: ${score.toString().padStart(4, '0')}`;
-                        createExplosion(ship.x, ship.y, '#ffffff');
-                        container.style.animation = 'shake 0.2s linear';
-                        setTimeout(() => container.style.animation = '', 200);
+                if (e.alive && Math.hypot(ship.x - e.x, ship.y - e.y) < 40) {
+                    e.alive = false;
+                    ship.takeDamage();
+                }
+            });
+
+            // 敌方子弹 vs 玩家
+            enemyBullets.forEach(eb => {
+                if (eb.alive && Math.hypot(ship.x - eb.x, ship.y - eb.y) < 25) {
+                    eb.alive = false;
+                    ship.takeDamage();
+                }
+            });
+
+            // 道具 vs 玩家
+            powerups.forEach(p => {
+                if (p.alive && Math.hypot(ship.x - p.x, ship.y - p.y) < 30) {
+                    p.alive = false;
+                    if (p.type === 'HEAL') {
+                        // 能量转换：满状态触发 EMP
+                        if (ship.shield === ship.maxShield && ship.hull === ship.maxHull) {
+                            triggerEMP();
+                        } else {
+                            ship.repair();
+                        }
+                    }
+                    else if (p.type === 'WINGMAN') {
+                        if (ship.wingmen.length < 2) ship.wingmen.push(new Wingman(p.x, p.y));
+                        else score += 500;
+                    } else if (p.type === 'WEAPON') {
+                        ship.weaponLevel = Math.min(3, ship.weaponLevel + 1);
                     }
                 }
             });
         }
+
+        // 冲击波 vs 普通敌人
+        shockwaves.forEach(sw => {
+            enemies.forEach(e => {
+                if (e.alive && Math.hypot(e.x - sw.x, e.y - sw.y) < sw.r) {
+                    e.alive = false;
+                    score += 50;
+                    scoreEl.innerText = `SCORE: ${score.toString().padStart(4, '0')}`;
+                    createExplosion(e.x, e.y, '#ff2d55');
+                }
+            });
+        });
+    }
+
+    function triggerEMP() {
+        if (!ship) return;
+        console.log("%c💥 SHOCKWAVE ACTIVATED!", "color: #fbbf24; font-weight: bold; font-size: 1.2em;");
+        shockwaves.push(new Shockwave(ship.x, ship.y, '#fbbf24'));
+        screenShake = 20; // 强力震动
     }
 
     function resize() {
         const rect = container.getBoundingClientRect();
+        const oldWidth = canvas.width;
         canvas.width = rect.width;
         canvas.height = 600;
+        // 仅在初次或宽度剧变时初始化流星，防止缩放时抖动
+        if (stars.length === 0 || Math.abs(oldWidth - canvas.width) > 100) {
+            initStars();
+        }
     }
 
     window.addEventListener('resize', resize);
@@ -886,9 +1361,28 @@ function initStarshipGame() {
     });
 
     canvas.addEventListener('mousedown', () => {
-        if (isPlaying) {
+        if (!isPlaying || !ship || isPaused) return;
+
+        // 核心射击逻辑：根据武器等级决定弹道数量
+        if (ship.weaponLevel === 1) {
             bullets.push(new Bullet(ship.x, ship.y - 20));
+        } else if (ship.weaponLevel === 2) {
+            bullets.push(new Bullet(ship.x - 10, ship.y - 20));
+            bullets.push(new Bullet(ship.x + 10, ship.y - 20));
+        } else {
+            bullets.push(new Bullet(ship.x, ship.y - 25));
+            bullets.push(new Bullet(ship.x - 15, ship.y - 15));
+            bullets.push(new Bullet(ship.x + 15, ship.y - 15));
         }
+
+        // 僚机同步火力支援
+        ship.wingmen.forEach(w => w.shoot());
+
+        // 触发射击视觉闪烁特效
+        const flash = document.createElement('div');
+        flash.className = 'shoot-flash';
+        container.appendChild(flash);
+        setTimeout(() => flash.remove(), 50);
     });
 
     canvas.addEventListener('mouseleave', () => {
@@ -904,15 +1398,14 @@ function initStarshipGame() {
         isPlaying = false;
         isPaused = false;
         overlay.classList.remove('hidden');
-        
+
         const h2 = overlay.querySelector('h2');
         const p = overlay.querySelector('p');
-        const btn = overlay.querySelector('button');
-        
-        const text = 'SYSTEM TERMINATED';
-        h2.innerText = text;
-        h2.setAttribute('data-text', text);
-        p.innerText = `最终防御得分: ${score}`;
+        const btn = document.getElementById('start-game-btn');
+
+        h2.innerText = 'MISSION ABORTED';
+        h2.setAttribute('data-text', 'MISSION ABORTED');
+        p.innerText = `LAST KNOWN SCORE: ${score}`;
         btn.innerText = 'REBOOT SYSTEM';
     });
 
@@ -921,14 +1414,22 @@ function initStarshipGame() {
             requestAnimationFrame(gameLoop);
             return;
         }
-        
+
         // 强力重置绘图状态，防止阴影残留扩散
         ctx.shadowBlur = 0;
         ctx.shadowColor = 'transparent';
-        
+
         // 强制使用背景色填充，防止变色 BUG
         ctx.fillStyle = isPaused ? 'rgba(10, 12, 18, 0.9)' : 'rgba(10, 12, 18, 0.2)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 屏幕震动
+        ctx.save();
+        if (screenShake > 0) {
+            ctx.translate(Math.random() * screenShake - screenShake / 2, Math.random() * screenShake - screenShake / 2);
+            screenShake *= 0.9;
+            if (screenShake < 0.5) screenShake = 0;
+        }
 
         if (isPaused) {
             ctx.fillStyle = '#fff';
@@ -939,15 +1440,50 @@ function initStarshipGame() {
 
         if (isPlaying && !isPaused) {
             frameCount++;
+
+            // 超频模式边缘特效
+            if (ship && ship.isOverclocked) {
+                ctx.strokeStyle = `rgba(255, 0, 193, ${0.3 + Math.random() * 0.2})`;
+                ctx.lineWidth = 10;
+                ctx.strokeRect(0, 0, canvas.width, canvas.height);
+            }
+
+            // 绘制星海背景
+            stars.forEach(s => { s.update(); s.draw(); });
+
             ship.update(mouseX, mouseY);
             ship.draw();
 
-            if (frameCount % Math.max(10, 40 - Math.floor(score / 1000)) === 0) {
-                enemies.push(new Enemy());
+            // 阶梯式 Boss 战触发 (3000, 10000, 30000, 100000)
+            if (!isBossMode && !boss) {
+                if (score >= 100000 && !spawnedBosses.has('ZERO_DAY_EXPLOIT')) {
+                    spawnBoss('ZERO_DAY_EXPLOIT', 500, '#ff2d55', 10);
+                } else if (score >= 30000 && !spawnedBosses.has('SYSTEM_CRASHER')) {
+                    spawnBoss('SYSTEM_CRASHER', 120, '#ff00c1', 3);
+                } else if (score >= 10000 && !spawnedBosses.has('LOGIC_EATER')) {
+                    spawnBoss('LOGIC_EATER', 50, '#00fff9', 2);
+                } else if (score >= 3000 && !spawnedBosses.has('PATCH_MINER')) {
+                    spawnBoss('PATCH_MINER', 20, '#fbbf24', 1);
+                }
+            }
+
+            if (isBossMode && boss) {
+                boss.update();
+                boss.draw();
+                // Boss 战期间允许少量小怪出现 (4倍稀疏)
+                if (frameCount % 160 === 0) enemies.push(new Enemy());
+            } else {
+                // 普通小怪生成逻辑
+                if (frameCount % Math.max(10, 40 - Math.floor(score / 1000)) === 0) {
+                    enemies.push(new Enemy());
+                }
             }
 
             bullets = bullets.filter(b => b.alive);
             bullets.forEach(b => { b.update(); b.draw(); });
+
+            enemyBullets = enemyBullets.filter(eb => eb.alive);
+            enemyBullets.forEach(eb => { eb.update(); eb.draw(); });
 
             enemies = enemies.filter(e => e.alive);
             enemies.forEach(e => { e.update(); e.draw(); });
@@ -955,10 +1491,30 @@ function initStarshipGame() {
             particles = particles.filter(p => p.alpha > 0);
             particles.forEach(p => { p.update(); p.draw(); });
 
+            powerups = powerups.filter(p => p.alive);
+            powerups.forEach(p => { p.update(); p.draw(); });
+
+            shockwaves = shockwaves.filter(sw => sw.alive);
+            shockwaves.forEach(sw => { sw.update(); sw.draw(); });
+
             handleCollisions();
         }
 
+        ctx.restore(); // 结束屏幕震动
         requestAnimationFrame(gameLoop);
+    }
+
+    function spawnBoss(name, hp, color, drops) {
+        isBossMode = true;
+        boss = new Boss(name, hp, color, drops);
+        spawnedBosses.add(name);
+        console.log(`%c⚠️ BOSS INCOMING: ${name}`, `color: ${color}; font-weight: bold; font-size: 1.5em;`);
+
+        // 特事特办：超级 Boss 进场直接激发玩家狂暴
+        if (name === 'ZERO_DAY_EXPLOIT' && ship) {
+            ship.isOverclocked = true;
+            ship.overclockTimer = 600; // 10秒狂暴
+        }
     }
 
     startBtn.addEventListener('click', (e) => {
@@ -967,18 +1523,39 @@ function initStarshipGame() {
         const text = 'INITIALIZE DEFENSE';
         h2.innerText = text;
         h2.setAttribute('data-text', text);
-        
+
         overlay.classList.add('hidden');
         isPlaying = true;
         isPaused = false;
         ship = new Ship();
+        ship.updateUI(); // 同步满血状态到 UI
         score = 0;
         scoreEl.innerText = 'SCORE: 0000';
         enemies = [];
         bullets = [];
         particles = [];
+        powerups = []; // 清空上局掉落
+        enemyBullets = []; // 清空上局敌弹
+        shockwaves = []; // 清空上局冲击波
+        boss = null;
+        isBossMode = false;
+        spawnedBosses.clear(); // 重置 Boss 出场记录
         frameCount = 0;
+        screenShake = 0;
     });
+
+    function gameOver() {
+        isPlaying = false;
+        overlay.classList.remove('hidden');
+        const h2 = overlay.querySelector('h2');
+        const p = overlay.querySelector('p');
+        const btn = document.getElementById('start-game-btn');
+
+        h2.innerText = 'CORE TERMINATED';
+        h2.setAttribute('data-text', 'CORE TERMINATED');
+        p.innerText = `FINAL DEFENSE SCORE: ${score}`;
+        btn.innerText = 'REBOOT & RETALIATE';
+    }
 
     gameLoop();
 }

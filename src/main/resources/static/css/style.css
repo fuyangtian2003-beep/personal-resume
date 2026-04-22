@@ -1049,41 +1049,36 @@ body .galaxy-container .showcase-header .subtitle {
 }
 
 @keyframes shake {
-    0% { transform: translate(0, 0); }
-    25% { transform: translate(5px, 5px); }
-    50% { transform: translate(-5px, -5px); }
-    75% { transform: translate(5px, -5px); }
-    100% { transform: translate(0, 0); }
+    0% {
+        transform: translate(0, 0);
+    }
+
+    25% {
+        transform: translate(5px, 5px);
+    }
+
+    50% {
+        transform: translate(-5px, -5px);
+    }
+
+    75% {
+        transform: translate(5px, -5px);
+    }
+
+    100% {
+        transform: translate(0, 0);
+    }
 }
 
-.game-header {
-    position: absolute;
-    top: 0;
-    left: 0;
+.game-container {
+    position: relative;
     width: 100%;
-    padding: 20px 30px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: linear-gradient(to bottom, rgba(5, 7, 10, 0.8), transparent);
-    z-index: 10;
-    pointer-events: none;
-}
-
-.game-title {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 14px;
-    letter-spacing: 2px;
-    color: var(--primary-color);
-    text-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
-}
-
-.game-stats {
-    font-family: 'Fira Code', monospace;
-    font-size: 18px;
-    color: #fff;
-    display: flex;
-    gap: 30px;
+    height: 600px;
+    background: #05070a;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
 }
 
 #game-canvas {
@@ -1215,29 +1210,162 @@ body .galaxy-container .showcase-header .subtitle {
 }
 
 @keyframes glitch-anim {
-    0% { clip: rect(31px, 9999px, 94px, 0); }
-    20% { clip: rect(62px, 9999px, 42px, 0); }
-    40% { clip: rect(10px, 9999px, 78px, 0); }
-    60% { clip: rect(85px, 9999px, 13px, 0); }
-    80% { clip: rect(54px, 9999px, 22px, 0); }
-    100% { clip: rect(91px, 9999px, 3px, 0); }
+    0% {
+        clip: rect(31px, 9999px, 94px, 0);
+    }
+
+    20% {
+        clip: rect(62px, 9999px, 42px, 0);
+    }
+
+    40% {
+        clip: rect(10px, 9999px, 78px, 0);
+    }
+
+    60% {
+        clip: rect(85px, 9999px, 13px, 0);
+    }
+
+    80% {
+        clip: rect(54px, 9999px, 22px, 0);
+    }
+
+    100% {
+        clip: rect(91px, 9999px, 3px, 0);
+    }
 }
 
 @keyframes glitch-anim2 {
-    0% { clip: rect(65px, 9999px, 100px, 0); }
-    20% { clip: rect(12px, 9999px, 55px, 0); }
-    40% { clip: rect(78px, 9999px, 21px, 0); }
-    60% { clip: rect(33px, 9999px, 89px, 0); }
-    80% { clip: rect(5px, 9999px, 47px, 0); }
-    100% { clip: rect(98px, 9999px, 14px, 0); }
+    0% {
+        clip: rect(65px, 9999px, 100px, 0);
+    }
+
+    20% {
+        clip: rect(12px, 9999px, 55px, 0);
+    }
+
+    40% {
+        clip: rect(78px, 9999px, 21px, 0);
+    }
+
+    60% {
+        clip: rect(33px, 9999px, 89px, 0);
+    }
+
+    80% {
+        clip: rect(5px, 9999px, 47px, 0);
+    }
+
+    100% {
+        clip: rect(98px, 9999px, 14px, 0);
+    }
+}
+
+.game-container {
+    position: relative;
+    width: 100%;
+    height: 600px;
+    background: #0a0c12;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+}
+
+.game-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(to bottom, rgba(5, 7, 10, 0.8), transparent);
+    z-index: 10;
+    pointer-events: none;
+}
+
+.game-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    letter-spacing: 2px;
+    color: var(--primary-color);
+    text-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+}
+
+.game-stats {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    pointer-events: auto;
+    font-family: 'Fira Code', monospace;
+    font-size: 16px;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+#game-score {
+    letter-spacing: 1px;
+}
+
+/* 游戏血条矩阵 - 独立定位到左下角 */
+.health-matrix {
+    position: absolute;
+    bottom: 30px;
+    left: 30px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    z-index: 11;
+    pointer-events: none;
+}
+
+.shield-bars, .hull-bars {
+    display: flex;
+    gap: 4px;
+}
+
+.bar {
+    width: 26px;
+    height: 6px;
+    border-radius: 1px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bar.shield {
+    background: #00fff9;
+    box-shadow: 0 0 15px rgba(0, 255, 249, 0.4);
+}
+
+.bar.hull {
+    background: #fbbf24;
+    box-shadow: 0 0 15px rgba(251, 191, 36, 0.4);
+}
+
+.bar.depleted {
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: none;
+    filter: brightness(0.2);
+}
+
+.health-matrix::after {
+    content: 'CORE STATUS';
+    position: absolute;
+    bottom: -15px; /* 移动到血条下方 */
+    left: 0;
+    font-size: 8px;
+    color: rgba(255, 255, 255, 0.3);
+    letter-spacing: 1.5px;
 }
 
 @media (max-width: 768px) {
     .game-container {
         height: 400px;
     }
+
     .game-stats {
         font-size: 14px;
         gap: 15px;
     }
-}
+}

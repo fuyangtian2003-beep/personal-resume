@@ -1,25 +1,28 @@
-# Personal Resume - 顶级个人简历网站
+# Personal Resume & Interactive Showcase
 
-> "排障如割草、逻辑如丝滑、文档如史诗"
+基于 **Java 21** + **Spring Boot** 构建的工业级个人简历展示系统。
 
-## 🚀 项目愿景
-本项目旨在通过 **Java 21**、**Spring Boot 4.x** 以及 **现代前端技术**，打造一个视觉震撼、体验流畅的顶级个人简历展示平台。它不仅是一个简历，更是一个展示个人技术审美与工程能力的“活”的艺术品。
+## 🌟 核心亮点：Starship Defender (星际防线)
 
-## 🛠 技术栈
-- **后端**: Java 21, Spring Boot 4.0.5, Maven, Lombok
-- **前端**: HTML5, Modern CSS (Glassmorphism, CSS Variables), Vanilla JavaScript
-- **交互**: AOS (Animate On Scroll), Remix Icons (SVG)
-- **设计风格**: 深色模式 (Dark Mode), 毛玻璃拟态 (Glassmorphism), 动态流光渐变
+在简历展示页中深度集成了基于 HTML5 Canvas 渲染的 2D 射击游戏，展现了对高性能图形渲染和复杂游戏逻辑的处理能力。
 
-## 📂 目录结构
-- `src/main/java`: 后端业务逻辑（预留）
-- `src/main/resources/static`: 前端核心代码 (HTML, CSS, JS)
-- `database-tables-spec.md`: 数据库设计说明
-- `problem.md`: 故障排除编年史
-- `goodies.md`: 绝妙设计灵感集锦
+### 核心引擎功能：
+- **🌌 Parallax Background**: 三层视差滚动星海背景，打造沉浸式太空感。
+- **🛡️ Dual-Layer Survival**: 护盾（自动回充）+ 结构（硬件受损）的双层生命矩阵设计。
+- **🛰️ Wingman System**: 具备牺牲机制的僚机系统，支持同步火力支援。
+- **🔥 Overclock Mode**: 连击（Combo）驱动的超频爆发系统，支持无敌状态与视觉残影。
+- **⚡ EMP Overload**: 能量溢出转化机制，全屏清扫逻辑。
+- **👾 Epic Boss Fights**: 2000分阶梯式里程碑 Boss 战（Logic Black Hole）。
 
-## 📜 军规
-1. 总是保持原子级逻辑更新。
-2. 严禁全量覆盖代码，优先使用增量更新。
-3. 文档先行，保持 `problem.md` 和 `goodies.md` 的更新。
-4. 保证响应式体验，适配全设备。
+## 🛠️ 技术栈
+- **Backend**: Java 21, Spring Boot 3.x
+- **Frontend**: Vanilla JS, HTML5 Canvas, CSS3 (Neon Glow Aesthetics)
+- **Deployment**: Local JAR execution support
+
+## 🎮 游戏操作
+- **移动**: 鼠标跟随 (Smooth Lerp)
+- **射击**: 鼠标左键
+- **生存**: 自动脱战护盾回充 (10s)
+
+---
+*Created with ❤️ by BOB & Antigravity AI*
