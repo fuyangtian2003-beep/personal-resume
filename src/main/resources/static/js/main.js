@@ -729,19 +729,60 @@ function initStarshipGame() {
             this.x = Math.random() * canvas.width;
             this.y = Math.random() * canvas.height;
             this.size = Math.random() * 2;
-            this.speed = this.size * 0.5; // 远景慢，近景快
+            this.speed = this.size * 0.5 + 0.5; // 基础速度
             this.alpha = 0.2 + Math.random() * 0.5;
+            this.chars = "0123456789ABCDEF$#@%&*+-/<>[]";
+            this.char = this.chars[Math.floor(Math.random() * this.chars.length)];
         }
         update() {
-            this.y += this.speed;
+            // 计算曲率动力学权重 (warpFactor: 0 -> 1 -> 0)
+            let warpFactor = 0;
+            if (ship && ship.isOverclocked) {
+                const timeLeft = ship.overclockTimer;
+                const transition = 60; // 1秒(60帧)过渡期
+                if (timeLeft > 480 - transition) warpFactor = (480 - timeLeft) / transition;
+                else if (timeLeft < transition) warpFactor = timeLeft / transition;
+                else warpFactor = 1.0;
+            }
+
+            let speedMult = 1 + (11 * warpFactor);
+            this.y += this.speed * speedMult;
+            
             if (this.y > canvas.height) {
-                this.y = -10;
+                this.y = -20;
                 this.x = Math.random() * canvas.width;
+                this.char = this.chars[Math.floor(Math.random() * this.chars.length)];
             }
         }
         draw() {
-            ctx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
-            ctx.fillRect(this.x, this.y, this.size, this.size);
+            let warpFactor = 0;
+            if (ship && ship.isOverclocked) {
+                const timeLeft = ship.overclockTimer;
+                const transition = 60;
+                if (timeLeft > 480 - transition) warpFactor = (480 - timeLeft) / transition;
+                else if (timeLeft < transition) warpFactor = timeLeft / transition;
+                else warpFactor = 1.0;
+            }
+
+            // 1. 渲染代码流 (亮度压低)
+            if (warpFactor > 0.01) {
+                ctx.save();
+                ctx.fillStyle = '#00fff9';
+                const fontSize = this.size * 8 + 8;
+                ctx.font = `${fontSize}px monospace`;
+                ctx.globalAlpha = this.alpha * warpFactor * 0.4; // 基础透明度 0.4
+                ctx.fillText(this.char, this.x, this.y);
+                ctx.restore();
+            }
+
+            // 2. 渲染原始星空 (与代码流平滑交替)
+            if (warpFactor < 0.99) {
+                ctx.save();
+                ctx.globalAlpha = this.alpha * (1 - warpFactor);
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(this.x, this.y, this.size, this.size);
+                ctx.restore();
+            }
         }
     }
 
