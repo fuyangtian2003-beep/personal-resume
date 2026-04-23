@@ -64,9 +64,25 @@
                             <li><a href="#projects">项目</a></li>
                             <li><a href="#contact" class="btn-primary">联系我</a></li>
                         </ul>
-                        <div class="menu-btn"><i class="ri-menu-line"></i></div>
+                        <div class="nav-actions">
+                            <div class="menu-btn" id="menu-btn">
+                                <i class="ri-menu-line"></i>
+                                <div class="dropdown-menu" id="dropdown-menu">
+                                    <div class="dropdown-item" id="view-achievements">
+                                        <i class="ri-medal-line"></i> 访客成就
+                                    </div>
+                                    <div class="dropdown-divider"></div>
+                                    <a href="#home" class="dropdown-item mobile-only">首页</a>
+                                    <a href="#about" class="dropdown-item mobile-only">关于</a>
+                                    <a href="#skills" class="dropdown-item mobile-only">技能</a>
+                                    <a href="#projects" class="dropdown-item mobile-only">项目</a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </nav>
+
+                
 
                 <main>
                     <!-- Hero Section -->
@@ -201,6 +217,24 @@
             <img src="https://i.postimg.cc/WT7ySHV8/9ea996c6d8067148fd202045dbc68f0a.jpg" id="qr-img" class="qr-image" alt="微信二维码">
             <p style="color: var(--text-muted); font-size: 0.9rem;">添加时请备注：来自个人简历</p>
             <div class="close-modal" id="close-modal-btn">[ 点击关闭 ]</div>
+        </div>
+    </div>
+
+    <!-- 成就中心 Modal (移至此处以脱离 transform 容器) -->
+    <div id="achievement-modal" class="modal-overlay">
+        <div class="modal-content achievement-modal-content">
+            <div class="modal-header">
+                <h2><i class="ri-trophy-line"></i> 访客成就中心</h2>
+                <button class="modal-close" id="close-achievement-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="achievement-grid" id="achievement-grid">
+                    <!-- 由 JS 渲染 -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <p class="status-hint">已解锁 <span id="unlocked-count">0</span> / <span id="total-count">0</span></p>
+            </div>
         </div>
     </div>
 

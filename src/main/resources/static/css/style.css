@@ -1682,3 +1682,256 @@ body .galaxy-container .showcase-header .subtitle {
 .close-modal:hover {
     color: var(--primary);
 }
+
+/* --- 下拉菜单 & 成就中心 专题样式 --- */
+.nav-actions {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.menu-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 10px;
+    transition: var(--transition);
+    color: var(--text-main);
+    font-size: 1.5rem;
+    position: relative;
+    z-index: 1001;
+}
+
+.menu-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--primary);
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: calc(100% + 15px);
+    right: 0;
+    width: 200px;
+    background: rgba(15, 18, 25, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 15px;
+    padding: 0.8rem;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.menu-btn.active .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-item {
+    padding: 0.8rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.dropdown-item i {
+    font-size: 1.1rem;
+}
+
+.dropdown-item:hover {
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--primary);
+}
+
+.dropdown-divider {
+    height: 1px;
+    background: var(--glass-border);
+    margin: 0.5rem 0.8rem;
+}
+
+.mobile-only {
+    display: none;
+}
+
+/* 成就中心 Modal 终极显形 */
+.achievement-modal-content {
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) scale(1) !important;
+    width: 600px !important;
+    max-width: 95% !important;
+    min-height: 300px !important;
+    background: #0a0c10 !important;
+    border: 2px solid #6366f1 !important;
+    box-shadow: 0 0 100px rgba(99, 102, 241, 0.5);
+    display: flex !important;
+    flex-direction: column;
+    z-index: 20005 !important;
+    border-radius: 20px;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.modal-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--glass-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.modal-header h2 {
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    color: var(--primary);
+    margin: 0 !important;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.8rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.modal-close:hover {
+    color: var(--accent);
+    transform: rotate(90deg);
+}
+
+.modal-body {
+    padding: 2rem;
+    max-height: 65vh;
+    overflow-y: auto;
+}
+
+/* 赛博风格滚动条 */
+.modal-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.3);
+    border-radius: 10px;
+    border: 1px solid rgba(99, 102, 241, 0.1);
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+    box-shadow: 0 0 10px var(--primary-glow);
+}
+
+.achievement-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+.achievement-item {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    padding: 1.2rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    transition: var(--transition);
+    opacity: 0.3;
+    filter: grayscale(1);
+    position: relative;
+}
+
+.achievement-item.unlocked {
+    opacity: 1;
+    filter: grayscale(0);
+    background: rgba(99, 102, 241, 0.05);
+    border-color: rgba(99, 102, 241, 0.3);
+}
+
+.achievement-item.unlocked::after {
+    content: 'UNLOCKED';
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 0.6rem;
+    font-weight: 900;
+    color: var(--primary);
+    letter-spacing: 1px;
+    opacity: 0.6;
+}
+
+.item-icon {
+    font-size: 2rem;
+    min-width: 55px;
+    height: 55px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 14px;
+}
+
+.item-info h4 {
+    font-size: 1.05rem;
+    margin-bottom: 0.3rem;
+    color: var(--text-main);
+}
+
+.item-info p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+    margin: 0;
+}
+
+.modal-footer {
+    padding: 1.2rem 2rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-top: 1px solid var(--glass-border);
+}
+
+.status-hint {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.status-hint span {
+    color: var(--primary);
+    font-weight: 800;
+    text-shadow: 0 0 10px var(--primary-glow);
+}
+
+/* 适配移动端 */
+@media (max-width: 768px) {
+    .nav-links {
+        display: none;
+    }
+    .mobile-only {
+        display: flex;
+    }
+}

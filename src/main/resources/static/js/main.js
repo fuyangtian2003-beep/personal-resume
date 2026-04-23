@@ -121,9 +121,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!gallery) return;
 
         const labs = [
-            { title: "三维全息投影", desc: "基于 WebGL 的全息交互系统", img: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&q=80" },
-            { title: "神经网络可视化", desc: "实时呈现 AI 决策链条的拓扑结构", img: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80" },
-            { title: "量子加密通信", desc: "端到端非对称加密安全实验台", img: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&q=80" }
+            { title: "3D 地球同步轨道", desc: "基于 Three.js 的实时地球渲染系统", img: "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&q=80" },
+            { title: "赛博交互终端", desc: "集成自动化引导的命令行交互系统", img: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80" },
+            { title: "星舰防御系统", desc: "基于 Canvas 的高性能街机游戏", img: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&q=80" }
         ];
 
         gallery.innerHTML = labs.map(lab => `
@@ -2033,12 +2033,34 @@ function initStarshipGame() {
 
     // 滚动监听成就
     let scrollAchieved = false;
-    window.addEventListener('scroll', () => {
-        if (!scrollAchieved && (window.innerHeight + window.scrollY) >= document.body.offsetHeight - 100) {
+    const mainPage = document.getElementById('main-page');
+
+    function checkScroll(e) {
+        const target = e ? e.target : mainPage;
+        if (!target || !target.scrollHeight) return;
+
+        const scrollBottom = (target === window || target === document) 
+            ? (window.innerHeight + window.scrollY) 
+            : (target.scrollTop + target.clientHeight);
+        const totalHeight = (target === window || target === document)
+            ? document.documentElement.scrollHeight
+            : target.scrollHeight;
+        
+        if (!scrollAchieved && scrollBottom >= totalHeight - 200) {
             window.unlockAchievement('EXPLORER');
             scrollAchieved = true;
+            window.removeEventListener('scroll', checkScroll);
+            if (mainPage) mainPage.removeEventListener('scroll', checkScroll);
         }
-    });
+    }
+
+    window.addEventListener('scroll', checkScroll, true);
+    document.addEventListener('scroll', checkScroll, true);
+    if (mainPage) {
+        mainPage.addEventListener('scroll', checkScroll);
+    }
+    
+    setTimeout(() => checkScroll({ target: mainPage }), 2000);
 
     // --- UI Helpers ---
     window.showToast = function(message) {
@@ -2061,13 +2083,99 @@ function initStarshipGame() {
         if (modal) modal.classList.remove('show');
     };
 
-    // 绑定弹窗关闭（点击背景或关闭按钮）
-    const modal = document.getElementById('wechat-modal');
-    if (modal) {
-        modal.addEventListener('click', (e) => {
-            if (e.target.id === 'wechat-modal' || e.target.id === 'close-modal-btn') {
-                closeWechatModal();
+    // --- 下拉菜单 & 成就中心 逻辑 ---
+    const menuBtn = document.getElementById('menu-btn');
+    const achievementModal = document.getElementById('achievement-modal');
+    const closeAchievementBtn = document.getElementById('close-achievement-modal');
+    const viewAchievementsBtn = document.getElementById('view-achievements');
+    const achievementGrid = document.getElementById('achievement-grid');
+    const unlockedCountEl = document.getElementById('unlocked-count');
+    const totalCountLabelEl = document.getElementById('total-count');
+
+    // 切换下拉菜单
+    if (menuBtn) {
+        menuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            menuBtn.classList.toggle('active');
+        });
+    }
+
+    // 点击外部关闭下拉菜单
+    document.addEventListener('click', () => {
+        if (menuBtn) menuBtn.classList.remove('active');
+    });
+
+    // 点击菜单项后自动关闭下拉菜单
+    document.querySelectorAll('.dropdown-item').forEach(item => {
+        item.addEventListener('click', () => {
+            if (menuBtn) menuBtn.classList.remove('active');
+        });
+    });
+
+    // 打开成就 Modal
+    if (viewAchievementsBtn && achievementModal) {
+        viewAchievementsBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log("Opening achievement modal...");
+            renderAchievementModal();
+            
+            // 延迟一丢丢，给浏览器时间渲染 innerHTML
+            setTimeout(() => {
+                achievementModal.classList.add('show');
+                console.log("Modal HTML content:", achievementGrid.innerHTML); // 打印渲染出的内容
+            }, 50);
+            
+            if (menuBtn) menuBtn.classList.remove('active');
+        });
+    }
+
+    // 关闭成就 Modal
+    if (closeAchievementBtn && achievementModal) {
+        closeAchievementBtn.addEventListener('click', () => {
+            achievementModal.classList.remove('show');
+        });
+    }
+
+    if (achievementModal) {
+        achievementModal.addEventListener('click', (e) => {
+            if (e.target === achievementModal) {
+                achievementModal.classList.remove('show');
             }
         });
+    }
+
+    function renderAchievementModal() {
+        console.log("Rendering achievements...", { achievementGrid, achievementManager, ACHIEVEMENTS });
+        if (!achievementGrid || !achievementManager || !ACHIEVEMENTS) {
+            console.error("Missing core components for achievement rendering");
+            return;
+        }
+        
+        const unlockedIds = achievementManager.unlocked || [];
+        const totalKeys = Object.keys(ACHIEVEMENTS);
+        console.log(`Found ${totalKeys.length} total achievements, ${unlockedIds.length} unlocked`);
+
+        if (unlockedCountEl) unlockedCountEl.innerText = unlockedIds.length;
+        if (totalCountLabelEl) totalCountLabelEl.innerText = totalKeys.length;
+
+        if (totalKeys.length === 0) {
+            achievementGrid.innerHTML = '<p style="text-align:center; padding:2rem; color:var(--text-muted);">暂无成就数据...</p>';
+            return;
+        }
+
+        achievementGrid.innerHTML = totalKeys.map(key => {
+            const ach = ACHIEVEMENTS[key];
+            const isUnlocked = unlockedIds.includes(ach.id);
+            return `
+                <div class="achievement-item ${isUnlocked ? 'unlocked' : ''}">
+                    <div class="item-icon">${isUnlocked ? ach.icon : '<i class="ri-lock-2-line"></i>'}</div>
+                    <div class="item-info">
+                        <h4 style="color: #fff;">${isUnlocked ? ach.title : '已锁定'}</h4>
+                        <p>${isUnlocked ? ach.desc : '继续探索简历以解锁该成就...'}</p>
+                    </div>
+                </div>
+            `;
+        }).join('');
     }
 }
