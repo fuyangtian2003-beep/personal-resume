@@ -600,7 +600,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const commands = {
             'help': 'Available commands: [whoami, ls, cat, help, clear, exit]',
-            'whoami': `${RESUME_DATA.profile.name} - ${RESUME_DATA.profile.role}. A code architect specializing in high-performance web systems and visual experiences.`,
+            'whoami': `${RESUME_DATA.profile.chineseName} - ${RESUME_DATA.profile.role}. A code architect specializing in high-performance web systems and visual experiences.`,
             'ls': 'skills/  projects/  experience/  achievements/',
             'cat skills': 'Core: Java 21, Spring Boot, Three.js, Redis. <br>Design: Glassmorphism, UI/UX Engineering.',
             'cat projects': 'Recent: School Marketplace, Starship Defender Engine, Personal Resume (Current).',
