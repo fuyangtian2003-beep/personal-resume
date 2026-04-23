@@ -1184,7 +1184,6 @@ function initStarshipGame() {
             ctx.restore();
         }
     }
- bitumen
 
     class ExplosionParticle {
         constructor(x, y, color) {
