@@ -35,7 +35,7 @@ for /f %%t in ('git tag -l "backup-%TODAY%_*"') do set /a TODAY_COUNT+=1
 
 if %TODAY_COUNT% GTR 3 (
     for /f "skip=3" %%t in ('git tag -l "backup-%TODAY%_*" --sort=-version:refname') do (
-        echo [Cleanup] Daily count > 3, deleting older: %%t
+        echo [Cleanup] Daily count ^> 3, deleting older: %%t
         git tag -d %%t
     )
 )
@@ -47,7 +47,7 @@ for /f %%t in ('git tag -l "backup-*"') do set /a TOTAL_COUNT+=1
 
 if %TOTAL_COUNT% GTR 9 (
     for /f "skip=9" %%t in ('git tag -l "backup-*" --sort=-version:refname') do (
-        echo [Cleanup] Total count > 9, deleting oldest: %%t
+        echo [Cleanup] Total count ^> 9, deleting oldest: %%t
         git tag -d %%t
     )
 )

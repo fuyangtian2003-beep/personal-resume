@@ -415,6 +415,11 @@ document.addEventListener('DOMContentLoaded', () => {
         window.addEventListener('resize', onWindowResize);
         animate();
         console.log("%c🌍 3D Earth Engine Online (Three.js Mode)", "color: #10b981; font-weight: bold;");
+
+        // 成就触发：环球旅行者 (点击地球容器)
+        container.addEventListener('mousedown', () => {
+            window.unlockAchievement('GLOBE_TROTTER');
+        });
     }
 
     function init3DInteraction() {
@@ -764,12 +769,17 @@ function initStarshipGame() {
             // 强化系统
             this.wingmen = [];
             this.weaponLevel = 1;
+            this.wingmanLevel = 0; // 新增：僚机强化等级 (0-3)
 
             // 超频系统
             this.combo = 0;
             this.comboTimer = 0;
             this.isOverclocked = false;
             this.overclockTimer = 0;
+            // 视觉系统
+            this.shieldScale = 0; // 护盾缩放
+            this.shieldAlpha = 0; // 护盾透明度
+            this.shieldHitPulse = 0; // 受击震荡强度
             this.lastAutoShootTime = 0;
         }
 
@@ -779,14 +789,16 @@ function initStarshipGame() {
             // 优先牺牲僚机抵挡伤害
             if (this.wingmen.length > 0) {
                 const lostWingman = this.wingmen.pop();
+                this.wingmanLevel = 0; // 核心：僚机阵亡，增益清零
                 createExplosion(lostWingman.x, lostWingman.y, lostWingman.color);
-                console.log("%c💥 Wingman Sacrificed!", "color: #ff2d55; font-weight: bold;");
+                console.log("%c💥 Wingman Sacrificed! Buffs Reset.", "color: #ff2d55; font-weight: bold;");
                 return;
             }
 
             this.lastHitTime = Date.now();
             if (this.shield > 0) {
                 this.shield--;
+                this.shieldHitPulse = 1.5; // 触发护盾受击视觉脉冲
                 container.style.boxShadow = 'inset 0 0 30px rgba(0, 255, 249, 0.5)';
             } else if (this.hull > 0) {
                 this.hull--;
@@ -833,6 +845,16 @@ function initStarshipGame() {
             this.y = Math.max(canvas.height / 2, Math.min(canvas.height - this.h, this.y));
             this.regenShield();
 
+            // 护盾视觉物理模拟
+            if (this.shield > 0 || this.isOverclocked) {
+                this.shieldScale += (1.0 - this.shieldScale) * 0.12;
+                this.shieldAlpha += (1.0 - this.shieldAlpha) * 0.1;
+            } else {
+                this.shieldScale *= 0.85;
+                this.shieldAlpha *= 0.85;
+            }
+            this.shieldHitPulse *= 0.85; // 震荡快速衰减
+
             // 超频与连击计时器
             if (this.isOverclocked) {
                 this.overclockTimer--;
@@ -855,7 +877,7 @@ function initStarshipGame() {
                 const offset = i === 0 ? -50 : 50;
                 w.x += (this.x + offset - w.x) * 0.1;
                 w.y += (this.y + 20 - w.y) * 0.1;
-                w.autoUpdate(); // 核心：空闲时自动开火
+                w.autoUpdate(this.wingmanLevel); // 核心：空闲时自动开火
             });
         }
 
@@ -892,11 +914,22 @@ function initStarshipGame() {
             ctx.shadowBlur = this.isOverclocked ? 30 : 15;
             ctx.shadowColor = mainColor;
 
-            // 护盾力场视觉
-            if (this.shield > 0 || this.isOverclocked) {
+            // 护盾力场动态渲染
+            if (this.shieldAlpha > 0.01) {
                 ctx.beginPath();
-                ctx.arc(0, 0, 35, 0, Math.PI * 2);
-                ctx.strokeStyle = this.isOverclocked ? `rgba(255, 0, 193, 0.4)` : `rgba(0, 255, 249, ${0.1 + Math.random() * 0.1})`;
+                // 基础半径 35，叠加缩放与受击震荡
+                const currentRadius = 35 * this.shieldScale * (1 + this.shieldHitPulse * 0.15);
+                ctx.arc(0, 0, currentRadius, 0, Math.PI * 2);
+                
+                // 动态计算透明度与颜色
+                const baseAlpha = this.isOverclocked ? 0.4 : 0.15;
+                const alpha = this.shieldAlpha * (baseAlpha + this.shieldHitPulse * 0.4);
+                const color = this.isOverclocked ? `rgba(255, 0, 193, ${alpha})` : `rgba(0, 255, 249, ${alpha})`;
+                
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2 + this.shieldHitPulse * 4; // 受击时线条变粗
+                ctx.shadowBlur = 15 + this.shieldHitPulse * 25; // 受击时发光增强
+                ctx.shadowColor = this.isOverclocked ? '#ff00c1' : '#00fff9';
                 ctx.stroke();
             }
             // ... (绘制本体逻辑保持不变)
@@ -951,9 +984,12 @@ function initStarshipGame() {
             bullets.push(new Bullet(this.x, this.y - 10));
             this.lastAutoShootTime = Date.now(); // 无论是自动还是手动，只要开火就重置计时器
         }
-        autoUpdate() {
-            // 如果距离上次开火超过 600ms，则自动补射
-            if (Date.now() - this.lastAutoShootTime > 600) {
+        autoUpdate(level = 0) {
+            // 等级 0-3 对应的开火间隔：600ms, 400ms, 250ms, 150ms
+            const intervals = [600, 400, 250, 150];
+            const interval = intervals[Math.min(level, 3)];
+
+            if (Date.now() - this.lastAutoShootTime > interval) {
                 this.shoot();
             }
         }
@@ -1017,6 +1053,7 @@ function initStarshipGame() {
             this.r = 0; this.maxR = 800;
             this.alive = true;
             this.width = 20;
+            this.hasHitBoss = false; // 确保每圈冲击波只对 Boss 造成一次伤害
         }
         update() {
             this.r += 15;
@@ -1246,6 +1283,19 @@ function initStarshipGame() {
         }
     }
 
+    function checkBossDeath() {
+        if (!boss || boss.hp > 0) return;
+        
+        isBossMode = false;
+        score += (boss.maxHp * 100); // 奖励分
+        scoreEl.innerText = `SCORE: ${score.toString().padStart(4, '0')}`;
+        createExplosion(boss.x, boss.y, boss.color);
+        boss.dropLoot(); // 必掉物资包
+        triggerEMP(); // 击败 Boss 奖励全屏清弹
+        boss = null;
+        console.log("%c🏆 BOSS ELIMINATED!", "color: #22c55e; font-weight: bold;");
+    }
+
     function handleCollisions() {
         // 子弹 vs 敌人
         bullets.forEach(b => {
@@ -1254,6 +1304,7 @@ function initStarshipGame() {
                 if (b.alive && e.alive && Math.hypot(b.x - e.x, b.y - e.y) < 30) {
                     b.alive = false; e.alive = false; score += 100;
                     scoreEl.innerText = `SCORE: ${score.toString().padStart(4, '0')}`;
+                    if (score >= 1000) window.unlockAchievement('PILOT'); // 成就：代码卫士
                     createExplosion(e.x, e.y, '#ff2d55');
 
                     // Combo 处理
@@ -1280,19 +1331,12 @@ function initStarshipGame() {
                 b.alive = false;
                 boss.hp--;
                 createExplosion(b.x, b.y, boss.color);
-                if (boss.hp <= 0) {
-                    isBossMode = false;
-                    score += (boss.maxHp * 100); // 奖励分
-                    createExplosion(boss.x, boss.y, boss.color);
-                    boss.dropLoot(); // 必掉物资包
-                    triggerEMP(); // 击败 Boss 奖励全屏清弹
-                    boss = null;
-                    console.log("%c🏆 BOSS ELIMINATED!", "color: #22c55e; font-weight: bold;");
-                }
+                checkBossDeath();
             }
         });
 
         if (ship) {
+            // ... (玩家相关碰撞保持不变)
             // 敌人 vs 玩家
             enemies.forEach(e => {
                 if (e.alive && Math.hypot(ship.x - e.x, ship.y - e.y) < 40) {
@@ -1325,14 +1369,21 @@ function initStarshipGame() {
                         if (ship.wingmen.length < 2) ship.wingmen.push(new Wingman(p.x, p.y));
                         else score += 500;
                     } else if (p.type === 'WEAPON') {
-                        ship.weaponLevel = Math.min(3, ship.weaponLevel + 1);
+                        if (ship.weaponLevel < 3) {
+                            ship.weaponLevel++;
+                        } else {
+                            // 溢出转化：提升僚机火力
+                            ship.wingmanLevel = Math.min(3, ship.wingmanLevel + 1);
+                            console.log(`%c🚀 Wingmen Overclocked: Lv.${ship.wingmanLevel}`, "color: #fbbf24; font-weight: bold;");
+                        }
                     }
                 }
             });
         }
 
-        // 冲击波 vs 普通敌人
+        // 冲击波 vs 普通敌人 & Boss
         shockwaves.forEach(sw => {
+            // 对普通敌人：秒杀
             enemies.forEach(e => {
                 if (e.alive && Math.hypot(e.x - sw.x, e.y - sw.y) < sw.r) {
                     e.alive = false;
@@ -1341,6 +1392,18 @@ function initStarshipGame() {
                     createExplosion(e.x, e.y, '#ff2d55');
                 }
             });
+
+            // 对 Boss：过载伤害 (20 + 1% 比例)
+            if (isBossMode && boss && !sw.hasHitBoss) {
+                if (Math.hypot(boss.x - sw.x, boss.y - sw.y) < sw.r) {
+                    const dmg = 20 + Math.floor(boss.maxHp * 0.01);
+                    boss.hp -= dmg;
+                    sw.hasHitBoss = true; // 每一波冲击波只伤一次
+                    createExplosion(boss.x, boss.y, sw.color);
+                    console.log(`%c💥 OVERLOAD DAMAGE: ${dmg} to ${boss.name}`, "color: #fbbf24; font-weight: bold;");
+                    checkBossDeath();
+                }
+            }
         });
     }
 
@@ -1572,4 +1635,91 @@ function initStarshipGame() {
     }
 
     gameLoop();
+
+    // ============================================
+    // 成就系统核心逻辑 (Achievement System)
+    // ============================================
+    const ACHIEVEMENTS = {
+        WELCOME: { id: 'welcome', title: '初次降临', desc: '欢迎来到炫技空间，开启你的极客之旅。', icon: '🚀' },
+        EXPLORER: { id: 'explorer', title: '深度探索', desc: '阅读完所有简历内容，求知欲拉满！', icon: '📖' },
+        PILOT: { id: 'pilot', title: '代码卫士', desc: '在星舰防御战中成功击退 10 个 Bug。', icon: '🛡️' },
+        GLOBE_TROTTER: { id: 'globe', title: '环球旅行者', desc: '深度观察 3D 地球，视野已跨越国界。', icon: '🌍' }
+    };
+
+    class AchievementManager {
+        constructor() {
+            this.container = document.getElementById('achievement-container');
+            this.unlocked = JSON.parse(localStorage.getItem('unlocked_achievements') || '[]');
+            this.queue = [];
+            this.isShowing = false;
+        }
+
+        unlock(key) {
+            const achievement = ACHIEVEMENTS[key];
+            if (!achievement || this.unlocked.includes(achievement.id)) return;
+
+            this.unlocked.push(achievement.id);
+            localStorage.setItem('unlocked_achievements', JSON.stringify(this.unlocked));
+
+            this.queue.push(achievement);
+            this.processQueue();
+        }
+
+        processQueue() {
+            if (this.isShowing || this.queue.length === 0) return;
+
+            this.isShowing = true;
+            const achievement = this.queue.shift();
+            this.showNotification(achievement);
+        }
+
+        showNotification(achievement) {
+            const card = document.createElement('div');
+            card.className = 'achievement-card';
+            card.innerHTML = `
+                <div class="achievement-icon">${achievement.icon}</div>
+                <div class="achievement-content">
+                    <div class="achievement-title">${achievement.title}</div>
+                    <div class="achievement-desc">${achievement.desc}</div>
+                </div>
+                <div class="achievement-close">×</div>
+            `;
+
+            this.container.appendChild(card);
+            requestAnimationFrame(() => card.classList.add('show'));
+
+            setTimeout(() => {
+                card.classList.remove('show');
+                setTimeout(() => {
+                    card.remove();
+                    this.isShowing = false;
+                    this.processQueue();
+                }, 800);
+            }, 5000);
+
+            card.querySelector('.achievement-close').onclick = () => {
+                card.classList.remove('show');
+                setTimeout(() => {
+                    card.remove();
+                    this.isShowing = false;
+                    this.processQueue();
+                }, 800);
+            };
+        }
+    }
+
+    const achievementManager = new AchievementManager();
+    window.unlockAchievement = (key) => achievementManager.unlock(key);
+
+    // 初始成就
+    setTimeout(() => window.unlockAchievement('WELCOME'), 2000);
+
+    // 滚动监听成就
+    let scrollAchieved = false;
+    window.addEventListener('scroll', () => {
+        if (!scrollAchieved && (window.innerHeight + window.scrollY) >= document.body.offsetHeight - 100) {
+            window.unlockAchievement('EXPLORER');
+            scrollAchieved = true;
+        }
+    });
 }

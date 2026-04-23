@@ -9,3 +9,8 @@
 - **问题描述**：在 `initMouseTrail` 函数中直接引用了 `initStarshipGame` 函数内的局部变量 `container`，导致脚本抛出 `ReferenceError` 并终止执行。
 - **解决办法**：在函数内部使用 `document.getElementById` 重新获取目标 DOM 节点，并增加判空保护。
 - **教训**：不要迷信局部变量的“跨界”能力，每一个独立的功能模块都应该拥有自己稳定的 DOM 句柄。
+
+### 3. Grep Search Failure on File Tail (Grep 搜索末尾失效)
+- **问题描述**：在对 `main.js` 进行 `grep_search` 时，即便代码确实存在于文件末尾（如 `score` 变量），搜索工具仍返回空结果。
+- **解决办法**：当 Grep 失效时，直接使用 `view_file` 配合 `StartLine` 参数对文件尾部进行“地毯式”人工确认。
+- **教训**：搜索工具并非万能，在超大 JS 文件面前，手动定位锚点往往更可靠。
