@@ -423,7 +423,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function init3DInteraction() {
-        const cards = document.querySelectorAll('.lab-card');
+        const cards = document.querySelectorAll('.lab-card, .skill-group');
         cards.forEach(card => {
             card.addEventListener('mousemove', (e) => {
                 const rect = card.getBoundingClientRect();
@@ -449,7 +449,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. Navbar & Scroll Logic (Target internal page)
     const navbar = document.getElementById('navbar');
 
+    let scrollIndicatorTimeout;
     resumePage.addEventListener('scroll', () => {
+        const indicator = document.querySelector('.scroll-indicator');
+        if (indicator) {
+            indicator.classList.add('hidden');
+            clearTimeout(scrollIndicatorTimeout);
+            if (resumePage.scrollTop < 10) {
+                scrollIndicatorTimeout = setTimeout(() => {
+                    if (resumePage.scrollTop < 10) {
+                        indicator.classList.remove('hidden');
+                    }
+                }, 2000);
+            }
+        }
+
         if (resumePage.scrollTop > 50) {
             navbar.style.background = 'rgba(5, 7, 10, 0.9)';
             navbar.style.height = '70px';
@@ -547,20 +561,118 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </div>
             <div class="hero-visual">
-                <div class="visual-card glass">
-                    <div class="glow"></div>
-                    <div class="inner-content">
-                        <code>
-                            <span class="c-1">const</span> <span class="c-2">developer</span> = {<br>
-                            &nbsp;&nbsp;<span class="c-3">name</span>: <span class="c-4">'${p.name}'</span>,<br>
-                            &nbsp;&nbsp;<span class="c-3">role</span>: <span class="c-4">'Full Stack'</span>,<br>
-                            &nbsp;&nbsp;<span class="c-3">passion</span>: <span class="c-4">'Visual Arts'</span><br>
-                            };
-                        </code>
+                <div class="terminal-card">
+                    <div class="terminal-header">
+                        <div class="terminal-dots">
+                            <span class="dot red"></span>
+                            <span class="dot yellow"></span>
+                            <span class="dot green"></span>
+                        </div>
+                        <div class="terminal-title">bash — vuyangtian</div>
+                    </div>
+                    <div class="terminal-body" id="terminal-body">
+                        <div class="terminal-line">Welcome to Bob's OS v1.0.0...</div>
+                        <div class="terminal-line">Type 'help' to see available commands.</div>
+                        <div class="input-area">
+                            <span class="prompt">bob@fythub:~$</span>
+                            <input type="text" class="terminal-input" id="terminal-input" spellcheck="false" autocomplete="off">
+                        </div>
                     </div>
                 </div>
             </div>
         `;
+
+        // 初始化终端逻辑
+        setTimeout(() => initTerminal(), 100);
+    }
+
+    function initTerminal() {
+        const input = document.getElementById('terminal-input');
+        const body = document.getElementById('terminal-body');
+        if (!input || !body) return;
+
+        let isManualInterrupted = false;
+
+        // 点击聚焦
+        document.querySelector('.terminal-card').addEventListener('click', () => {
+            input.focus();
+        });
+
+        const commands = {
+            'help': 'Available commands: [whoami, ls, cat, help, clear, exit]',
+            'whoami': `${RESUME_DATA.profile.name} - ${RESUME_DATA.profile.role}. A code architect specializing in high-performance web systems and visual experiences.`,
+            'ls': 'skills/  projects/  experience/  achievements/',
+            'cat skills': 'Core: Java 21, Spring Boot, Three.js, Redis. <br>Design: Glassmorphism, UI/UX Engineering.',
+            'cat projects': 'Recent: School Marketplace, Starship Defender Engine, Personal Resume (Current).',
+            'cat experience': 'Full-stack development with a focus on scalable architecture and creative frontend interaction.',
+            'exit': 'Access denied. You can never leave the matrix.',
+            'clear': 'CLEAR_CMD'
+        };
+
+        function executeCommand(val) {
+            if (!val) return;
+            appendLine(`bob@fythub:~$ ${val}`, 'command-input');
+            
+            if (val === 'clear') {
+                const lines = body.querySelectorAll('.terminal-line');
+                lines.forEach(l => l.remove());
+            } else if (commands[val]) {
+                appendLine(commands[val], 'command-output');
+            } else if (val.startsWith('cat ')) {
+                const target = val.replace('cat ', '');
+                const response = commands[val] || `Error: File '${target}' not found.`;
+                appendLine(response, 'command-output');
+            } else {
+                appendLine(`Command not found: ${val}. Type 'help' for assistance.`, 'error');
+            }
+            body.scrollTop = body.scrollHeight;
+        }
+
+        function appendLine(text, className) {
+            const line = document.createElement('div');
+            line.className = `terminal-line ${className}`;
+            line.innerHTML = text;
+            body.insertBefore(line, input.parentElement);
+        }
+
+        // 自动输入逻辑
+        async function autoType(text) {
+            for (let i = 0; i < text.length; i++) {
+                if (isManualInterrupted) return;
+                input.value += text[i];
+                await new Promise(resolve => setTimeout(resolve, 100 + Math.random() * 50));
+            }
+            if (!isManualInterrupted) {
+                setTimeout(() => {
+                    if (!isManualInterrupted) {
+                        executeCommand(input.value);
+                        input.value = '';
+                        input.focus(); // 执行完自动聚焦，找回光标
+                    }
+                }, 500);
+            }
+        }
+
+        input.addEventListener('mousedown', () => {
+            isManualInterrupted = true;
+        });
+
+        input.addEventListener('keydown', (e) => {
+            isManualInterrupted = true; // 只要用户按键，立刻停止自动输入
+            if (e.key === 'Enter') {
+                const val = input.value.trim().toLowerCase();
+                executeCommand(val);
+                input.value = '';
+            }
+        });
+
+        // 1.5秒后开始自动输入，给用户一点心理准备
+        setTimeout(() => {
+            if (!isManualInterrupted) {
+                input.focus(); // 启动时也自动聚焦
+                autoType('help');
+            }
+        }, 1500);
     }
 
     function renderAbout() {
@@ -635,17 +747,30 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p>如果您有任何有趣的想法或项目，欢迎随时联系我。我始终对新技术和新挑战保持开放态度。</p>
                 </div>
                 <div class="contact-links">
-                    <a href="mailto:${RESUME_DATA.profile.email}" class="contact-item">
+                    <div class="contact-item" id="email-copy-btn" style="cursor: pointer;">
                         <i class="ri-mail-send-line"></i>
-                        <span>发送邮件</span>
-                    </a>
-                    <a href="#" class="contact-item" id="wechat-btn">
+                        <span>复制邮箱</span>
+                    </div>
+                    <div class="contact-item" id="wechat-btn" style="cursor: pointer;">
                         <i class="ri-wechat-line"></i>
                         <span>微信联系</span>
-                    </a>
+                    </div>
                 </div>
             </div>
         `;
+
+        // 绑定邮箱复制
+        document.getElementById('email-copy-btn').addEventListener('click', () => {
+            const email = RESUME_DATA.profile.email;
+            navigator.clipboard.writeText(email).then(() => {
+                showToast("邮箱已复制到剪贴板！");
+            });
+        });
+
+        // 绑定微信弹窗
+        document.getElementById('wechat-btn').addEventListener('click', () => {
+            showWechatModal();
+        });
     }
 
     function initRevealAnimations(scrollContainer) {
@@ -1864,4 +1989,35 @@ function initStarshipGame() {
             scrollAchieved = true;
         }
     });
+
+    // --- UI Helpers ---
+    window.showToast = function(message) {
+        const toast = document.getElementById('toast');
+        if (!toast) return;
+        toast.innerText = message;
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    };
+
+    window.showWechatModal = function() {
+        const modal = document.getElementById('wechat-modal');
+        if (modal) modal.classList.add('show');
+    };
+
+    window.closeWechatModal = function() {
+        const modal = document.getElementById('wechat-modal');
+        if (modal) modal.classList.remove('show');
+    };
+
+    // 绑定弹窗关闭（点击背景或关闭按钮）
+    const modal = document.getElementById('wechat-modal');
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target.id === 'wechat-modal' || e.target.id === 'close-modal-btn') {
+                closeWechatModal();
+            }
+        });
+    }
 }
