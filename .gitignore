@@ -31,3 +31,12 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Private Info & Internal Docs ###
+backup.bat
+backup2.bat
+restore.bat
+database-tables-spec.md
+goodies.md
+problem.md
+skills.md
