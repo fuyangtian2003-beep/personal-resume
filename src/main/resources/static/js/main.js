@@ -1689,6 +1689,7 @@ function initStarshipGame() {
 
     let mouseX = canvas.width / 2;
     let mouseY = canvas.height - 80;
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
     canvas.addEventListener('mousemove', (e) => {
         const rect = canvas.getBoundingClientRect();
@@ -1798,6 +1799,11 @@ function initStarshipGame() {
         }
 
         if (isPlaying && !isPaused) {
+            // 移动端自动开火逻辑：每 15 帧（约 250ms）触发一次点击
+            if (isMobile && frameCount % 15 === 0) {
+                const mousedownEvent = new MouseEvent('mousedown');
+                canvas.dispatchEvent(mousedownEvent);
+            }
             frameCount++;
 
             // 超频模式边缘特效
@@ -1902,6 +1908,11 @@ function initStarshipGame() {
         isPaused = false;
         ship = new Ship();
         ship.updateUI(); // 同步满血状态到 UI
+
+        // 新增：移动端自动开火提示
+        if (isMobile) {
+            achievementManager.notify('识别到手机用户', '已为你开启【自动开火】逻辑，PC端使用体验更佳！', '📱');
+        }
         score = 0;
         scoreEl.innerText = 'SCORE: 0000';
         enemies = [];
@@ -1962,6 +1973,12 @@ function initStarshipGame() {
             localStorage.setItem('unlocked_achievements', JSON.stringify(this.unlocked));
 
             this.queue.push(achievement);
+            this.processQueue();
+        }
+
+        // 新增：播报实时通知（不存 localStorage）
+        notify(title, desc, icon = '📢') {
+            this.queue.push({ title, desc, icon });
             this.processQueue();
         }
 
