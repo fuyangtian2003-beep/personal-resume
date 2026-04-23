@@ -36,3 +36,22 @@
 ### 9. Dynamic Spawn Rate Modulation (动态刷怪率调节)
 - **技巧**：通过 Boss 状态机中的 `swarmTimer` 实时修改全局 `gameLoop` 中的 `spawnInterval` 参数。
 - **效果**：在 Boss 发动技能时，将刷怪频率提升至黄金平衡点（每 12 帧一个），营造出持续涌动的“虫群感”，既保证了视觉上的压迫力，又兼顾了游戏的可玩性与挑战性。
+
+## 10. 静态前端一键飞升：GitHub + Cloudflare Pages 自动化部署方案 (2026-04-23)
+### 场景
+将 Spring Boot 内部的静态前端（`src/main/resources/static`）独立部署到云端，实现国内访问加速及自动更新。
+
+### 核心步骤
+1. **仓库同步**：
+   - 本地 Git 关联远程仓库：`git remote add origin https://github.com/fuyangtian2003-beep/personal-resume.git`
+   - 推送代码：`git push -u origin main`
+2. **Cloudflare Pages 配置**：
+   - **Build command**: (保持空白，严禁填写内容)
+   - **Build output directory**: `src/main/resources/static` (锁定前端目录，保护后端源码)
+3. **自动化流**：
+   - 后续只需执行 `git push`，Cloudflare 会自动触发构建并秒级上线。
+
+### 优势
+- **安全性**：利用 Private 仓库配合 Pages，外网只能看到编译后的前端，看不见 Java 源码。
+- **速度**：Cloudflare CDN 全球加速，即便没有绑定子域名，其自带的 SSL 和节点分发也比普通虚拟主机快得多。
+

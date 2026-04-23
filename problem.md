@@ -14,3 +14,9 @@
 - **问题描述**：在对 `main.js` 进行 `grep_search` 时，即便代码确实存在于文件末尾（如 `score` 变量），搜索工具仍返回空结果。
 - **解决办法**：当 Grep 失效时，直接使用 `view_file` 配合 `StartLine` 参数对文件尾部进行“地毯式”人工确认。
 - **教训**：搜索工具并非万能，在超大 JS 文件面前，手动定位锚点往往更可靠。
+
+### 4. Cloudflare UI 的“千层套路”：Workers 与 Pages 混淆 (2026-04-23)
+- **问题描述**：在 Cloudflare 后台点击 `Create application` 后，默认进入的是 `Workers` 配置流，导致找不到 `Build output directory` 选项。
+- **解决办法**：在创建页面务必点击 **`Pages`** 标签页，或者寻找 **`Looking to deploy Pages? Get started`** 的微小链接。
+- **教训**：看到 `npx wrangler deploy` 这种字样就说明进错房间了，Pages 才是前端部署的正道。
+

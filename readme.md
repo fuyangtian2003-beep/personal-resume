@@ -17,7 +17,10 @@
 ## 🛠️ 技术栈
 - **Backend**: Java 21, Spring Boot 3.x
 - **Frontend**: Vanilla JS, HTML5 Canvas, CSS3 (Neon Glow Aesthetics)
-- **Deployment**: Local JAR execution support
+- **Deployment**: 
+  - **GitHub**: [personal-resume](https://github.com/fuyangtian2003-beep/personal-resume.git) (Open Source)
+  - **Cloudflare Pages**: [fythub.top (Coming Soon)](https://personal-resume-d41.pages.dev/)
+
 
 ## 🎮 游戏操作
 - **移动**: 鼠标跟随 (Smooth Lerp)
