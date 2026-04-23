@@ -165,6 +165,9 @@ document.addEventListener('DOMContentLoaded', () => {
         let isVisible = true; // 2D 粒子可见性状态
         let isMouseInGame = false; // 是否在游戏区域
 
+        // 鲁棒获取游戏容器，用于屏蔽拖尾
+        const gameContainer = document.getElementById('game-section');
+
         // 监听可见性
         const observer = new IntersectionObserver((entries) => {
             isVisible = entries[0].isIntersecting;
@@ -172,8 +175,10 @@ document.addEventListener('DOMContentLoaded', () => {
         observer.observe(wrapper);
 
         // 监听是否进入游戏区域，用来屏蔽全局拖尾
-        container.addEventListener('mouseenter', () => isMouseInGame = true);
-        container.addEventListener('mouseleave', () => isMouseInGame = false);
+        if (gameContainer) {
+            gameContainer.addEventListener('mouseenter', () => isMouseInGame = true);
+            gameContainer.addEventListener('mouseleave', () => isMouseInGame = false);
+        }
 
         function resize() {
             canvas.width = wrapper.offsetWidth;
@@ -845,11 +850,12 @@ function initStarshipGame() {
                 if (this.comboTimer <= 0) this.combo = 0;
             }
 
-            // 僚机跟随
+            // 僚机跟随与自动火控
             this.wingmen.forEach((w, i) => {
                 const offset = i === 0 ? -50 : 50;
                 w.x += (this.x + offset - w.x) * 0.1;
                 w.y += (this.y + 20 - w.y) * 0.1;
+                w.autoUpdate(); // 核心：空闲时自动开火
             });
         }
 
@@ -933,6 +939,7 @@ function initStarshipGame() {
     class Wingman {
         constructor(x, y) {
             this.x = x; this.y = y; this.color = '#00fff9';
+            this.lastAutoShootTime = Date.now();
         }
         draw() {
             ctx.save(); ctx.translate(this.x, this.y);
@@ -942,6 +949,13 @@ function initStarshipGame() {
         }
         shoot() {
             bullets.push(new Bullet(this.x, this.y - 10));
+            this.lastAutoShootTime = Date.now(); // 无论是自动还是手动，只要开火就重置计时器
+        }
+        autoUpdate() {
+            // 如果距离上次开火超过 600ms，则自动补射
+            if (Date.now() - this.lastAutoShootTime > 600) {
+                this.shoot();
+            }
         }
     }
 
