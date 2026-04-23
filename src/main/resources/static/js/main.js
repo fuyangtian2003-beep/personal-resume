@@ -612,7 +612,7 @@ document.addEventListener('DOMContentLoaded', () => {
         function executeCommand(val) {
             if (!val) return;
             appendLine(`bob@fythub:~$ ${val}`, 'command-input');
-            
+
             if (val === 'clear') {
                 const lines = body.querySelectorAll('.terminal-line');
                 lines.forEach(l => l.remove());
@@ -642,7 +642,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 input.value += text[i];
                 await new Promise(resolve => setTimeout(resolve, 100 + Math.random() * 50));
             }
-            
+
             if (!isManualInterrupted) {
                 return new Promise(resolve => {
                     setTimeout(() => {
@@ -675,7 +675,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!isManualInterrupted) {
                 input.focus();
                 await autoType('help');
-                
+
                 // 等待 1 秒后再打第二枪
                 if (!isManualInterrupted) {
                     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -1252,7 +1252,7 @@ function initStarshipGame() {
         constructor(x, y) {
             super(x, y, 0, 0);
             this.speed = 2.8;
-            this.turnRate = 0.02; 
+            this.turnRate = 0.02;
             this.angle = Math.PI / 2;
             this.life = 420; // 总寿命 7 秒 (420 帧)
             this.alpha = 1;
@@ -1339,7 +1339,7 @@ function initStarshipGame() {
 
     let boss = null;
     let isBossMode = false;
-    let gameWon = false; 
+    let gameWon = false;
     let nextEndlessBossScore = 250000;
     let endlessBossCount = 0;
     let spawnedBosses = new Set();
@@ -1390,12 +1390,12 @@ function initStarshipGame() {
                 // 无尽模式变种 Boss 增强逻辑
                 if (this.name.startsWith('VAR_STRIKER')) {
                     this.attackTimer++;
-                    
+
                     // 1. 弱追踪弹 (每 3 秒)
                     if (this.attackTimer % 180 === 0) {
                         enemyBullets.push(new HomingBullet(this.x, this.y + 30));
                     }
-                    
+
                     // 2. 召唤小怪潮 (改成开启 5 秒狂暴刷怪模式)
                     if (this.attackTimer % 1200 === 0 && this.y >= this.targetY) {
                         this.swarmTimer = 300; // 5 秒
@@ -1403,7 +1403,7 @@ function initStarshipGame() {
                         shockwaves.push(new Shockwave(this.x, this.y, this.color));
                         console.log("%c⚠️ VAR_STRIKER: SWARM MODE ACTIVATED (5s)!", "color: #ff00c1; font-weight: bold;");
                     }
-                    
+
                     // 3. 扩散弹幕 (每 5 秒)
                     if (this.attackTimer % 300 === 0) {
                         for (let a = 0; a < Math.PI * 2; a += Math.PI / 4) {
@@ -2039,13 +2039,13 @@ function initStarshipGame() {
         const target = e ? e.target : mainPage;
         if (!target || !target.scrollHeight) return;
 
-        const scrollBottom = (target === window || target === document) 
-            ? (window.innerHeight + window.scrollY) 
+        const scrollBottom = (target === window || target === document)
+            ? (window.innerHeight + window.scrollY)
             : (target.scrollTop + target.clientHeight);
         const totalHeight = (target === window || target === document)
             ? document.documentElement.scrollHeight
             : target.scrollHeight;
-        
+
         if (!scrollAchieved && scrollBottom >= totalHeight - 200) {
             window.unlockAchievement('EXPLORER');
             scrollAchieved = true;
@@ -2059,11 +2059,11 @@ function initStarshipGame() {
     if (mainPage) {
         mainPage.addEventListener('scroll', checkScroll);
     }
-    
+
     setTimeout(() => checkScroll({ target: mainPage }), 2000);
 
     // --- UI Helpers ---
-    window.showToast = function(message) {
+    window.showToast = function (message) {
         const toast = document.getElementById('toast');
         if (!toast) return;
         toast.innerText = message;
@@ -2073,12 +2073,12 @@ function initStarshipGame() {
         }, 3000);
     };
 
-    window.showWechatModal = function() {
+    window.showWechatModal = function () {
         const modal = document.getElementById('wechat-modal');
         if (modal) modal.classList.add('show');
     };
 
-    window.closeWechatModal = function() {
+    window.closeWechatModal = function () {
         const modal = document.getElementById('wechat-modal');
         if (modal) modal.classList.remove('show');
     };
@@ -2105,9 +2105,51 @@ function initStarshipGame() {
         if (menuBtn) menuBtn.classList.remove('active');
     });
 
-    // 点击菜单项后自动关闭下拉菜单
-    document.querySelectorAll('.dropdown-item').forEach(item => {
-        item.addEventListener('click', () => {
+    // 智能导航函数：处理内部滚动与跨页跳转
+    window.smartNavigate = function (targetId) {
+        const slider = document.getElementById('page-slider');
+        const mainPage = document.getElementById('main-page');
+        const arrowLeft = document.getElementById('slide-arrow-left');
+        const arrowRight = document.getElementById('slide-arrow-right');
+        const resumePage = document.getElementById('resume-page');
+        const targetElement = document.querySelector(targetId);
+
+        if (!targetElement) return;
+
+        // 如果当前在 3D 展示页 (slider 偏移为 -100vw)，先滑回主页
+        if (slider && slider.style.transform === 'translateX(-100vw)') {
+            resumePage.style.visibility = 'visible';
+            slider.style.transform = 'translateX(0)';
+            if (arrowLeft) arrowLeft.classList.add('hidden');
+            if (arrowRight) arrowRight.classList.remove('hidden');
+
+            // 等待滑动手感结束后再滚动
+            setTimeout(() => {
+                scrollToElement(mainPage, targetElement);
+            }, 600);
+        } else {
+            scrollToElement(mainPage, targetElement);
+        }
+    };
+
+    function scrollToElement(container, element) {
+        if (!container || !element) return;
+        const headerOffset = 80;
+        const top = element.offsetTop - headerOffset;
+        container.scrollTo({
+            top: top,
+            behavior: 'smooth'
+        });
+    }
+
+    // 点击导航链接后执行智能导航 (支持全平台)
+    document.querySelectorAll('.nav-links a, .dropdown-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            const href = item.getAttribute('href');
+            if (href && href.startsWith('#')) {
+                e.preventDefault();
+                window.smartNavigate(href);
+            }
             if (menuBtn) menuBtn.classList.remove('active');
         });
     });
@@ -2119,13 +2161,13 @@ function initStarshipGame() {
             e.stopPropagation();
             console.log("Opening achievement modal...");
             renderAchievementModal();
-            
+
             // 延迟一丢丢，给浏览器时间渲染 innerHTML
             setTimeout(() => {
                 achievementModal.classList.add('show');
                 console.log("Modal HTML content:", achievementGrid.innerHTML); // 打印渲染出的内容
             }, 50);
-            
+
             if (menuBtn) menuBtn.classList.remove('active');
         });
     }
@@ -2151,7 +2193,7 @@ function initStarshipGame() {
             console.error("Missing core components for achievement rendering");
             return;
         }
-        
+
         const unlockedIds = achievementManager.unlocked || [];
         const totalKeys = Object.keys(ACHIEVEMENTS);
         console.log(`Found ${totalKeys.length} total achievements, ${unlockedIds.length} unlocked`);
