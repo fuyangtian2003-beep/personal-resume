@@ -747,7 +747,7 @@ function initStarshipGame() {
 
             let speedMult = 1 + (11 * warpFactor);
             this.y += this.speed * speedMult;
-            
+
             if (this.y > canvas.height) {
                 this.y = -20;
                 this.x = Math.random() * canvas.width;
@@ -961,12 +961,12 @@ function initStarshipGame() {
                 // 基础半径 35，叠加缩放与受击震荡
                 const currentRadius = 35 * this.shieldScale * (1 + this.shieldHitPulse * 0.15);
                 ctx.arc(0, 0, currentRadius, 0, Math.PI * 2);
-                
+
                 // 动态计算透明度与颜色
                 const baseAlpha = this.isOverclocked ? 0.4 : 0.15;
                 const alpha = this.shieldAlpha * (baseAlpha + this.shieldHitPulse * 0.4);
                 const color = this.isOverclocked ? `rgba(255, 0, 193, ${alpha})` : `rgba(0, 255, 249, ${alpha})`;
-                
+
                 ctx.strokeStyle = color;
                 ctx.lineWidth = 2 + this.shieldHitPulse * 4; // 受击时线条变粗
                 ctx.shadowBlur = 15 + this.shieldHitPulse * 25; // 受击时发光增强
@@ -1112,11 +1112,52 @@ function initStarshipGame() {
         }
     }
 
+    // 新增：弱追踪弹 (用于无尽模式 Boss)
+    class HomingBullet extends EnemyBullet {
+        constructor(x, y) {
+            super(x, y, 0, 0);
+            this.speed = 2.8;
+            this.turnRate = 0.02; 
+            this.angle = Math.PI / 2;
+            this.life = 420; // 总寿命 7 秒 (420 帧)
+            this.alpha = 1;
+        }
+        update() {
+            // 前 4 秒 (240 帧) 保持追踪
+            if (ship && this.life > 180) {
+                const targetAngle = Math.atan2(ship.y - this.y, ship.x - this.x);
+                let diff = targetAngle - this.angle;
+                while (diff < -Math.PI) diff += Math.PI * 2;
+                while (diff > Math.PI) diff -= Math.PI * 2;
+                this.angle += diff * this.turnRate;
+            }
+            // 后 3 秒 (180 帧) 停止追踪并淡出
+            if (this.life <= 180) {
+                this.alpha = this.life / 180;
+            }
+
+            this.vx = Math.cos(this.angle) * this.speed;
+            this.vy = Math.sin(this.angle) * this.speed;
+            this.life--;
+            if (this.life <= 0) this.alive = false;
+
+            super.update();
+        }
+        draw() {
+            ctx.save();
+            ctx.globalAlpha = this.alpha;
+            ctx.fillStyle = '#a855f7';
+            ctx.shadowBlur = 10; ctx.shadowColor = '#a855f7';
+            ctx.beginPath(); ctx.arc(this.x, this.y, 5, 0, Math.PI * 2); ctx.fill();
+            ctx.restore();
+        }
+    }
+
     class Enemy {
-        constructor() {
+        constructor(startX = null, startY = null) {
             this.w = 60; this.h = 30;
-            this.x = Math.random() * (canvas.width - this.w) + this.w / 2;
-            this.y = -50;
+            this.x = startX !== null ? startX : (Math.random() * (canvas.width - this.w) + this.w / 2);
+            this.y = startY !== null ? startY : -50;
             this.vy = 2 + Math.random() * 2;
             this.alive = true;
             const labels = ['BUG', 'NULL', '404', 'ERROR', 'CRASH', 'XSS', 'DDOS'];
@@ -1143,6 +1184,7 @@ function initStarshipGame() {
             ctx.restore();
         }
     }
+ bitumen
 
     class ExplosionParticle {
         constructor(x, y, color) {
@@ -1163,6 +1205,9 @@ function initStarshipGame() {
 
     let boss = null;
     let isBossMode = false;
+    let gameWon = false; 
+    let nextEndlessBossScore = 250000;
+    let endlessBossCount = 0;
     let spawnedBosses = new Set();
 
     class Boss {
@@ -1185,9 +1230,13 @@ function initStarshipGame() {
             this.healDropTimer = 0; // 新增：战斗中掉落药包计时器
             this.wingmanDropTimer = 0; // 新增：战斗中掉落僚机计时器
             this.laserCooldown = 0; // 新增：激光攻击冷却
+            this.attackTimer = 0; // 新增：进化攻击计数器
+            this.swarmTimer = 0; // 新增：狂暴刷怪计时器
         }
         update() {
             if (!this.alive) return;
+            if (this.swarmTimer > 0) this.swarmTimer--;
+
             // 出场动画
             if (this.y < this.targetY) this.y += 1.5;
             else {
@@ -1197,12 +1246,37 @@ function initStarshipGame() {
                     if (this.blinkTimer > 20) this.alpha -= 0.05; // 前20帧淡出
                     else if (this.blinkTimer === 20) {
                         this.x = Math.random() * (canvas.width - this.w) + this.w / 2; // 跃迁
-                    } else this.alpha += 0.05; // 后20帧淡入
+                    } else this.alpha += 0.05; // 后 20 帧淡入
                     this.alpha = Math.max(0, Math.min(1, this.alpha));
                     return; // 跃迁期间不执行其他逻辑
                 }
                 if (this.blinkCooldown > 0) this.blinkCooldown--;
                 if (this.laserCooldown > 0) this.laserCooldown--;
+
+                // 无尽模式变种 Boss 增强逻辑
+                if (this.name.startsWith('VAR_STRIKER')) {
+                    this.attackTimer++;
+                    
+                    // 1. 弱追踪弹 (每 3 秒)
+                    if (this.attackTimer % 180 === 0) {
+                        enemyBullets.push(new HomingBullet(this.x, this.y + 30));
+                    }
+                    
+                    // 2. 召唤小怪潮 (改成开启 5 秒狂暴刷怪模式)
+                    if (this.attackTimer % 1200 === 0 && this.y >= this.targetY) {
+                        this.swarmTimer = 300; // 5 秒
+                        // 冲击波作为启动特效
+                        shockwaves.push(new Shockwave(this.x, this.y, this.color));
+                        console.log("%c⚠️ VAR_STRIKER: SWARM MODE ACTIVATED (5s)!", "color: #ff00c1; font-weight: bold;");
+                    }
+                    
+                    // 3. 扩散弹幕 (每 5 秒)
+                    if (this.attackTimer % 300 === 0) {
+                        for (let a = 0; a < Math.PI * 2; a += Math.PI / 4) {
+                            enemyBullets.push(new EnemyBullet(this.x, this.y, Math.cos(a) * 3, Math.sin(a) * 3));
+                        }
+                    }
+                }
 
                 // 战斗中掉落补给 (仅限超级 Boss)
                 if (this.name === 'ZERO_DAY_EXPLOIT' && this.blinkTimer === 0) {
@@ -1326,15 +1400,25 @@ function initStarshipGame() {
 
     function checkBossDeath() {
         if (!boss || boss.hp > 0) return;
-        
+
         isBossMode = false;
         score += (boss.maxHp * 100); // 奖励分
         scoreEl.innerText = `SCORE: ${score.toString().padStart(4, '0')}`;
         createExplosion(boss.x, boss.y, boss.color);
         boss.dropLoot(); // 必掉物资包
         triggerEMP(); // 击败 Boss 奖励全屏清弹
+
+        // 最终 Boss 通关逻辑
+        if (boss.name === 'ROOT_ENTITY' && !gameWon) {
+            gameWon = true;
+            window.unlockAchievement('THE_ARCHITECT');
+            console.log("%c👑 SYSTEM CLEARED: YOU ARE THE ARCHITECT!", "color: #fbbf24; font-weight: bold; font-size: 1.2em;");
+            // 初始化下一个无尽 Boss 分数 (在当前分基础上加 3-5万)
+            nextEndlessBossScore = score + 30000;
+        }
+
+        console.log(`%c🏆 BOSS ${boss.name} ELIMINATED!`, "color: #22c55e; font-weight: bold;");
         boss = null;
-        console.log("%c🏆 BOSS ELIMINATED!", "color: #22c55e; font-weight: bold;");
     }
 
     function handleCollisions() {
@@ -1572,9 +1656,11 @@ function initStarshipGame() {
             ship.update(mouseX, mouseY);
             ship.draw();
 
-            // 阶梯式 Boss 战触发 (3000, 10000, 30000, 100000)
+            // 阶梯式 Boss 战触发 (3000 -> 10000 -> 30000 -> 100000 -> 200000 -> Endless)
             if (!isBossMode && !boss) {
-                if (score >= 100000 && !spawnedBosses.has('ZERO_DAY_EXPLOIT')) {
+                if (score >= 200000 && !spawnedBosses.has('ROOT_ENTITY')) {
+                    spawnBoss('ROOT_ENTITY', 1500, '#fbbf24', 5);
+                } else if (score >= 100000 && !spawnedBosses.has('ZERO_DAY_EXPLOIT')) {
                     spawnBoss('ZERO_DAY_EXPLOIT', 500, '#ff2d55', 10);
                 } else if (score >= 30000 && !spawnedBosses.has('SYSTEM_CRASHER')) {
                     spawnBoss('SYSTEM_CRASHER', 120, '#ff00c1', 3);
@@ -1582,14 +1668,26 @@ function initStarshipGame() {
                     spawnBoss('LOGIC_EATER', 50, '#00fff9', 2);
                 } else if (score >= 3000 && !spawnedBosses.has('PATCH_MINER')) {
                     spawnBoss('PATCH_MINER', 20, '#fbbf24', 1);
+                } else if (gameWon && score >= nextEndlessBossScore) {
+                    // 无尽模式：随机 Boss
+                    endlessBossCount++;
+                    const name = `VAR_STRIKER_V${endlessBossCount}`;
+                    const hp = 300 + (endlessBossCount * 100);
+                    const colors = ['#ff2d55', '#ff00c1', '#00fff9', '#fbbf24'];
+                    const color = colors[Math.floor(Math.random() * colors.length)];
+                    spawnBoss(name, hp, color, 3);
+                    // 设置下一个无尽 Boss 出现的分数 (3-5万分间隔)
+                    nextEndlessBossScore += 30000 + Math.random() * 20000;
                 }
             }
 
             if (isBossMode && boss) {
                 boss.update();
                 boss.draw();
-                // Boss 战期间允许少量小怪出现 (4倍稀疏)
-                if (frameCount % 160 === 0) enemies.push(new Enemy());
+                // Boss 战期间允许少量小怪出现
+                // 狂暴模式 (Swarm Mode) 下频率提升至每 12 帧一个 (每秒 5 只)
+                let spawnInterval = (boss.swarmTimer > 0) ? 12 : 160;
+                if (frameCount % spawnInterval === 0) enemies.push(new Enemy());
             } else {
                 // 普通小怪生成逻辑
                 if (frameCount % Math.max(10, 40 - Math.floor(score / 1000)) === 0) {
@@ -1657,6 +1755,9 @@ function initStarshipGame() {
         shockwaves = []; // 清空上局冲击波
         boss = null;
         isBossMode = false;
+        gameWon = false;
+        nextEndlessBossScore = 250000;
+        endlessBossCount = 0;
         spawnedBosses.clear(); // 重置 Boss 出场记录
         frameCount = 0;
         screenShake = 0;
@@ -1684,7 +1785,8 @@ function initStarshipGame() {
         WELCOME: { id: 'welcome', title: '初次降临', desc: '欢迎来到炫技空间，开启你的极客之旅。', icon: '🚀' },
         EXPLORER: { id: 'explorer', title: '深度探索', desc: '阅读完所有简历内容，求知欲拉满！', icon: '📖' },
         PILOT: { id: 'pilot', title: '代码卫士', desc: '在星舰防御战中成功击退 10 个 Bug。', icon: '🛡️' },
-        GLOBE_TROTTER: { id: 'globe', title: '环球旅行者', desc: '深度观察 3D 地球，视野已跨越国界。', icon: '🌍' }
+        GLOBE_TROTTER: { id: 'globe', title: '环球旅行者', desc: '深度观察 3D 地球，视野已跨越国界。', icon: '🌍' },
+        THE_ARCHITECT: { id: 'architect', title: '代码建筑师', desc: '击败终极实体 ROOT_ENTITY，掌控了炫技空间的底层逻辑。', icon: '👑' }
     };
 
     class AchievementManager {
