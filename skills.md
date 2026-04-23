@@ -55,3 +55,25 @@
 - **安全性**：利用 Private 仓库配合 Pages，外网只能看到编译后的前端，看不见 Java 源码。
 - **速度**：Cloudflare CDN 全球加速，即便没有绑定子域名，其自带的 SSL 和节点分发也比普通虚拟主机快得多。
 
+## 11. 移动端“顺滑”操控与自动火控系统 (2026-04-23)
+### 挑战
+手机浏览器在滑动 Canvas 时会默认触发页面滚动，导致游戏无法操作且画面乱跑。
+
+### 解决方案
+- **阻止劫持**：在 `touchstart` 和 `touchmove` 中调用 `e.preventDefault({ passive: false })`，强制切断浏览器滚屏逻辑。
+- **坐标重映射**：利用 `e.touches[0]` 结合 `getBoundingClientRect()` 动态解算触点坐标。
+- **自动火控 (Auto-Fire)**：通过 `navigator.userAgent` 识别手机端，并在 `gameLoop` 中以固定频率（如 15 帧/次）自动触发 `mousedown` 逻辑，解决手机端点击不便的问题。
+
+## 12. 极客版纯净二维码生成方案 (2026-04-23)
+### 推荐 API
+使用 `api.qrserver.com` 实现无广告、高定制的二维码。
+
+### 调用示例
+```html
+<img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=YOUR_URL&bgcolor=0a0c12&color=00fff9" />
+```
+### 优势
+- **配色对齐**：支持通过 `color` 和 `bgcolor` 参数直接匹配网页的 UI 风格（如霓虹色）。
+- **零成本**：无需任何第三方库，一行 URL 即可渲染。
+- **纯净度**：无任何多余跳转或广告水印。
+
