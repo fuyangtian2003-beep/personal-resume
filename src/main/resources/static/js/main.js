@@ -1696,6 +1696,29 @@ function initStarshipGame() {
         mouseY = e.clientY - rect.top;
     });
 
+    // --- 移动端触摸适配 (Mobile Touch Support) ---
+    const handleTouch = (e) => {
+        if (!isPlaying || isPaused) return;
+        if (e.touches.length > 0) {
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            mouseX = touch.clientX - rect.left;
+            mouseY = touch.clientY - rect.top;
+            if (e.cancelable) e.preventDefault(); // 阻止手机浏览器默认的滚屏行为
+        }
+    };
+
+    canvas.addEventListener('touchstart', (e) => {
+        handleTouch(e);
+        // 模拟点击开火
+        const mousedownEvent = new MouseEvent('mousedown');
+        canvas.dispatchEvent(mousedownEvent);
+    }, { passive: false });
+
+    canvas.addEventListener('touchmove', (e) => {
+        handleTouch(e);
+    }, { passive: false });
+
     canvas.addEventListener('mousedown', () => {
         if (!isPlaying || !ship || isPaused) return;
 
