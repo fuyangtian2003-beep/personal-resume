@@ -635,21 +635,25 @@ document.addEventListener('DOMContentLoaded', () => {
             body.insertBefore(line, input.parentElement);
         }
 
-        // 自动输入逻辑
+        // 自动输入逻辑 (支持链式等待)
         async function autoType(text) {
             for (let i = 0; i < text.length; i++) {
                 if (isManualInterrupted) return;
                 input.value += text[i];
                 await new Promise(resolve => setTimeout(resolve, 100 + Math.random() * 50));
             }
+            
             if (!isManualInterrupted) {
-                setTimeout(() => {
-                    if (!isManualInterrupted) {
-                        executeCommand(input.value);
-                        input.value = '';
-                        input.focus(); // 执行完自动聚焦，找回光标
-                    }
-                }, 500);
+                return new Promise(resolve => {
+                    setTimeout(() => {
+                        if (!isManualInterrupted) {
+                            executeCommand(input.value);
+                            input.value = '';
+                            input.focus();
+                        }
+                        resolve();
+                    }, 500);
+                });
             }
         }
 
@@ -666,11 +670,17 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // 1.5秒后开始自动输入，给用户一点心理准备
-        setTimeout(() => {
+        // 1.5秒后开始自动输入序列
+        setTimeout(async () => {
             if (!isManualInterrupted) {
-                input.focus(); // 启动时也自动聚焦
-                autoType('help');
+                input.focus();
+                await autoType('help');
+                
+                // 等待 1 秒后再打第二枪
+                if (!isManualInterrupted) {
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    await autoType('whoami');
+                }
             }
         }, 1500);
     }
