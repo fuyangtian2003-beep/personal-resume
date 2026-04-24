@@ -1713,25 +1713,42 @@ function initStarshipGame() {
     }
 
     // 全屏切换逻辑
+    let originalParent = null;
+    let originalNextSibling = null;
+
     if (fullscreenBtn) {
         fullscreenBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            container.classList.toggle('fullscreen');
+            const isEntering = !container.classList.contains('fullscreen');
             
-            // 切换图标
-            const icon = fullscreenBtn.querySelector('i');
-            if (container.classList.contains('fullscreen')) {
+            if (isEntering) {
+                // 记录原始位置，用于恢复
+                originalParent = container.parentNode;
+                originalNextSibling = container.nextSibling;
+                
+                // 核心：脱离父级 transform 限制，挂载到 body
+                container.classList.add('fullscreen');
+                document.body.appendChild(container);
+                
+                const icon = fullscreenBtn.querySelector('i');
                 icon.className = 'ri-fullscreen-exit-line';
                 fullscreenBtn.title = 'RESTORE SYSTEM';
                 showToast('FULLSCREEN MODE ENGAGED');
             } else {
+                // 还原到 DOM 原位
+                container.classList.remove('fullscreen');
+                if (originalParent) {
+                    originalParent.insertBefore(container, originalNextSibling);
+                }
+                
+                const icon = fullscreenBtn.querySelector('i');
                 icon.className = 'ri-fullscreen-line';
                 fullscreenBtn.title = 'TOGGLE FULLSCREEN';
                 showToast('SYSTEM RESTORED');
             }
             
             // 强制重绘尺寸
-            setTimeout(resize, 50); // 给 CSS 渲染一点喘息时间
+            setTimeout(resize, 100); 
         });
     }
 
