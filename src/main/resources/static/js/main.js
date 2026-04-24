@@ -852,6 +852,7 @@ function initStarshipGame() {
     const quitBtn = document.getElementById('quit-game-btn');
     const overlay = document.getElementById('game-overlay');
     const scoreEl = document.getElementById('game-score');
+    const fullscreenBtn = document.getElementById('fullscreen-game-btn');
 
     if (!canvas || !container) return;
 
@@ -1699,12 +1700,39 @@ function initStarshipGame() {
     function resize() {
         const rect = container.getBoundingClientRect();
         const oldWidth = canvas.width;
+        
+        // 全屏自适应：如果处于全屏模式，高度撑满容器；否则保持 600
+        const isFullscreen = container.classList.contains('fullscreen');
         canvas.width = rect.width;
-        canvas.height = 600;
+        canvas.height = isFullscreen ? rect.height : 600;
+        
         // 仅在初次或宽度剧变时初始化流星，防止缩放时抖动
         if (stars.length === 0 || Math.abs(oldWidth - canvas.width) > 100) {
             initStars();
         }
+    }
+
+    // 全屏切换逻辑
+    if (fullscreenBtn) {
+        fullscreenBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            container.classList.toggle('fullscreen');
+            
+            // 切换图标
+            const icon = fullscreenBtn.querySelector('i');
+            if (container.classList.contains('fullscreen')) {
+                icon.className = 'ri-fullscreen-exit-line';
+                fullscreenBtn.title = 'RESTORE SYSTEM';
+                showToast('FULLSCREEN MODE ENGAGED');
+            } else {
+                icon.className = 'ri-fullscreen-line';
+                fullscreenBtn.title = 'TOGGLE FULLSCREEN';
+                showToast('SYSTEM RESTORED');
+            }
+            
+            // 强制重绘尺寸
+            setTimeout(resize, 50); // 给 CSS 渲染一点喘息时间
+        });
     }
 
     window.addEventListener('resize', resize);

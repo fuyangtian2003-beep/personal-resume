@@ -1250,6 +1250,45 @@ body .galaxy-container .showcase-header .subtitle {
     box-shadow: 0 0 15px #ff2d55;
 }
 
+.btn-fullscreen {
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.4);
+    color: #6366f1;
+    padding: 2px 8px;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    pointer-events: auto;
+    margin-right: 5px;
+}
+
+.btn-fullscreen:hover {
+    background: #6366f1;
+    color: #fff;
+    box-shadow: 0 0 15px #6366f1;
+}
+
+/* 全屏状态样式 */
+.game-container.fullscreen {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 9999 !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    background: #05070a !important;
+}
+
+.game-container.fullscreen #game-canvas {
+    height: calc(100% - 60px) !important; /* 减去 header 高度 */
+}
+
 .game-overlay {
     position: absolute;
     top: 0;
