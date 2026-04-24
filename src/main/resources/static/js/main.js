@@ -170,7 +170,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 监听可见性
         const observer = new IntersectionObserver((entries) => {
+            const wasVisible = isVisible;
             isVisible = entries[0].isIntersecting;
+            
+            // 唤醒逻辑
+            if (isVisible && !wasVisible) {
+                console.log("%c✨ 2D Particles Resumed", "color: #818cf8;");
+                animate();
+            }
         }, { threshold: 0.1 });
         observer.observe(wrapper);
 
@@ -321,8 +328,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     p.update(currentCount);
                     p.draw();
                 });
+                requestAnimationFrame(animate);
             }
-            requestAnimationFrame(animate);
         }
 
         window.addEventListener('resize', resize);
@@ -336,7 +343,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         threeEngine.isVisible = true; // 3D 可见性
         const observer = new IntersectionObserver((entries) => {
+            const wasVisible = threeEngine.isVisible;
             threeEngine.isVisible = entries[0].isIntersecting;
+            
+            // 如果从不可见变为可见，重新启动动画循环
+            if (threeEngine.isVisible && !wasVisible) {
+                console.log("%c🌍 3D Earth Resumed by Observer", "color: #10b981;");
+                animate();
+            }
         }, { threshold: 0.1 });
         observer.observe(container);
 
@@ -395,13 +409,16 @@ document.addEventListener('DOMContentLoaded', () => {
         threeEngine.scene.add(atmosphere);
 
         function animate() {
-            threeEngine.animationID = requestAnimationFrame(animate);
-            if (threeEngine.isVisible) {
-                if (threeEngine.earth) {
-                    threeEngine.earth.rotation.y += 0.0002; // 极致优雅的慢速自转
-                }
-                threeEngine.renderer.render(threeEngine.scene, threeEngine.camera);
+            if (!threeEngine.isVisible) {
+                threeEngine.animationID = null;
+                return; // 看不见，直接断流
             }
+            
+            threeEngine.animationID = requestAnimationFrame(animate);
+            if (threeEngine.earth) {
+                threeEngine.earth.rotation.y += 0.0002; // 极致优雅的慢速自转
+            }
+            threeEngine.renderer.render(threeEngine.scene, threeEngine.camera);
         }
 
         function onWindowResize() {
@@ -844,10 +861,16 @@ function initStarshipGame() {
     let score = 0;
     let frameCount = 0;
 
-    // 游戏视口可见性监听
     let isVisible = true; // 默认为 true，防止首屏加载不灵
     const observer = new IntersectionObserver((entries) => {
+        const wasVisible = isVisible;
         isVisible = entries[0].isIntersecting;
+        
+        // 唤醒逻辑
+        if (isVisible && !wasVisible) {
+            console.log("%c🚀 Starship Engine Resumed", "color: #3b82f6;");
+            gameLoop();
+        }
     }, { threshold: 0.01 }); // 降低阈值，只要露头就画
     observer.observe(container);
 
@@ -1771,8 +1794,7 @@ function initStarshipGame() {
 
     function gameLoop() {
         if (!isVisible) {
-            requestAnimationFrame(gameLoop);
-            return;
+            return; // 彻底停火，由 Observer 负责唤醒
         }
 
         // 强力重置绘图状态，防止阴影残留扩散
