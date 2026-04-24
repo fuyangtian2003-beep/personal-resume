@@ -2010,4 +2010,101 @@ body .galaxy-container .showcase-header .subtitle {
     .achievement-modal-content {
         box-shadow: 0 0 30px rgba(99, 102, 241, 0.3) !important;
     }
+}/* --- 技术栈滚动长廊 (Tech Marquee) --- */
+.tech-marquee-section {
+    width: 100vw;
+    margin-left: calc(-50vw + 50%);
+    overflow: hidden;
+    padding: 30px 0;
+    margin-top: 60px;
+    margin-bottom: 60px;
+    background: rgba(255, 255, 255, 0.01);
+    border-top: 1px solid var(--glass-border);
+    border-bottom: 1px solid var(--glass-border);
+    backdrop-filter: blur(5px);
+    position: relative;
+}
+
+.tech-marquee-section::before,
+.tech-marquee-section::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    width: 150px;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.tech-marquee-section::before {
+    left: 0;
+    background: linear-gradient(to right, #05070a, transparent);
+}
+
+.tech-marquee-section::after {
+    right: 0;
+    background: linear-gradient(to left, #05070a, transparent);
+}
+
+.tech-marquee-container {
+    display: flex;
+    width: max-content;
+    animation: tech-marquee-scroll 80s linear infinite;
+    will-change: transform;
+}
+
+@keyframes tech-marquee-scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+
+.tech-marquee-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 0 50px;
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: var(--transition);
+    user-select: none;
+}
+
+.tech-marquee-item i {
+    font-size: 2.2rem;
+    color: var(--primary);
+    filter: drop-shadow(0 0 5px var(--primary-glow));
+    transition: var(--transition);
+}
+
+.tech-marquee-item:hover {
+    color: var(--text-main);
+    transform: scale(1.1);
+}
+
+.tech-marquee-item:hover i {
+    color: var(--accent);
+    filter: drop-shadow(0 0 15px var(--accent-glow));
+}
+
+.tech-marquee-section:hover .tech-marquee-container {
+    animation-play-state: paused;
+}
+
+@media (max-width: 768px) {
+    .tech-marquee-section {
+        backdrop-filter: none;
+        margin-top: 40px;
+        margin-bottom: 40px;
+        padding: 20px 0;
+    }
+    .tech-marquee-item {
+        padding: 0 30px;
+        font-size: 1rem;
+    }
+    .tech-marquee-item i {
+        font-size: 1.8rem;
+    }
 }
