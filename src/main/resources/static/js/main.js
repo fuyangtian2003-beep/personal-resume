@@ -574,7 +574,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="terminal-line">Welcome to Bob's OS v1.0.0...</div>
                         <div class="terminal-line">Type 'help' to see available commands.</div>
                         <div class="input-area">
-                            <span class="prompt">伏杨天@fythub:~$</span>
+                            <span class="prompt">bob@fythub:~$</span>
                             <input type="text" class="terminal-input" id="terminal-input" spellcheck="false" autocomplete="off">
                         </div>
                     </div>
@@ -611,7 +611,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function executeCommand(val) {
             if (!val) return;
-            appendLine(`伏杨天@fythub:~$ ${val}`, 'command-input');
+            appendLine(`bob@fythub:~$ ${val}`, 'command-input');
 
             if (val === 'clear') {
                 const lines = body.querySelectorAll('.terminal-line');
