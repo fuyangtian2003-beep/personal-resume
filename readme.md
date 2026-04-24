@@ -13,6 +13,8 @@
 - **🔥 Overclock Mode**: 连击（Combo）驱动的超频爆发系统，支持无敌状态与视觉残影。
 - **⚡ EMP Overload**: 能量溢出转化机制，全屏清扫逻辑。
 - **👾 Epic Boss Fights**: 2000分阶梯式里程碑 Boss 战（Logic Black Hole）。
+- **📱 Immersive Mobile**: 具备视口级全屏模式与基于可见性的渲染休眠（Hibernation）技术，极致省电，满血顺滑。
+- **💻 Cyber Terminal**: 内置 `bob@fythub` 赛博终端，支持极客指令交互，体现全栈身份。
 
 ## 🛠️ 技术栈
 - **Backend**: Java 21, Spring Boot 3.x
