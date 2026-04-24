@@ -180,7 +180,8 @@ body {
     width: 100%;
     height: 100%;
     pointer-events: none;
-    z-index: 1; /* 位于 wrapper 内容之下，背景之上 */
+    z-index: 1;
+    /* 位于 wrapper 内容之下，背景之上 */
 }
 
 .coming-soon {
@@ -490,9 +491,17 @@ h1 {
     border-radius: 50%;
 }
 
-.dot.red { background: #ff5f56; }
-.dot.yellow { background: #ffbd2e; }
-.dot.green { background: #27c93f; }
+.dot.red {
+    background: #ff5f56;
+}
+
+.dot.yellow {
+    background: #ffbd2e;
+}
+
+.dot.green {
+    background: #27c93f;
+}
 
 .terminal-title {
     flex-grow: 1;
@@ -1451,7 +1460,8 @@ body .galaxy-container .showcase-header .subtitle {
     pointer-events: none;
 }
 
-.shield-bars, .hull-bars {
+.shield-bars,
+.hull-bars {
     display: flex;
     gap: 4px;
 }
@@ -1482,7 +1492,8 @@ body .galaxy-container .showcase-header .subtitle {
 .health-matrix::after {
     content: 'CORE STATUS';
     position: absolute;
-    bottom: -15px; /* 移动到血条下方 */
+    bottom: -15px;
+    /* 移动到血条下方 */
     left: 0;
     font-size: 8px;
     color: rgba(255, 255, 255, 0.3);
@@ -1526,8 +1537,8 @@ body .galaxy-container .showcase-header .subtitle {
     align-items: center;
     gap: 18px;
     color: #fff;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), 
-                inset 0 0 20px rgba(0, 255, 249, 0.05);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6),
+        inset 0 0 20px rgba(0, 255, 249, 0.05);
     transform: translateX(130%);
     transition: transform 0.8s cubic-bezier(0.19, 1, 0.22, 1);
     pointer-events: all;
@@ -1543,8 +1554,10 @@ body .galaxy-container .showcase-header .subtitle {
 .achievement-card::before {
     content: '';
     position: absolute;
-    top: 0; left: -150%;
-    width: 60%; height: 100%;
+    top: 0;
+    left: -150%;
+    width: 60%;
+    height: 100%;
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
     transform: skewX(-30deg);
 }
@@ -1554,8 +1567,13 @@ body .galaxy-container .showcase-header .subtitle {
 }
 
 @keyframes achievement-shimmer {
-    0% { left: -150%; }
-    100% { left: 250%; }
+    0% {
+        left: -150%;
+    }
+
+    100% {
+        left: 250%;
+    }
 }
 
 .achievement-icon {
@@ -1639,12 +1657,14 @@ body .galaxy-container .showcase-header .subtitle {
     z-index: 20000;
     opacity: 0;
     visibility: hidden;
+    pointer-events: none; /* 核心修复：隐藏时禁止交互 */
     transition: all 0.3s ease;
 }
 
 .modal-overlay.show {
     opacity: 1;
     visibility: visible;
+    pointer-events: auto; /* 显示时恢复交互 */
 }
 
 .modal-content {
@@ -1667,7 +1687,7 @@ body .galaxy-container .showcase-header .subtitle {
     height: 250px;
     border-radius: 12px;
     margin-bottom: 1rem;
-    background: white; 
+    background: white;
     object-fit: cover;
 }
 
@@ -1927,11 +1947,24 @@ body .galaxy-container .showcase-header .subtitle {
 }
 
 /* 适配移动端 */
+/* 移动端极致性能优化 */
 @media (max-width: 768px) {
     .nav-links {
         display: none;
     }
     .mobile-only {
         display: flex;
+    }
+    
+    /* 核心性能：手机端禁用吃资源的滤镜 */
+    .glass, #navbar.glass, .modal-overlay, .dropdown-menu, .game-overlay, .terminal-card {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background: rgba(15, 18, 25, 0.98) !important; /* 提高不透明度补偿视觉 */
+    }
+    
+    /* 减小阴影开销 */
+    .achievement-modal-content {
+        box-shadow: 0 0 30px rgba(99, 102, 241, 0.3) !important;
     }
 }

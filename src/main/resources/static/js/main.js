@@ -574,7 +574,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="terminal-line">Welcome to Bob's OS v1.0.0...</div>
                         <div class="terminal-line">Type 'help' to see available commands.</div>
                         <div class="input-area">
-                            <span class="prompt">bob@fythub:~$</span>
+                            <span class="prompt">伏杨天@fythub:~$</span>
                             <input type="text" class="terminal-input" id="terminal-input" spellcheck="false" autocomplete="off">
                         </div>
                     </div>
@@ -611,8 +611,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function executeCommand(val) {
             if (!val) return;
-            appendLine(`bob@fythub:~$ ${val}`, 'command-input');
-            
+            appendLine(`伏杨天@fythub:~$ ${val}`, 'command-input');
+
             if (val === 'clear') {
                 const lines = body.querySelectorAll('.terminal-line');
                 lines.forEach(l => l.remove());
@@ -642,7 +642,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 input.value += text[i];
                 await new Promise(resolve => setTimeout(resolve, 100 + Math.random() * 50));
             }
-            
+
             if (!isManualInterrupted) {
                 return new Promise(resolve => {
                     setTimeout(() => {
@@ -675,7 +675,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!isManualInterrupted) {
                 input.focus();
                 await autoType('help');
-                
+
                 // 等待 1 秒后再打第二枪
                 if (!isManualInterrupted) {
                     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -845,10 +845,10 @@ function initStarshipGame() {
     let frameCount = 0;
 
     // 游戏视口可见性监听
-    let isVisible = false;
+    let isVisible = true; // 默认为 true，防止首屏加载不灵
     const observer = new IntersectionObserver((entries) => {
         isVisible = entries[0].isIntersecting;
-    }, { threshold: 0.1 });
+    }, { threshold: 0.01 }); // 降低阈值，只要露头就画
     observer.observe(container);
 
     // 实体容器
@@ -1252,7 +1252,7 @@ function initStarshipGame() {
         constructor(x, y) {
             super(x, y, 0, 0);
             this.speed = 2.8;
-            this.turnRate = 0.02; 
+            this.turnRate = 0.02;
             this.angle = Math.PI / 2;
             this.life = 420; // 总寿命 7 秒 (420 帧)
             this.alpha = 1;
@@ -1339,7 +1339,7 @@ function initStarshipGame() {
 
     let boss = null;
     let isBossMode = false;
-    let gameWon = false; 
+    let gameWon = false;
     let nextEndlessBossScore = 250000;
     let endlessBossCount = 0;
     let spawnedBosses = new Set();
@@ -1390,12 +1390,12 @@ function initStarshipGame() {
                 // 无尽模式变种 Boss 增强逻辑
                 if (this.name.startsWith('VAR_STRIKER')) {
                     this.attackTimer++;
-                    
+
                     // 1. 弱追踪弹 (每 3 秒)
                     if (this.attackTimer % 180 === 0) {
                         enemyBullets.push(new HomingBullet(this.x, this.y + 30));
                     }
-                    
+
                     // 2. 召唤小怪潮 (改成开启 5 秒狂暴刷怪模式)
                     if (this.attackTimer % 1200 === 0 && this.y >= this.targetY) {
                         this.swarmTimer = 300; // 5 秒
@@ -1403,7 +1403,7 @@ function initStarshipGame() {
                         shockwaves.push(new Shockwave(this.x, this.y, this.color));
                         console.log("%c⚠️ VAR_STRIKER: SWARM MODE ACTIVATED (5s)!", "color: #ff00c1; font-weight: bold;");
                     }
-                    
+
                     // 3. 扩散弹幕 (每 5 秒)
                     if (this.attackTimer % 300 === 0) {
                         for (let a = 0; a < Math.PI * 2; a += Math.PI / 4) {
@@ -1798,6 +1798,11 @@ function initStarshipGame() {
             ctx.fillText('PAUSED', canvas.width / 2, canvas.height / 2);
         }
 
+        // 无论是否在游戏中，都绘制星海背景（除了游戏赢/输的特定静止状态）
+        if (!isPaused) {
+            stars.forEach(s => { s.update(); s.draw(); });
+        }
+
         if (isPlaying && !isPaused) {
             // 移动端自动开火逻辑：每 15 帧（约 250ms）触发一次点击
             if (isMobile && frameCount % 15 === 0) {
@@ -1813,13 +1818,10 @@ function initStarshipGame() {
                 ctx.strokeRect(0, 0, canvas.width, canvas.height);
             }
 
-            // 绘制星海背景
-            stars.forEach(s => { s.update(); s.draw(); });
-
             ship.update(mouseX, mouseY);
             ship.draw();
 
-            // 阶梯式 Boss 战触发 (3000 -> 10000 -> 30000 -> 100000 -> 200000 -> Endless)
+            // 阶梯式 Boss 战触发... (此处逻辑保持不变)
             if (!isBossMode && !boss) {
                 if (score >= 200000 && !spawnedBosses.has('ROOT_ENTITY')) {
                     spawnBoss('ROOT_ENTITY', 1500, '#fbbf24', 5);
@@ -1832,14 +1834,12 @@ function initStarshipGame() {
                 } else if (score >= 3000 && !spawnedBosses.has('PATCH_MINER')) {
                     spawnBoss('PATCH_MINER', 20, '#fbbf24', 1);
                 } else if (gameWon && score >= nextEndlessBossScore) {
-                    // 无尽模式：随机 Boss
                     endlessBossCount++;
                     const name = `VAR_STRIKER_V${endlessBossCount}`;
                     const hp = 300 + (endlessBossCount * 100);
                     const colors = ['#ff2d55', '#ff00c1', '#00fff9', '#fbbf24'];
                     const color = colors[Math.floor(Math.random() * colors.length)];
                     spawnBoss(name, hp, color, 3);
-                    // 设置下一个无尽 Boss 出现的分数 (3-5万分间隔)
                     nextEndlessBossScore += 30000 + Math.random() * 20000;
                 }
             }
@@ -1847,12 +1847,9 @@ function initStarshipGame() {
             if (isBossMode && boss) {
                 boss.update();
                 boss.draw();
-                // Boss 战期间允许少量小怪出现
-                // 狂暴模式 (Swarm Mode) 下频率提升至每 12 帧一个 (每秒 5 只)
                 let spawnInterval = (boss.swarmTimer > 0) ? 12 : 160;
                 if (frameCount % spawnInterval === 0) enemies.push(new Enemy());
             } else {
-                // 普通小怪生成逻辑
                 if (frameCount % Math.max(10, 40 - Math.floor(score / 1000)) === 0) {
                     enemies.push(new Enemy());
                 }
@@ -1879,7 +1876,7 @@ function initStarshipGame() {
             handleCollisions();
         }
 
-        ctx.restore(); // 结束屏幕震动
+        ctx.restore();
         requestAnimationFrame(gameLoop);
     }
 
@@ -2031,39 +2028,31 @@ function initStarshipGame() {
     // 初始成就
     setTimeout(() => window.unlockAchievement('WELCOME'), 2000);
 
-    // 滚动监听成就
+    // 滚动监听成就 - 修正版：精准指向 resume-page
     let scrollAchieved = false;
-    const mainPage = document.getElementById('main-page');
+    const scrollTarget = document.getElementById('resume-page');
 
-    function checkScroll(e) {
-        const target = e ? e.target : mainPage;
-        if (!target || !target.scrollHeight) return;
+    function checkScroll() {
+        if (!scrollTarget || scrollAchieved) return;
 
-        const scrollBottom = (target === window || target === document) 
-            ? (window.innerHeight + window.scrollY) 
-            : (target.scrollTop + target.clientHeight);
-        const totalHeight = (target === window || target === document)
-            ? document.documentElement.scrollHeight
-            : target.scrollHeight;
-        
-        if (!scrollAchieved && scrollBottom >= totalHeight - 200) {
+        const scrollBottom = scrollTarget.scrollTop + scrollTarget.clientHeight;
+        const totalHeight = scrollTarget.scrollHeight;
+
+        if (scrollBottom >= totalHeight - 200) {
             window.unlockAchievement('EXPLORER');
             scrollAchieved = true;
-            window.removeEventListener('scroll', checkScroll);
-            if (mainPage) mainPage.removeEventListener('scroll', checkScroll);
+            scrollTarget.removeEventListener('scroll', checkScroll);
         }
     }
 
-    window.addEventListener('scroll', checkScroll, true);
-    document.addEventListener('scroll', checkScroll, true);
-    if (mainPage) {
-        mainPage.addEventListener('scroll', checkScroll);
+    if (scrollTarget) {
+        scrollTarget.addEventListener('scroll', checkScroll, { passive: true });
+        // 初始检查
+        setTimeout(checkScroll, 2000);
     }
-    
-    setTimeout(() => checkScroll({ target: mainPage }), 2000);
 
     // --- UI Helpers ---
-    window.showToast = function(message) {
+    window.showToast = function (message) {
         const toast = document.getElementById('toast');
         if (!toast) return;
         toast.innerText = message;
@@ -2073,15 +2062,34 @@ function initStarshipGame() {
         }, 3000);
     };
 
-    window.showWechatModal = function() {
+    window.showWechatModal = function () {
         const modal = document.getElementById('wechat-modal');
         if (modal) modal.classList.add('show');
     };
 
-    window.closeWechatModal = function() {
+    window.closeWechatModal = function () {
         const modal = document.getElementById('wechat-modal');
         if (modal) modal.classList.remove('show');
     };
+
+    // 绑定微信关闭按钮
+    const closeWechatBtn = document.getElementById('close-modal-btn');
+    if (closeWechatBtn) {
+        closeWechatBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeWechatModal();
+        });
+    }
+
+    // 增加微信弹窗背景点击关闭
+    const wechatModal = document.getElementById('wechat-modal');
+    if (wechatModal) {
+        wechatModal.addEventListener('click', (e) => {
+            if (e.target === wechatModal) {
+                closeWechatModal();
+            }
+        });
+    }
 
     // --- 下拉菜单 & 成就中心 逻辑 ---
     const menuBtn = document.getElementById('menu-btn');
@@ -2119,13 +2127,13 @@ function initStarshipGame() {
             e.stopPropagation();
             console.log("Opening achievement modal...");
             renderAchievementModal();
-            
+
             // 延迟一丢丢，给浏览器时间渲染 innerHTML
             setTimeout(() => {
                 achievementModal.classList.add('show');
                 console.log("Modal HTML content:", achievementGrid.innerHTML); // 打印渲染出的内容
             }, 50);
-            
+
             if (menuBtn) menuBtn.classList.remove('active');
         });
     }
@@ -2145,13 +2153,15 @@ function initStarshipGame() {
         });
     }
 
+
+
     function renderAchievementModal() {
         console.log("Rendering achievements...", { achievementGrid, achievementManager, ACHIEVEMENTS });
         if (!achievementGrid || !achievementManager || !ACHIEVEMENTS) {
             console.error("Missing core components for achievement rendering");
             return;
         }
-        
+
         const unlockedIds = achievementManager.unlocked || [];
         const totalKeys = Object.keys(ACHIEVEMENTS);
         console.log(`Found ${totalKeys.length} total achievements, ${unlockedIds.length} unlocked`);
