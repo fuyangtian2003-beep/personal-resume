@@ -1671,19 +1671,23 @@ body .galaxy-container .showcase-header .subtitle {
     position: fixed;
     bottom: 2rem;
     left: 50%;
-    transform: translateX(-50%) translateY(100px);
+    transform: translateX(-50%) translateY(150%);
+    opacity: 0;
+    visibility: hidden;
     background: var(--primary);
     color: white;
     padding: 0.8rem 1.5rem;
     border-radius: 50px;
     box-shadow: 0 10px 30px var(--primary-glow);
     z-index: 10000;
-    transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+    transition: all 0.4s ease;
     font-weight: 600;
 }
 
 .toast.show {
     transform: translateX(-50%) translateY(0);
+    opacity: 1;
+    visibility: visible;
 }
 
 .modal-overlay {
