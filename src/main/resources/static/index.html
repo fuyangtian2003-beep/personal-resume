@@ -14,8 +14,17 @@
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@300;400;600&display=swap"
         rel="stylesheet">
 
-    <!-- 图标库: Remix Icon -->
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet">
+    <!-- 智能双路图标库：首选国内高速源，加载失败自动无缝切回国外备用源 -->
+    <link id="remixicon-cdn" href="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/remixicon/4.2.0/remixicon.css" rel="stylesheet" onerror="fallbackRemixicon()">
+    <script>
+        function fallbackRemixicon() {
+            console.warn("⚠️ [Remixicon CDN Fallback] 首选加速源加载失败，正在自动切回备用 CDN 镜像...");
+            const link = document.getElementById('remixicon-cdn');
+            if (link) {
+                link.href = "https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css";
+            }
+        }
+    </script>
 
     <!-- 核心样式 -->
     <link rel="stylesheet" href="css/style.css">
