@@ -217,6 +217,7 @@
                                 <div class="game-title">DEFEND THE CORE // 代码保卫战</div>
                                 <div class="game-stats">
                                     <span id="game-score">SCORE: 0000</span>
+                                    <button id="settings-game-btn" class="btn-settings" title="GAME SETTINGS"><i class="ri-settings-3-line"></i></button>
                                     <button id="fullscreen-game-btn" class="btn-fullscreen" title="TOGGLE FULLSCREEN"><i class="ri-fullscreen-line"></i></button>
                                     <button id="quit-game-btn" class="btn-quit" title="TERMINATE SYSTEM">QUIT</button>
                                 </div>
@@ -234,6 +235,31 @@
                                 </div>
                             </div>
                             <canvas id="game-canvas"></canvas>
+                            
+                            <!-- 赛博设置控制台 (磨砂玻璃面板) -->
+                            <div id="game-settings-menu" class="game-settings-menu hidden">
+                                <div class="settings-content">
+                                    <h3 class="settings-title">SYSTEM CONFIG // 系统设定</h3>
+                                    <div class="settings-list">
+                                        <div class="setting-item">
+                                            <span class="setting-label"><i class="ri-focus-3-line"></i> 自动开火 (Auto Fire)</span>
+                                            <label class="cyber-switch">
+                                                <input type="checkbox" id="settings-autofire">
+                                                <span class="switch-slider"></span>
+                                            </label>
+                                        </div>
+                                        <div class="setting-item">
+                                            <span class="setting-label"><i class="ri-music-2-line"></i> 背景音乐 (Music BGM)</span>
+                                            <label class="cyber-switch">
+                                                <input type="checkbox" id="settings-music">
+                                                <span class="switch-slider"></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <button id="close-settings-btn" class="btn-settings-confirm">APPLY CONFIG</button>
+                                </div>
+                            </div>
+
                             <div id="game-overlay" class="game-overlay">
                                 <div class="overlay-content">
                                     <h2 class="glitch" data-text="SYSTEM BREACH">SYSTEM BREACH</h2>

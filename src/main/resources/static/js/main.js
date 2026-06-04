@@ -854,7 +854,41 @@ function initStarshipGame() {
     const scoreEl = document.getElementById('game-score');
     const fullscreenBtn = document.getElementById('fullscreen-game-btn');
 
+    // 注入设置页面 DOM 节点
+    const settingsBtn = document.getElementById('settings-game-btn');
+    const settingsMenu = document.getElementById('game-settings-menu');
+    const closeSettingsBtn = document.getElementById('close-settings-btn');
+    const autoFireCheckbox = document.getElementById('settings-autofire');
+    const musicCheckbox = document.getElementById('settings-music');
+
     if (!canvas || !container) return;
+
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    let isAutoFire = isMobile; // 移动端默认开启，PC默认关闭
+    let isMusicOn = false;
+    let gameBgm = null;
+
+    function playBgm() {
+        if (!gameBgm) {
+            gameBgm = new Audio('assets/bgm.mp3');
+            gameBgm.loop = true;
+        }
+        if (isMusicOn && isPlaying && !isPaused) {
+            gameBgm.play().catch(err => {
+                console.warn("🔊 [BGM play fallback/missing]: bgm.mp3 play was blocked or resource unavailable.", err.message);
+            });
+        }
+    }
+
+    function stopBgm() {
+        if (gameBgm) {
+            try {
+                gameBgm.pause();
+            } catch (err) {
+                console.warn("🔊 [BGM pause failed]:", err.message);
+            }
+        }
+    }
 
     const ctx = canvas.getContext('2d');
     let isPlaying = false;
@@ -1752,12 +1786,78 @@ function initStarshipGame() {
         });
     }
 
+    // 移除老旧 autofireBtn，注入 settings 面板事件
+    if (settingsBtn) {
+        settingsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (!settingsMenu) return;
+            
+            const isMenuHidden = settingsMenu.classList.contains('hidden');
+            if (isMenuHidden) {
+                // 打开设置菜单
+                settingsMenu.classList.remove('hidden');
+                // 同步复选框状态
+                if (autoFireCheckbox) autoFireCheckbox.checked = isAutoFire;
+                if (musicCheckbox) musicCheckbox.checked = isMusicOn;
+                // 暂停游戏与音乐
+                if (isPlaying) {
+                    isPaused = true;
+                    stopBgm();
+                }
+            } else {
+                // 关闭设置菜单（应用配置）
+                settingsMenu.classList.add('hidden');
+                if (autoFireCheckbox) isAutoFire = autoFireCheckbox.checked;
+                if (musicCheckbox) isMusicOn = musicCheckbox.checked;
+                // 恢复游戏与音乐
+                if (isPlaying) {
+                    isPaused = false;
+                    if (isMusicOn) playBgm();
+                    else stopBgm();
+                }
+                showToast('CONFIG APPLIED');
+            }
+        });
+    }
+
+    if (closeSettingsBtn) {
+        closeSettingsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (settingsMenu) settingsMenu.classList.add('hidden');
+            if (autoFireCheckbox) isAutoFire = autoFireCheckbox.checked;
+            if (musicCheckbox) isMusicOn = musicCheckbox.checked;
+            
+            if (isPlaying) {
+                isPaused = false;
+                if (isMusicOn) playBgm();
+                else stopBgm();
+            }
+            showToast('CONFIG APPLIED');
+        });
+    }
+
+    if (settingsMenu) {
+        settingsMenu.addEventListener('click', (e) => {
+            if (e.target === settingsMenu) {
+                settingsMenu.classList.add('hidden');
+                if (autoFireCheckbox) isAutoFire = autoFireCheckbox.checked;
+                if (musicCheckbox) isMusicOn = musicCheckbox.checked;
+                
+                if (isPlaying) {
+                    isPaused = false;
+                    if (isMusicOn) playBgm();
+                    else stopBgm();
+                }
+                showToast('CONFIG APPLIED');
+            }
+        });
+    }
+
     window.addEventListener('resize', resize);
     resize();
 
     let mouseX = canvas.width / 2;
     let mouseY = canvas.height - 80;
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
     canvas.addEventListener('mousemove', (e) => {
         const rect = canvas.getBoundingClientRect();
@@ -1814,17 +1914,27 @@ function initStarshipGame() {
     });
 
     canvas.addEventListener('mouseleave', () => {
-        if (isPlaying) isPaused = true;
+        if (isPlaying) {
+            isPaused = true;
+            stopBgm();
+        }
     });
 
     canvas.addEventListener('mouseenter', () => {
-        if (isPlaying) isPaused = false;
+        // 如果设置菜单开启，不要在移入时自动恢复游戏
+        const settingsClosed = !settingsMenu || settingsMenu.classList.contains('hidden');
+        if (isPlaying && settingsClosed) {
+            isPaused = false;
+            if (isMusicOn) playBgm();
+        }
     });
 
     quitBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         isPlaying = false;
         isPaused = false;
+        stopBgm(); // 退出时停止音乐播放
+        if (settingsMenu) settingsMenu.classList.add('hidden'); // 退出时确保设置关闭
         overlay.classList.remove('hidden');
 
         const h2 = overlay.querySelector('h2');
@@ -1871,8 +1981,8 @@ function initStarshipGame() {
         }
 
         if (isPlaying && !isPaused) {
-            // 移动端自动开火逻辑：每 15 帧（约 250ms）触发一次点击
-            if (isMobile && frameCount % 15 === 0) {
+            // 自动开火系统：当开启 isAutoFire 时，每 12 帧（约 200ms）自动发射子弹
+            if (isAutoFire && frameCount % 12 === 0) {
                 const mousedownEvent = new MouseEvent('mousedown');
                 canvas.dispatchEvent(mousedownEvent);
             }
@@ -1973,10 +2083,19 @@ function initStarshipGame() {
         ship = new Ship();
         ship.updateUI(); // 同步满血状态到 UI
 
-        // 新增：移动端自动开火提示
+        // 新增：自适应平台开启/关闭自动开火状态
         if (isMobile) {
-            achievementManager.notify('识别到手机用户', '已为你开启【自动开火】逻辑，PC端使用体验更佳！', '📱');
+            isAutoFire = true;
+            if (autoFireCheckbox) autoFireCheckbox.checked = true;
+            achievementManager.notify('识别到手机用户', '已自动开启【自动开火】系统！', '📱');
+        } else {
+            // PC 端如果是打开了设置，保持设置里的值；如果未打开过，默认设为 false
+            if (autoFireCheckbox) autoFireCheckbox.checked = isAutoFire;
         }
+        
+        // 游戏启动时同步背景音乐开关状态并启动 BGM
+        if (musicCheckbox) musicCheckbox.checked = isMusicOn;
+        if (isMusicOn) playBgm();
         score = 0;
         scoreEl.innerText = 'SCORE: 0000';
         enemies = [];
@@ -1997,6 +2116,7 @@ function initStarshipGame() {
 
     function gameOver() {
         isPlaying = false;
+        stopBgm(); // 游戏结束停止音乐播放
         overlay.classList.remove('hidden');
         const h2 = overlay.querySelector('h2');
         const p = overlay.querySelector('p');
