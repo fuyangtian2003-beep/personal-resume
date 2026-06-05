@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>芯片拆解视觉实验室 | 伏杨天</title>
+    <meta name="description" content="一镜到底超导量子处理器芯片滚动拆解视觉效果测试页。">
+
+    <!-- 现代字体 Outfit & Inter & Fira Code -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@300;400;600&family=Fira+Code:wght@400;600&display=swap"
+        rel="stylesheet">
+
+    <!-- 图标库 -->
+    <link id="remixicon-cdn" href="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/remixicon/4.2.0/remixicon.css"
+        rel="stylesheet" onerror="fallbackRemixicon()">
+    <script>
+        function fallbackRemixicon() {
+            const link = document.getElementById('remixicon-cdn');
+            if (link) {
+                link.href = "https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css";
+            }
+        }
+    </script>
+
+    <!-- 独立样式 -->
+    <link rel="stylesheet" href="css/chip_test.css">
+</head>
+
+<body>
+    <!-- 极简预加载进度层 -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loader-content">
+            <div class="loader-spinner"></div>
+            <div class="loader-text">INITIALIZING CORE MAPPING // <span id="loading-progress">0%</span></div>
+            <div class="loader-progress-bar-container">
+                <div id="loader-progress-bar" class="loader-progress-bar"></div>
+            </div>
+            <p class="loader-subtext">正在静默构建芯片三维神经元映射，请稍候...</p>
+        </div>
+    </div>
+
+    <!-- 赛博极科背景 -->
+    <div class="cyber-background">
+        <div class="cyber-grid"></div>
+        <div class="glow-spot glow-spot-1"></div>
+        <div class="glow-spot glow-spot-2"></div>
+    </div>
+
+    <!-- 一镜到底 Canvas 绘图主舞台 -->
+    <canvas id="chip-canvas"></canvas>
+
+    <!-- 纯净的滚动占位，提供 400vh 的滚动条长度 -->
+    <div class="scroll-spacer"></div>
+
+    <!-- 固定定位的头部导航 -->
+    <header class="test-header">
+        <div class="logo">CHIP<span>.</span>LAB</div>
+        <a href="index.html" class="btn-return">
+            <i class="ri-portal-line"></i> 返回简历主页
+        </a>
+    </header>
+
+    <!-- 固定定位的全息线导面板容器 -->
+    <div class="info-panel-container">
+
+        <!-- 面板 0：首屏大气主标题 (0-87帧) -->
+        <div class="info-panel" id="panel-intro">
+            <span class="panel-tag">// ARCHITECTURE : QUANTUM CORE</span>
+            <h1 class="main-title-large">FULL-STACK</h1>
+            <h1 class="main-title-large"
+                style="color: var(--primary); text-shadow: 0 0 30px rgba(0,255,249,0.3); margin-top: -10px;">
+                SUPERCONDUCTOR</h1>
+            <h2 class="sub-title-chinese">全栈超导处理器芯片</h2>
+            <div class="line-guide" style="background-color: var(--primary); box-shadow: 0 0 10px var(--primary);">
+            </div>
+            <p class="panel-desc">这是集成了个人全栈技术栈的量子级超导处理器芯片。向下滚动滚轮，探索芯片在前端交互、后端超频引擎与安全存储底座中的爆炸式一镜到底拆解与聚合重组过程。</p>
+            <div class="action-hint" id="btn-auto-demo" style="cursor: pointer; pointer-events: auto;">
+                <i class="ri-play-circle-line" id="play-icon"></i> <span id="play-text">CLICK TO PLAY DEMO // 点击开启演示</span>
+            </div>
+        </div>
+
+        <!-- 面板 1：顶层前端设计 (88-119帧) -->
+        <div class="info-panel" id="panel-frontend">
+            <span class="panel-tag" style="color: #00fff9; border-color: rgba(0,255,249,0.3);">// LAYER_01 : FRONTEND
+                VISUAL</span>
+            <h2 class="section-title">顶层：前端交互视界层</h2>
+            <div class="line-guide" style="background-color: #00fff9; box-shadow: 0 0 10px #00fff9;"></div>
+            <p class="panel-desc">采用超高折射率的<strong class="highlight-cyan">幻彩全息玻璃盖板</strong>。表层蚀刻亮青色发光电路，专为 <strong
+                    class="highlight-cyan">Vue.js 3 响应式系统</strong>与 <strong class="highlight-cyan">Three.js 3D
+                    粒子星图</strong>设计。随着页面视角的滑移，微秒级渲染出极速、流畅的 3D 数据视界，呈现极致的数字交互美学。</p>
+            <div class="tech-tags">
+                <span>Vue.js 3</span>
+                <span>Three.js</span>
+                <span>Vanilla CSS</span>
+                <span>Canvas 2D/3D</span>
+            </div>
+        </div>
+
+        <!-- 面板 2：中层后端核心 (120-154帧) -->
+        <div class="info-panel" id="panel-backend">
+            <span class="panel-tag" style="color: #8b5cf6; border-color: rgba(139,92,246,0.3);">// LAYER_02 : BACKEND
+                CORE ENGINE</span>
+            <h2 class="section-title">中层：后端性能超频引擎</h2>
+            <div class="line-guide" style="background-color: #8b5cf6; box-shadow: 0 0 10px #8b5cf6;"></div>
+            <p class="panel-desc">深空灰超导晶圆基板。核心搭载亮紫色光芒闪烁的 <strong class="highlight-purple">Java 21 与 Spring Boot
+                    虚拟机核裂变引擎</strong>。四周布设高密度<strong
+                    class="highlight-purple">微米光纤数据总线管道</strong>，支持超高吞吐、多线程异步任务和毫秒级并发响应，为系统提供澎湃的超频算力。</p>
+            <div class="tech-tags">
+                <span class="tag-purple">Java 21</span>
+                <span class="tag-purple">Spring Boot</span>
+                <span class="tag-purple">MyBatis-Plus</span>
+                <span class="tag-purple">JVM Opt</span>
+            </div>
+        </div>
+
+        <!-- 面板 3：底层安全数据库 (155-191帧) -->
+        <div class="info-panel" id="panel-database">
+            <span class="panel-tag" style="color: #f59e0b; border-color: rgba(245,158,11,0.3);">// LAYER_03 : SECURE
+                DATA SUBSTRATE</span>
+            <h2 class="section-title">底层：安全数据库存储基底</h2>
+            <div class="line-guide" style="background-color: #f59e0b; box-shadow: 0 0 10px #f59e0b;"></div>
+            <p class="panel-desc"><strong class="highlight-gold">超强防爆钛合金装甲护罩</strong>。芯片最底层敷设一层<strong
+                    class="highlight-gold">霓虹金色安全加密光束防御网</strong>，物理隔离任何恶意注入。高效驱动 <strong class="highlight-gold">Redis
+                    极速缓存</strong>与高稳定性 <strong class="highlight-gold">MySQL 存储单元</strong>，提供坚如磐石的数据持久化方案。</p>
+            <div class="tech-tags">
+                <span class="tag-gold">Redis Cache</span>
+                <span class="tag-gold">MySQL</span>
+                <span class="tag-gold">Security Filter</span>
+                <span class="tag-gold">AOP Log</span>
+            </div>
+        </div>
+
+        <!-- 面板 4：搞怪动作招募面板 (192-224帧) -->
+        <div class="info-panel" id="panel-action">
+            <span class="panel-tag" style="color: #ef4444; border-color: rgba(239,68,68,0.3);">// SYSTEM : REASSEMBLY
+                COMPLETE</span>
+            <h2 class="section-title" style="color: #fff; text-shadow: 0 0 15px rgba(239,68,68,0.25);">核心就绪！立即装配？</h2>
+            <div class="line-guide" style="background-color: #ef4444; box-shadow: 0 0 10px #ef4444;"></div>
+            <p class="panel-desc">检测到全栈超导芯片已完成重组复位，全系统量子回路全线贯通！现在就将这枚拥有 300% 动力的全栈芯片安装到你的技术团队中吗？</p>
+            <div class="action-buttons-wrapper">
+                <a href="index.html#contact" class="btn-action-buy">
+                    <i class="ri-install-line"></i> 立即装配 / INSTALL
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 右下角极简赛博音频控制器 -->
+    <div id="audio-control" class="audio-control">
+        <div class="audio-waves">
+            <span class="stroke"></span>
+            <span class="stroke"></span>
+            <span class="stroke"></span>
+            <span class="stroke"></span>
+        </div>
+        <span class="audio-text">AUDIO OFF</span>
+    </div>
+
+    <!-- 右下角半透明极客调试 HUD -->
+    <div id="debug-hud" class="debug-hud">
+        <div class="hud-header">
+            <div class="hud-status-dot"></div>
+            <span>SYSTEM MONITOR</span>
+        </div>
+        <div class="hud-item">
+            <span class="label">SCROLLING:</span>
+            <span id="hud-progress" class="val">0.00%</span>
+        </div>
+        <div class="hud-item">
+            <span class="label">TARGET FRAME:</span>
+            <span id="hud-target-frame" class="val">0</span>
+        </div>
+        <div class="hud-item">
+            <span class="label">CURRENT FRAME:</span>
+            <span id="hud-current-frame" class="val">0</span>
+        </div>
+        <div class="hud-item">
+            <span class="label">FPS INDEX:</span>
+            <span id="hud-fps" class="val">60.0 FPS</span>
+        </div>
+        <div class="hud-item" style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 4px; margin-top: 4px;">
+            <span class="label" style="color: var(--primary);">ACTIVE MODULE:</span>
+            <span id="hud-active-layer" class="val" style="color: var(--primary);">INTRO</span>
+        </div>
+    </div>
+
+    <!-- 页面核心交互逻辑 -->
+    <script src="js/chip_test.js"></script>
+</body>
+
+</html>
