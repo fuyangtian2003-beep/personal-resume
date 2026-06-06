@@ -63,25 +63,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         console.log("%c📦 Summoning Three.js Engine...", "color: #3b82f6; font-weight: bold;");
         const script = document.createElement('script');
-        
-        // 首选本地静态资源库 (100% 离线秒开，防网络阻塞)
-        script.src = 'js/lib/three.min.js';
+
+        // 首选国内极速镜像源
+        script.src = 'https://cdnjs.net/ajax/libs/three.js/0.160.0/three.min.js';
         script.onload = callback;
-        
-        // 绑定 onerror 错误处理器，若本地源异常，无缝降级切换至官方 CDN 镜像
+
+        // 绑定 onerror 错误处理器，若国内源异常，无缝降级切换至国外官方源
         script.onerror = () => {
-            console.warn("⚠️ [Three.js Local Fallback] 本地静态库加载失败，正在自动切回备用 CDN 官方源...");
+            console.warn("⚠️ [Three.js CDN Fallback] 首选国内镜像源加载失败，正在自动切回备用 CDN 镜像...");
             script.remove(); // 清理失效标签
-            
+
             const backupScript = document.createElement('script');
             backupScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js';
             backupScript.onload = callback;
             backupScript.onerror = () => {
-                console.error("❌ [Three.js Load Failure] 本地与备用 CDN 均加载失败，3D 物理引擎初始化中断。");
+                console.error("❌ [Three.js Load Failure] 首选与备用 CDN 均加载失败，3D 物理引擎初始化中断。");
             };
             document.head.appendChild(backupScript);
         };
-        
+
         document.head.appendChild(script);
     }
 
@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const observer = new IntersectionObserver((entries) => {
             const wasVisible = isVisible;
             isVisible = entries[0].isIntersecting;
-            
+
             // 唤醒逻辑
             if (isVisible && !wasVisible) {
                 console.log("%c✨ 2D Particles Resumed", "color: #818cf8;");
@@ -362,7 +362,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const observer = new IntersectionObserver((entries) => {
             const wasVisible = threeEngine.isVisible;
             threeEngine.isVisible = entries[0].isIntersecting;
-            
+
             // 如果从不可见变为可见，重新启动动画循环
             if (threeEngine.isVisible && !wasVisible) {
                 console.log("%c🌍 3D Earth Resumed by Observer", "color: #10b981;");
@@ -394,15 +394,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 3. Earth Geometry & Texture
         const loader = new THREE.TextureLoader();
-        // 换回鲜艳的高饱和度贴图 (直接使用国外 unpkg 官方镜像，避免 file:// 协议本地 CORS 拦截)
-        const texture = loader.load('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg');
         const geometry = new THREE.SphereGeometry(200, 64, 64);
         // 使用 MeshBasicMaterial，不需要光照也能保持最高亮度
         const material = new THREE.MeshBasicMaterial({
-            map: texture,
             transparent: true,
             opacity: 0.98
         });
+
+        // 换回鲜艳的高饱和度贴图
+        const texture = loader.load('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg');
+        material.map = texture; // 绑定初始加载中的 texture
         threeEngine.earth = new THREE.Mesh(geometry, material);
         threeEngine.earth.rotation.y = Math.PI * 0.6; // 初始朝向：亚洲/中国方向
 
@@ -429,7 +430,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 threeEngine.animationID = null;
                 return; // 看不见，直接断流
             }
-            
+
             threeEngine.animationID = requestAnimationFrame(animate);
             if (threeEngine.earth) {
                 threeEngine.earth.rotation.y += 0.0002; // 极致优雅的慢速自转
@@ -916,7 +917,7 @@ function initStarshipGame() {
     const observer = new IntersectionObserver((entries) => {
         const wasVisible = isVisible;
         isVisible = entries[0].isIntersecting;
-        
+
         // 唤醒逻辑
         if (isVisible && !wasVisible) {
             console.log("%c🚀 Starship Engine Resumed", "color: #3b82f6;");
@@ -1750,12 +1751,12 @@ function initStarshipGame() {
     function resize() {
         const rect = container.getBoundingClientRect();
         const oldWidth = canvas.width;
-        
+
         // 全屏自适应：如果处于全屏模式，高度撑满容器；否则保持 600
         const isFullscreen = container.classList.contains('fullscreen');
         canvas.width = rect.width;
         canvas.height = isFullscreen ? rect.height : 600;
-        
+
         // 仅在初次或宽度剧变时初始化流星，防止缩放时抖动
         if (stars.length === 0 || Math.abs(oldWidth - canvas.width) > 100) {
             initStars();
@@ -1770,16 +1771,16 @@ function initStarshipGame() {
         fullscreenBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             const isEntering = !container.classList.contains('fullscreen');
-            
+
             if (isEntering) {
                 // 记录原始位置，用于恢复
                 originalParent = container.parentNode;
                 originalNextSibling = container.nextSibling;
-                
+
                 // 核心：脱离父级 transform 限制，挂载到 body
                 container.classList.add('fullscreen');
                 document.body.appendChild(container);
-                
+
                 const icon = fullscreenBtn.querySelector('i');
                 icon.className = 'ri-fullscreen-exit-line';
                 fullscreenBtn.title = 'RESTORE SYSTEM';
@@ -1790,15 +1791,15 @@ function initStarshipGame() {
                 if (originalParent) {
                     originalParent.insertBefore(container, originalNextSibling);
                 }
-                
+
                 const icon = fullscreenBtn.querySelector('i');
                 icon.className = 'ri-fullscreen-line';
                 fullscreenBtn.title = 'TOGGLE FULLSCREEN';
                 showToast('SYSTEM RESTORED');
             }
-            
+
             // 强制重绘尺寸
-            setTimeout(resize, 100); 
+            setTimeout(resize, 100);
         });
     }
 
@@ -1807,7 +1808,7 @@ function initStarshipGame() {
         settingsBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             if (!settingsMenu) return;
-            
+
             const isMenuHidden = settingsMenu.classList.contains('hidden');
             if (isMenuHidden) {
                 // 打开设置菜单
@@ -1842,7 +1843,7 @@ function initStarshipGame() {
             if (settingsMenu) settingsMenu.classList.add('hidden');
             if (autoFireCheckbox) isAutoFire = autoFireCheckbox.checked;
             if (musicCheckbox) isMusicOn = musicCheckbox.checked;
-            
+
             if (isPlaying) {
                 isPaused = false;
                 if (isMusicOn) playBgm();
@@ -1858,7 +1859,7 @@ function initStarshipGame() {
                 settingsMenu.classList.add('hidden');
                 if (autoFireCheckbox) isAutoFire = autoFireCheckbox.checked;
                 if (musicCheckbox) isMusicOn = musicCheckbox.checked;
-                
+
                 if (isPlaying) {
                     isPaused = false;
                     if (isMusicOn) playBgm();
@@ -2108,7 +2109,7 @@ function initStarshipGame() {
             // PC 端如果是打开了设置，保持设置里的值；如果未打开过，默认设为 false
             if (autoFireCheckbox) autoFireCheckbox.checked = isAutoFire;
         }
-        
+
         // 游戏启动时同步背景音乐开关状态并启动 BGM
         if (musicCheckbox) musicCheckbox.checked = isMusicOn;
         if (isMusicOn) playBgm();
