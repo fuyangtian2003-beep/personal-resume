@@ -470,7 +470,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 初始化展示默认信息
     function showDefaultProjector() {
-        if (holoTitle) holoTitle.textContent = "LAB // 实验室主控台";
+        if (holoTitle) holoTitle.textContent = "STAR // 观星主控台";
         if (holoCategoryDesc) {
             holoCategoryDesc.innerHTML = `<span style="color: var(--primary);">SYSTEM READY.</span> 请点击左侧三维星图中的任意技能节点（如 Java/Spring Boot、Vue.js 等），全息系统将自动扫描关联的数据结构、熟练矩阵与精选实战作品。`;
         }
