@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const chatSend = document.getElementById("ai-chat-send");
 
     // 默认的 API 请求地址。由于蹭另一个项目的后端，直接把这个 baseURL 改为另一个后端的绝对地址
-    const API_BASE_URL = "http://localhost:8080";
+    const API_BASE_URL = "https://larou.fythub.top:9443";
 
     // 伏杨天（Bob）的真实简历数据底座，防止 AI 编造幻觉
     const RESUME_INFO = `
