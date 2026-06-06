@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>芯片拆解视觉实验室 | 伏杨天</title>
-    <meta name="description" content="一镜到底超导量子处理器芯片滚动拆解视觉效果测试页。">
+    <title>3D 芯片量子空间 | 伏杨天</title>
+    <meta name="description" content="一镜到底超导量子处理器芯片滚动拆解三维交互实验室。">
 
     <!-- 现代字体 Outfit & Inter & Fira Code -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -39,7 +39,7 @@
             <div class="loader-progress-bar-container">
                 <div id="loader-progress-bar" class="loader-progress-bar"></div>
             </div>
-            <p class="loader-subtext">正在静默构建芯片三维神经元映射，请稍候...</p>
+            <p class="loader-subtext">正在静默构建芯片三维量子映射，请稍候...</p>
         </div>
     </div>
 
@@ -50,7 +50,7 @@
         <div class="glow-spot glow-spot-2"></div>
     </div>
 
-    <!-- 一镜到底 Canvas 绘图主舞台 -->
+    <!-- 一镜到底 Canvas 绘图主舞台 (Three.js 渲染器绑定) -->
     <canvas id="chip-canvas"></canvas>
 
     <!-- 纯净的滚动占位，提供 400vh 的滚动条长度 -->
@@ -58,7 +58,7 @@
 
     <!-- 固定定位的头部导航 -->
     <header class="test-header">
-        <div class="logo">CHIP<span>.</span>LAB</div>
+        <div class="logo">3D.CHIP<span>.</span>LAB</div>
         <a href="index.html" class="btn-return">
             <i class="ri-portal-line"></i> 返回简历主页
         </a>
@@ -70,16 +70,16 @@
         <!-- 面板 0：首屏大气主标题 (0-87帧) -->
         <div class="info-panel" id="panel-intro">
             <span class="panel-tag">// ARCHITECTURE : QUANTUM CORE</span>
-            <h1 class="main-title-large">FULL-STACK</h1>
+            <h1 class="main-title-large">3D FULL-STACK</h1>
             <h1 class="main-title-large"
                 style="color: var(--primary); text-shadow: 0 0 30px rgba(0,255,249,0.3); margin-top: -10px;">
                 SUPERCONDUCTOR</h1>
-            <h2 class="sub-title-chinese">全栈超导处理器芯片</h2>
+            <h2 class="sub-title-chinese">3D 全栈超导处理器</h2>
             <div class="line-guide" style="background-color: var(--primary); box-shadow: 0 0 10px var(--primary);">
             </div>
-            <p class="panel-desc">这是集成了个人全栈技术栈的量子级超导处理器芯片。向下滚动滚轮，探索芯片在前端交互、后端超频引擎与安全存储底座中的爆炸式一镜到底拆解与聚合重组过程。</p>
-            <div class="action-hint" id="btn-auto-demo" style="cursor: pointer; pointer-events: auto;">
-                <i class="ri-play-circle-line" id="play-icon"></i> <span id="play-text">CLICK TO PLAY DEMO // 点击开启演示</span>
+            <p class="panel-desc">这是集成了个人全栈技术栈的 3D 量子级超导芯片模型。按住鼠标左键并拖动可进行自由 3D 视角变换，向下滚动滚轮探索全栈架构的一镜到底阻尼差值联动拆解过程。</p>
+            <div class="action-hint" style="cursor: default; pointer-events: none;">
+                <i class="ri-mouse-line"></i> <span>DRAG TO ROTATE // 鼠标拖拽旋转</span>
             </div>
         </div>
 
@@ -165,7 +165,7 @@
     <div id="debug-hud" class="debug-hud">
         <div class="hud-header">
             <div class="hud-status-dot"></div>
-            <span>SYSTEM MONITOR</span>
+            <span>3D SYSTEM MONITOR</span>
         </div>
         <div class="hud-item">
             <span class="label">SCROLLING:</span>
@@ -189,8 +189,9 @@
         </div>
     </div>
 
-    <!-- 页面核心交互逻辑 -->
-    <script src="js/chip_test.js"></script>
+    <!-- 页面核心数据与三维交互逻辑 -->
+    <script src="js/model_data.js"></script>
+    <script src="js/chip_model_viewer.js"></script>
 </body>
 
 </html>
