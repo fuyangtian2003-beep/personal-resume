@@ -638,13 +638,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 全局点击点击背景均可启闭自动演示
+    // 全局点击点击背景均可启闭自动演示 (防拖拽交互及误触导致自动演示复位)
     document.addEventListener('click', (e) => {
         const isInteractiveBtn = e.target.closest('#btn-auto-demo') ||
             e.target.closest('.btn-action-buy') ||
             e.target.closest('.btn-return') ||
-            e.target.closest('#audio-control');
-        if (!isInteractiveBtn && isLoaded) {
+            e.target.closest('#audio-control') ||
+            e.target.closest('#chip-3d-canvas');
+        if (isInteractiveBtn) return; // 点击了交互按钮或3D画布，直接忽略
+
+        // 3D 章节防穿透气囊：若当前处于 3D 阶段 (>= 224 帧)，点击任何背景均不响应自动播放，彻底杜绝拖拽手势甩出画布误触 Demo
+        if (currentFrame >= WEBP_FRAMES_COUNT - 1) {
+            return;
+        }
+
+        if (isLoaded) {
             toggleAutoPlay();
         }
     });
