@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
         animationID: null
     };
 
-    // 动态加载 Three.js 引擎
+    // 动态加载 Three.js 引擎 (支持国内镜像首选与国外源无缝降级容灾)
     function loadThreeJS(callback) {
         if (window.THREE) {
             callback();
@@ -63,8 +63,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         console.log("%c📦 Summoning Three.js Engine...", "color: #3b82f6; font-weight: bold;");
         const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js';
+        
+        // 首选国内极速镜像源
+        script.src = 'https://cdnjs.net/ajax/libs/three.js/0.160.0/three.min.js';
         script.onload = callback;
+        
+        // 绑定 onerror 错误处理器，若国内源异常，无缝降级切换至国外官方源
+        script.onerror = () => {
+            console.warn("⚠️ [Three.js CDN Fallback] 首选国内镜像源加载失败，正在自动切回备用 CDN 镜像...");
+            script.remove(); // 清理失效标签
+            
+            const backupScript = document.createElement('script');
+            backupScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js';
+            backupScript.onload = callback;
+            backupScript.onerror = () => {
+                console.error("❌ [Three.js Load Failure] 首选与备用 CDN 均加载失败，3D 物理引擎初始化中断。");
+            };
+            document.head.appendChild(backupScript);
+        };
+        
         document.head.appendChild(script);
     }
 
