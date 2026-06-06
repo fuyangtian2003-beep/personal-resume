@@ -64,20 +64,20 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("%c📦 Summoning Three.js Engine...", "color: #3b82f6; font-weight: bold;");
         const script = document.createElement('script');
         
-        // 首选国内极速镜像源
-        script.src = 'https://cdnjs.net/ajax/libs/three.js/0.160.0/three.min.js';
+        // 首选本地静态资源库 (100% 离线秒开，防网络阻塞)
+        script.src = 'js/lib/three.min.js';
         script.onload = callback;
         
-        // 绑定 onerror 错误处理器，若国内源异常，无缝降级切换至国外官方源
+        // 绑定 onerror 错误处理器，若本地源异常，无缝降级切换至官方 CDN 镜像
         script.onerror = () => {
-            console.warn("⚠️ [Three.js CDN Fallback] 首选国内镜像源加载失败，正在自动切回备用 CDN 镜像...");
+            console.warn("⚠️ [Three.js Local Fallback] 本地静态库加载失败，正在自动切回备用 CDN 官方源...");
             script.remove(); // 清理失效标签
             
             const backupScript = document.createElement('script');
             backupScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js';
             backupScript.onload = callback;
             backupScript.onerror = () => {
-                console.error("❌ [Three.js Load Failure] 首选与备用 CDN 均加载失败，3D 物理引擎初始化中断。");
+                console.error("❌ [Three.js Load Failure] 本地与备用 CDN 均加载失败，3D 物理引擎初始化中断。");
             };
             document.head.appendChild(backupScript);
         };
@@ -394,9 +394,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 3. Earth Geometry & Texture
         const loader = new THREE.TextureLoader();
-        // 换回鲜艳的高饱和度贴图
-        const texture = loader.load('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg');
+        // 智能选择贴图源：file:// 协议下受浏览器 CORS 沙箱限制，首选加载支持跨域的 unpkg 官方贴图源（避开本地跨域红字报错）；HTTP/HTTPS 协议下首选纯本地静态资源，实现零外网开销秒开
+        const isLocalFile = window.location.protocol === 'file:';
+        const textureUrl = isLocalFile 
+            ? 'https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg' 
+            : 'img/earth-blue-marble.jpg';
 
+        const texture = loader.load(textureUrl);
         const geometry = new THREE.SphereGeometry(200, 64, 64);
         // 使用 MeshBasicMaterial，不需要光照也能保持最高亮度
         const material = new THREE.MeshBasicMaterial({
