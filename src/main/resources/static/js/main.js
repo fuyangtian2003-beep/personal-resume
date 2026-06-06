@@ -394,13 +394,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 3. Earth Geometry & Texture
         const loader = new THREE.TextureLoader();
-        // 智能选择贴图源：file:// 协议下受浏览器 CORS 沙箱限制，首选加载支持跨域的 unpkg 官方贴图源（避开本地跨域红字报错）；HTTP/HTTPS 协议下首选纯本地静态资源，实现零外网开销秒开
-        const isLocalFile = window.location.protocol === 'file:';
-        const textureUrl = isLocalFile 
-            ? 'https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg' 
-            : 'img/earth-blue-marble.jpg';
-
-        const texture = loader.load(textureUrl);
+        // 换回鲜艳的高饱和度贴图 (直接使用国外 unpkg 官方镜像，避免 file:// 协议本地 CORS 拦截)
+        const texture = loader.load('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg');
         const geometry = new THREE.SphereGeometry(200, 64, 64);
         // 使用 MeshBasicMaterial，不需要光照也能保持最高亮度
         const material = new THREE.MeshBasicMaterial({
