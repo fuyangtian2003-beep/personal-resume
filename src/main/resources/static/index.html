@@ -312,9 +312,45 @@
         </div>
     </div>
 
+    <!-- AI 助手悬浮窗 -->
+    <div id="ai-chat-widget" class="ai-widget">
+        <!-- 圆形触发按钮 -->
+        <button id="ai-chat-trigger" title="召唤 AI 助手">
+            <i class="ri-robot-2-line"></i>
+            <span class="ai-badge">AI</span>
+        </button>
+        
+        <!-- 对话面板 -->
+        <div id="ai-chat-panel" class="hidden">
+            <div class="ai-panel-header">
+                <div class="ai-title">
+                    <i class="ri-robot-2-line"></i>
+                    <div>
+                        <h4>AI 助手</h4>
+                        <span>在线中</span>
+                    </div>
+                </div>
+                <button id="ai-chat-close" title="收起面板">&times;</button>
+            </div>
+            
+            <div id="ai-chat-messages" class="ai-panel-body">
+                <div class="ai-msg bot">
+                    <div class="msg-content">你好，老板！我是你的 AI 助手。你可以问我关于伏杨天（Bob）的简历细节、核心技能，或者让我现场敲一段代码，我都十分乐意效劳！</div>
+                    <div class="msg-time">刚刚</div>
+                </div>
+            </div>
+            
+            <div class="ai-panel-footer">
+                <textarea id="ai-chat-input" placeholder="输入你想问的问题..." rows="1"></textarea>
+                <button id="ai-chat-send" title="发送 (Enter)"><i class="ri-send-plane-2-line"></i></button>
+            </div>
+        </div>
+    </div>
+
     <!-- 核心逻辑 -->
     <script src="js/data.js"></script>
     <script src="js/main.js"></script>
+    <script src="js/ai_chat.js"></script>
 </body>
 
 </html>

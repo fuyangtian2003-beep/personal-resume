@@ -2274,3 +2274,363 @@ body .galaxy-container .showcase-header .subtitle {
         font-size: 1.8rem;
     }
 }
+
+/* ============================================================
+   AI Assistant Widget (赛博 AI 助手)
+   ============================================================ */
+
+:root {
+    --ai-primary: #00f0ff;
+    --ai-primary-glow: rgba(0, 240, 255, 0.4);
+    --ai-accent: #a855f7;
+    --ai-accent-glow: rgba(168, 85, 247, 0.4);
+}
+
+.ai-widget {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 10000;
+    font-family: 'Inter', 'Outfit', sans-serif;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    width: 60px;
+    height: 60px;
+}
+
+.ai-widget.open {
+    width: 380px;
+    height: 520px;
+}
+
+/* 悬浮圆形触发按钮 */
+#ai-chat-trigger {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(10, 12, 18, 0.7);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+    color: var(--ai-primary);
+    font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+#ai-chat-trigger:hover {
+    transform: scale(1.1) rotate(5deg);
+    border-color: var(--ai-primary);
+    box-shadow: 0 0 30px var(--ai-primary-glow);
+    color: #fff;
+}
+
+.ai-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: linear-gradient(135deg, var(--ai-primary), var(--ai-accent));
+    color: #05070a;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 10px;
+    letter-spacing: 0.5px;
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+}
+
+/* 对话面板 */
+#ai-chat-panel {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 380px;
+    height: 520px;
+    border-radius: 20px;
+    background: rgba(10, 12, 18, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 
+                0 0 40px rgba(99, 102, 241, 0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    transform-origin: bottom right;
+    transition: all 0.4s cubic-bezier(0.075, 0.82, 0.165, 1);
+}
+
+#ai-chat-panel.hidden {
+    opacity: 0;
+    transform: scale(0.5) translateY(40px);
+    pointer-events: none;
+}
+
+/* 面板头部 */
+.ai-panel-header {
+    padding: 1.2rem 1.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.ai-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.ai-title i {
+    font-size: 1.6rem;
+    color: var(--ai-primary);
+    filter: drop-shadow(0 0 5px var(--ai-primary-glow));
+}
+
+.ai-title h4 {
+    margin: 0;
+    font-size: 1.05rem;
+    color: #fff;
+    font-weight: 600;
+}
+
+.ai-title span {
+    font-size: 0.75rem;
+    color: #10b981;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.ai-title span::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: #10b981;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 8px #10b981;
+}
+
+#ai-chat-close {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+}
+
+#ai-chat-close:hover {
+    color: #ff2d55;
+    background: rgba(255, 45, 85, 0.1);
+}
+
+/* 对话区域 */
+.ai-panel-body {
+    flex: 1;
+    padding: 1.5rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+    scroll-behavior: smooth;
+}
+
+/* 滚动条美化 */
+.ai-panel-body::-webkit-scrollbar {
+    width: 6px;
+}
+.ai-panel-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+.ai-panel-body::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+.ai-panel-body::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 240, 255, 0.3);
+}
+
+/* 气泡样式 */
+.ai-msg {
+    display: flex;
+    flex-direction: column;
+    max-width: 85%;
+}
+
+.ai-msg.bot {
+    align-self: flex-start;
+}
+
+.ai-msg.user {
+    align-self: flex-end;
+}
+
+.ai-msg .msg-content {
+    padding: 0.85rem 1.1rem;
+    border-radius: 16px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    word-break: break-all;
+    position: relative;
+}
+
+.ai-msg.bot .msg-content {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    color: var(--text-main);
+    border-top-left-radius: 4px;
+}
+
+.ai-msg.user .msg-content {
+    background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(168, 85, 247, 0.15));
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    color: #fff;
+    border-top-right-radius: 4px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.ai-msg .msg-time {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+    padding: 0 4px;
+}
+
+.ai-msg.user .msg-time {
+    align-self: flex-end;
+}
+
+/* 错误提示气泡 */
+.ai-msg.error .msg-content {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #f87171;
+}
+
+/* 输入区域 */
+.ai-panel-footer {
+    padding: 1rem 1.2rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#ai-chat-input {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 0.6rem 1.2rem;
+    color: #fff;
+    font-size: 0.9rem;
+    resize: none;
+    outline: none;
+    font-family: inherit;
+    transition: all 0.3s ease;
+    overflow: hidden; /* 彻底隐藏滚动条，高度由 JS 动态撑开 */
+    line-height: 1.4;
+}
+
+#ai-chat-input:focus {
+    border-color: var(--ai-primary);
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.1);
+}
+
+#ai-chat-send {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--ai-primary), var(--ai-accent));
+    border: none;
+    color: #05070a;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#ai-chat-send:hover {
+    transform: scale(1.08) translateY(-1px);
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+}
+
+#ai-chat-send:disabled {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-muted);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* 打字机光标动画 */
+.typing-cursor::after {
+    content: '▋';
+    color: var(--ai-primary);
+    animation: cursor-blink 0.8s infinite;
+}
+
+@keyframes cursor-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+/* 加载动画气泡 */
+.typing-indicator {
+    display: flex;
+    gap: 4px;
+    padding: 4px 8px;
+    align-items: center;
+    height: 20px;
+}
+
+.typing-indicator span {
+    width: 6px;
+    height: 6px;
+    background: var(--text-muted);
+    border-radius: 50%;
+    animation: typing-bounce 1.4s infinite ease-in-out both;
+}
+
+.typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+.typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes typing-bounce {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1.0); }
+}
+
+/* 适配移动端性能防爆：隐藏背景滤镜，微调大小 */
+@media (max-width: 768px) {
+    .ai-widget {
+        bottom: 20px;
+        right: 20px;
+    }
+    #ai-chat-panel {
+        width: 320px;
+        height: 450px;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        background: rgba(15, 18, 25, 0.98) !important;
+    }
+}
+
