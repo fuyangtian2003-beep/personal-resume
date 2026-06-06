@@ -105,6 +105,17 @@ document.addEventListener('DOMContentLoaded', () => {
         document.head.appendChild(script);
     }
 
+    // 页面空闲时静默预加载并挂载 Three.js 引擎，实现切换 3D Showcase 时的零延迟秒开
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            if (typeof window.THREE === 'undefined') {
+                loadThreeJS(() => {
+                    console.log("%c📦 Three.js Engine Preloaded silently in background.", "color: #10b981; font-weight: bold;");
+                });
+            }
+        }, 1500); // 延迟 1.5 秒避开首屏交互网络和 CPU 峰值
+    });
+
     arrowRight.addEventListener('click', () => {
         showcasePage.style.visibility = 'visible';
         slider.style.transform = 'translateX(-100vw)';
@@ -414,6 +425,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 3. Earth Geometry & Texture
         const loader = new THREE.TextureLoader();
+        loader.setCrossOrigin('anonymous'); // 显式声明跨域匿名模式以防 Credential 冲突，复用 prefetch 缓存
         const geometry = new THREE.SphereGeometry(200, 64, 64);
         // 使用 MeshBasicMaterial，不需要光照也能保持最高亮度
         const material = new THREE.MeshBasicMaterial({

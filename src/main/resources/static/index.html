@@ -15,7 +15,8 @@
         rel="stylesheet">
 
     <!-- 智能双路图标库：首选国内高速源，加载失败自动无缝切回国外备用源 -->
-    <link id="remixicon-cdn" href="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/remixicon/4.2.0/remixicon.css" rel="stylesheet" onerror="fallbackRemixicon()">
+    <link id="remixicon-cdn" href="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/remixicon/4.2.0/remixicon.css"
+        rel="stylesheet" onerror="fallbackRemixicon()">
     <script>
         function fallbackRemixicon() {
             console.warn("⚠️ [Remixicon CDN Fallback] 首选加速源加载失败，正在自动切回备用 CDN 镜像...");
@@ -28,6 +29,11 @@
 
     <!-- 核心样式 -->
     <link rel="stylesheet" href="css/style.css">
+
+    <!-- 智能静默预加载 Showcase 页面 3D 地球的 CDN 贴图，利用 prefetch 机制避免 preload 几秒内不使用的警告，实现极速秒开 -->
+    <link rel="prefetch" href="https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg" crossorigin="anonymous">
+    <!-- 智能静默预加载 3D 物理引擎 Three.js，利用 prefetch 机制在空闲时提前下载，消除点击切换时的加载延迟 -->
+    <link rel="prefetch" href="https://cdn.bootcdn.net/ajax/libs/three.js/0.160.0/three.min.js">
 
     <!-- 预留 Favicon -->
     <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
@@ -71,7 +77,9 @@
                             <li><a href="#about">关于</a></li>
                             <li><a href="#skills">技能</a></li>
                             <li><a href="#projects">项目</a></li>
-                            <li><a href="lab.html" style="color: #00f0ff; text-shadow: 0 0 10px rgba(0, 240, 255, 0.4);"><i class="ri-planet-line"></i> 观星台</a></li>
+                            <li><a href="lab.html"
+                                    style="color: #00f0ff; text-shadow: 0 0 10px rgba(0, 240, 255, 0.4);"><i
+                                        class="ri-planet-line"></i> 观星台</a></li>
                             <li><a href="#contact" class="btn-primary">联系我</a></li>
                         </ul>
                         <div class="nav-actions">
@@ -82,9 +90,11 @@
                                         <i class="ri-medal-line"></i> 访客成就
                                     </div>
                                     <a href="lab.html" class="dropdown-item"><i class="ri-planet-line"></i> 观星台</a>
-                                    <a href="chip_test.html" class="dropdown-item" style="color: #00fff9;"><i class="ri-cpu-line"></i> 芯片实验室</a>
+                                    <a href="chip_test.html" class="dropdown-item" style="color: #00fff9;"><i
+                                            class="ri-cpu-line"></i> 芯片实验室</a>
                                     <div class="dropdown-divider"></div>
-                                    <a href="chip_model.html" class="dropdown-item" style="color: #a855f7;"><i class="ri-instance-line"></i> 3D 芯片体验舱</a>
+                                    <a href="chip_model.html" class="dropdown-item" style="color: #a855f7;"><i
+                                            class="ri-instance-line"></i> 3D 芯片体验舱</a>
                                     <div class="dropdown-divider"></div>
                                     <a href="#home" class="dropdown-item mobile-only">首页</a>
                                     <a href="#about" class="dropdown-item mobile-only">关于</a>
@@ -185,31 +195,53 @@
                         <div class="tech-marquee-section">
                             <div class="tech-marquee-container">
                                 <!-- 第一组 -->
-                                <div class="tech-marquee-item"><i class="ri-code-s-slash-line"></i> <span>JAVA 21</span></div>
+                                <div class="tech-marquee-item"><i class="ri-code-s-slash-line"></i> <span>JAVA 21</span>
+                                </div>
                                 <div class="tech-marquee-item"><i class="ri-vuejs-line"></i> <span>VUE.JS 3</span></div>
-                                <div class="tech-marquee-item"><i class="ri-leaf-line"></i> <span>SPRING BOOT</span></div>
-                                <div class="tech-marquee-item"><i class="ri-database-2-line"></i> <span>REDIS</span></div>
-                                <div class="tech-marquee-item"><i class="ri-fire-line"></i> <span>MYBATIS-PLUS</span></div>
-                                <div class="tech-marquee-item"><i class="ri-html5-line"></i> <span>HTML5 / CSS3</span></div>
-                                <div class="tech-marquee-item"><i class="ri-javascript-line"></i> <span>JS (ES6+)</span></div>
-                                <div class="tech-marquee-item"><i class="ri-robot-line"></i> <span>AIGC ENHANCED</span></div>
-                                <div class="tech-marquee-item"><i class="ri-terminal-window-line"></i> <span>LINUX / SHELL</span></div>
-                                <div class="tech-marquee-item"><i class="ri-bubble-chart-line"></i> <span>THREE.JS</span></div>
-                                <div class="tech-marquee-item"><i class="ri-smartphone-line"></i> <span>UNI-APP</span></div>
-                                <div class="tech-marquee-item"><i class="ri-shield-user-line"></i> <span>AOP INTERCEPT</span></div>
+                                <div class="tech-marquee-item"><i class="ri-leaf-line"></i> <span>SPRING BOOT</span>
+                                </div>
+                                <div class="tech-marquee-item"><i class="ri-database-2-line"></i> <span>REDIS</span>
+                                </div>
+                                <div class="tech-marquee-item"><i class="ri-fire-line"></i> <span>MYBATIS-PLUS</span>
+                                </div>
+                                <div class="tech-marquee-item"><i class="ri-html5-line"></i> <span>HTML5 / CSS3</span>
+                                </div>
+                                <div class="tech-marquee-item"><i class="ri-javascript-line"></i> <span>JS (ES6+)</span>
+                                </div>
+                                <div class="tech-marquee-item"><i class="ri-robot-line"></i> <span>AIGC ENHANCED</span>
+                                </div>
+                                <div class="tech-marquee-item"><i class="ri-terminal-window-line"></i> <span>LINUX /
+                                        SHELL</span></div>
+                                <div class="tech-marquee-item"><i class="ri-bubble-chart-line"></i>
+                                    <span>THREE.JS</span></div>
+                                <div class="tech-marquee-item"><i class="ri-smartphone-line"></i> <span>UNI-APP</span>
+                                </div>
+                                <div class="tech-marquee-item"><i class="ri-shield-user-line"></i> <span>AOP
+                                        INTERCEPT</span></div>
                                 <!-- 第二组 (镜像，用于无缝滚动) -->
-                                <div class="tech-marquee-item"><i class="ri-code-s-slash-line"></i> <span>JAVA 21</span></div>
+                                <div class="tech-marquee-item"><i class="ri-code-s-slash-line"></i> <span>JAVA 21</span>
+                                </div>
                                 <div class="tech-marquee-item"><i class="ri-vuejs-line"></i> <span>VUE.JS 3</span></div>
-                                <div class="tech-marquee-item"><i class="ri-leaf-line"></i> <span>SPRING BOOT</span></div>
-                                <div class="tech-marquee-item"><i class="ri-database-2-line"></i> <span>REDIS</span></div>
-                                <div class="tech-marquee-item"><i class="ri-fire-line"></i> <span>MYBATIS-PLUS</span></div>
-                                <div class="tech-marquee-item"><i class="ri-html5-line"></i> <span>HTML5 / CSS3</span></div>
-                                <div class="tech-marquee-item"><i class="ri-javascript-line"></i> <span>JS (ES6+)</span></div>
-                                <div class="tech-marquee-item"><i class="ri-robot-line"></i> <span>AIGC ENHANCED</span></div>
-                                <div class="tech-marquee-item"><i class="ri-terminal-window-line"></i> <span>LINUX / SHELL</span></div>
-                                <div class="tech-marquee-item"><i class="ri-bubble-chart-line"></i> <span>THREE.JS</span></div>
-                                <div class="tech-marquee-item"><i class="ri-smartphone-line"></i> <span>UNI-APP</span></div>
-                                <div class="tech-marquee-item"><i class="ri-shield-user-line"></i> <span>AOP INTERCEPT</span></div>
+                                <div class="tech-marquee-item"><i class="ri-leaf-line"></i> <span>SPRING BOOT</span>
+                                </div>
+                                <div class="tech-marquee-item"><i class="ri-database-2-line"></i> <span>REDIS</span>
+                                </div>
+                                <div class="tech-marquee-item"><i class="ri-fire-line"></i> <span>MYBATIS-PLUS</span>
+                                </div>
+                                <div class="tech-marquee-item"><i class="ri-html5-line"></i> <span>HTML5 / CSS3</span>
+                                </div>
+                                <div class="tech-marquee-item"><i class="ri-javascript-line"></i> <span>JS (ES6+)</span>
+                                </div>
+                                <div class="tech-marquee-item"><i class="ri-robot-line"></i> <span>AIGC ENHANCED</span>
+                                </div>
+                                <div class="tech-marquee-item"><i class="ri-terminal-window-line"></i> <span>LINUX /
+                                        SHELL</span></div>
+                                <div class="tech-marquee-item"><i class="ri-bubble-chart-line"></i>
+                                    <span>THREE.JS</span></div>
+                                <div class="tech-marquee-item"><i class="ri-smartphone-line"></i> <span>UNI-APP</span>
+                                </div>
+                                <div class="tech-marquee-item"><i class="ri-shield-user-line"></i> <span>AOP
+                                        INTERCEPT</span></div>
                             </div>
                         </div>
 
@@ -219,8 +251,10 @@
                                 <div class="game-title">DEFEND THE CORE // 代码保卫战</div>
                                 <div class="game-stats">
                                     <span id="game-score">SCORE: 0000</span>
-                                    <button id="settings-game-btn" class="btn-settings" title="GAME SETTINGS"><i class="ri-settings-3-line"></i></button>
-                                    <button id="fullscreen-game-btn" class="btn-fullscreen" title="TOGGLE FULLSCREEN"><i class="ri-fullscreen-line"></i></button>
+                                    <button id="settings-game-btn" class="btn-settings" title="GAME SETTINGS"><i
+                                            class="ri-settings-3-line"></i></button>
+                                    <button id="fullscreen-game-btn" class="btn-fullscreen" title="TOGGLE FULLSCREEN"><i
+                                            class="ri-fullscreen-line"></i></button>
                                     <button id="quit-game-btn" class="btn-quit" title="TERMINATE SYSTEM">QUIT</button>
                                 </div>
                             </div>
@@ -237,21 +271,23 @@
                                 </div>
                             </div>
                             <canvas id="game-canvas"></canvas>
-                            
+
                             <!-- 赛博设置控制台 (磨砂玻璃面板) -->
                             <div id="game-settings-menu" class="game-settings-menu hidden">
                                 <div class="settings-content">
                                     <h3 class="settings-title">SYSTEM CONFIG // 系统设定</h3>
                                     <div class="settings-list">
                                         <div class="setting-item">
-                                            <span class="setting-label"><i class="ri-focus-3-line"></i> 自动开火 (Auto Fire)</span>
+                                            <span class="setting-label"><i class="ri-focus-3-line"></i> 自动开火 (Auto
+                                                Fire)</span>
                                             <label class="cyber-switch">
                                                 <input type="checkbox" id="settings-autofire">
                                                 <span class="switch-slider"></span>
                                             </label>
                                         </div>
                                         <div class="setting-item">
-                                            <span class="setting-label"><i class="ri-music-2-line"></i> 背景音乐 (Music BGM)</span>
+                                            <span class="setting-label"><i class="ri-music-2-line"></i> 背景音乐 (Music
+                                                BGM)</span>
                                             <label class="cyber-switch">
                                                 <input type="checkbox" id="settings-music">
                                                 <span class="switch-slider"></span>
@@ -287,8 +323,7 @@
     <div id="wechat-modal" class="modal-overlay">
         <div class="modal-content">
             <h3 style="margin-bottom: 1.5rem; color: var(--text-main);">扫码添加微信</h3>
-            <img src="img/wechat-qr.jpg" id="qr-img" class="qr-image"
-                alt="微信二维码">
+            <img src="img/wechat-qr.jpg" id="qr-img" class="qr-image" alt="微信二维码">
             <p style="color: var(--text-muted); font-size: 0.9rem;">添加时请备注：来自个人简历</p>
             <div class="close-modal" id="close-modal-btn">[ 点击关闭 ]</div>
         </div>
@@ -319,7 +354,7 @@
             <i class="ri-robot-2-line"></i>
             <span class="ai-badge">AI</span>
         </button>
-        
+
         <!-- 对话面板 -->
         <div id="ai-chat-panel" class="hidden">
             <div class="ai-panel-header">
@@ -332,14 +367,14 @@
                 </div>
                 <button id="ai-chat-close" title="收起面板">&times;</button>
             </div>
-            
+
             <div id="ai-chat-messages" class="ai-panel-body">
                 <div class="ai-msg bot">
                     <div class="msg-content">你好，老板！我是你的 AI 助手。你可以问我关于伏杨天（Bob）的简历细节、核心技能，或者让我现场敲一段代码，我都十分乐意效劳！</div>
                     <div class="msg-time">刚刚</div>
                 </div>
             </div>
-            
+
             <div class="ai-panel-footer">
                 <textarea id="ai-chat-input" placeholder="输入你想问的问题..." rows="1"></textarea>
                 <button id="ai-chat-send" title="发送 (Enter)"><i class="ri-send-plane-2-line"></i></button>

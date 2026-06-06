@@ -787,3 +787,172 @@ body {
     }
 }
 
+/* ==========================================================================
+   苹果风级 3D 案例大荧幕展台视觉重构样式 (只在 3D 阶段被触发)
+   ========================================================================== */
+
+/* 苹果系统英文字体与中文字体族定义 */
+:root {
+    --font-apple-en: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "Inter", sans-serif;
+    --font-apple-zh: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+}
+
+/* 居中大荧幕整体容器 */
+.cyber-theater-container {
+    position: fixed;
+    bottom: 6%;
+    left: 50%;
+    transform: translateX(-50%) translateY(30px);
+    width: 90%;
+    max-width: 780px;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 6;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: 
+        opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), 
+        transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), 
+        visibility 0.8s;
+}
+
+.cyber-theater-container.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+}
+
+/* 苹果风居中高冷标题排版 */
+.cases-typography-container {
+    text-align: center;
+    margin-bottom: 1.8rem;
+}
+
+.apple-case-title {
+    font-family: var(--font-apple-en);
+    font-size: 3.2rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -1.5px;
+    margin-bottom: 0.4rem;
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
+}
+
+.apple-case-subtitle {
+    font-family: var(--font-apple-zh);
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: #86868b; /* 苹果副标题标志性中灰 */
+    letter-spacing: -0.5px;
+    opacity: 0.95;
+}
+
+/* 苹果风视网膜悬浮视频卡 */
+.apple-theater-card {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(10, 12, 18, 0.45);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.7);
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.apple-theater-card:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 40px 120px rgba(0, 0, 0, 0.8), 0 0 40px rgba(255,255,255,0.02);
+}
+
+.theater-border-effect {
+    width: 100%;
+    height: 100%;
+}
+
+.theater-border-effect video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* 3D 案例阶段背景动态降噪：隐去网格线，将光斑平滑降亮并加深模糊 */
+.cyber-background {
+    transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cyber-background.state-case-study .cyber-grid {
+    opacity: 0 !important;
+    transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cyber-background.state-case-study .glow-spot-1 {
+    background: radial-gradient(circle, #1e293b 0%, transparent 70%) !important;
+    opacity: 0.03 !important;
+    filter: blur(180px) !important;
+    transition: background 1.2s ease, opacity 1.2s ease, filter 1.2s ease;
+}
+
+.cyber-background.state-case-study .glow-spot-2 {
+    background: radial-gradient(circle, #0f172a 0%, transparent 70%) !important;
+    opacity: 0.02 !important;
+    filter: blur(180px) !important;
+    transition: background 1.2s ease, opacity 1.2s ease, filter 1.2s ease;
+}
+
+/* 3D 专属结尾购买/行动面板 */
+#panel-action-3d {
+    border-left: 2px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+#panel-action-3d.active {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.012) 0%, transparent 100%) !important;
+}
+
+#panel-action-3d .section-title {
+    font-family: var(--font-apple-zh);
+    font-weight: 700;
+    letter-spacing: -1px;
+}
+
+.btn-apple-buy {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    box-shadow: 0 4px 20px rgba(255, 255, 255, 0.05) !important;
+}
+
+.btn-apple-buy:hover {
+    background-color: rgba(255, 255, 255, 0.18) !important;
+    border-color: rgba(255, 255, 255, 0.8) !important;
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.2) !important;
+    color: #ffffff !important;
+}
+
+/* 响应式适配 */
+@media (max-width: 992px) {
+    .cyber-theater-container {
+        width: 95%;
+        bottom: 3%;
+    }
+    
+    .apple-case-title {
+        font-size: 2.2rem;
+        letter-spacing: -1px;
+        margin-bottom: 0.2rem;
+    }
+    
+    .apple-case-subtitle {
+        font-size: 1rem;
+    }
+}
+

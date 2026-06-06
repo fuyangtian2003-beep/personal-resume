@@ -25,6 +25,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const audioControl = document.getElementById('audio-control');
     const audioText = audioControl ? audioControl.querySelector('.audio-text') : null;
     const scrollDownHint = document.getElementById('scroll-down-hint');
+    
+    // 3D 苹果级大荧幕 DOM 节点
+    const cyberTheater = document.getElementById('cyber-theater-container');
+    const appleCaseTitle = document.getElementById('apple-case-title');
+    const appleCaseSubtitle = document.getElementById('apple-case-subtitle');
+    const casesVideo = document.getElementById('cases-video');
 
     // HUD 调试节点
     const hudProgress = document.getElementById('hud-progress');
@@ -39,12 +45,13 @@ document.addEventListener('DOMContentLoaded', () => {
         frontend: document.getElementById('panel-frontend'),
         backend: document.getElementById('panel-backend'),
         database: document.getElementById('panel-database'),
-        action: document.getElementById('panel-action')
+        action: document.getElementById('panel-action'),
+        action3d: document.getElementById('panel-action-3d')
     };
 
     // 3. 基础参数与状态配置
     const WEBP_FRAMES_COUNT = 225; // 2D WebP 序列帧图片总数 (0-224)
-    const TOTAL_FRAMES = 265;      // 融合后页面总虚拟滚动帧数 (0-264)
+    const TOTAL_FRAMES = 320;      // 融合后页面总虚拟滚动帧数 (0-319)
     const images = []; // WebP 序列帧缓存
     let loadedImagesCount = 0;
     let isLoaded = false; // 是否整体加载完毕
@@ -63,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { startFrame: 120, endFrame: 154, speed: 28 },
         { startFrame: 155, endFrame: 191, speed: 28 },
         { startFrame: 192, endFrame: 224, speed: 30 },
-        { startFrame: 225, endFrame: 264, speed: 20 } // 3D 接力段较平缓，营造天降阻尼感
+        { startFrame: 225, endFrame: 319, speed: 20 } // 3D 接力段较平缓，营造天降阻尼与案例展示穿梭感
     ];
 
     let isAutoPlaying = false;
@@ -91,6 +98,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let targetScale = 1.0;
     let targetCameraY = 1.5;
     let targetModelY = 4.0; // 芯片模型 Y 轴，用于控制升降降临效果
+    let targetModelX = 0.0; // 新增：芯片模型 X 轴左右横移
+    let targetModelZ = 0.0; // 新增：芯片模型 Z 轴前后远近位移
 
     // 轨道控制器手势阻断判定
     let userInteracting = false;
@@ -391,7 +400,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateStageTransition(frameIndex) {
         if (!canvas2d || !canvas3d) return;
 
-        // 极客下滑提示器：仅在 2D 芯片合体完毕（192-224帧）时显现，进入 3D 阶段后淡出隐藏
+        const bgEl = document.querySelector('.cyber-background');
+
+        // 极客下滑指示器：仅在 2D 芯片合体完毕（192-224帧）时显现，进入 3D 阶段后淡出隐藏
         if (scrollDownHint) {
             if (frameIndex >= 192 && frameIndex < 225) {
                 scrollDownHint.classList.add('active');
@@ -400,7 +411,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // 接力阈值修改：2D WebP（0 - 224帧）全部播放完毕后，在 225 - 264 虚拟帧接力切换 3D
+        // 接力阈值修改：2D WebP（0 - 224帧）全部播放完毕后，在 225 - 319 虚拟帧接力切换 3D 并控制案例大荧幕
         if (frameIndex < 225) {
             // A. 纯 2D Canvas 展示阶段
             canvas2d.style.display = 'block';
@@ -410,11 +421,26 @@ document.addEventListener('DOMContentLoaded', () => {
             canvas3d.style.pointerEvents = 'none';
             canvas3d.style.transform = 'translateY(-80px)'; // 3D 芯片上提隐藏
 
-            targetModelY = 4.0; // 3D 坐标上提
+            // 三维模型及运动姿态复位
+            targetModelX = 0.0;
+            targetModelY = 4.0;
+            targetModelZ = 0.0;
+            targetScale = 0.8;
             targetCameraY = 1.5;
+
+            // 隐藏苹果大荧幕与停止视频
+            if (cyberTheater) cyberTheater.classList.remove('active');
+            if (casesVideo) {
+                casesVideo.pause();
+            }
+
+            // 背景复位
+            if (bgEl) bgEl.classList.remove('state-case-study');
         } else {
             // B. 2D/3D 无缝淡入淡出及天降接力阶段
-            const alpha = (frameIndex - 225) / (TOTAL_FRAMES - 1 - 225); // 在 225 ~ 264 帧区间计算淡入淡出因子
+            // 修改淡入淡出比例计算：由于 3D 被延长到 320 帧，接力只在 225 - 244 帧（亮相期）进行以保平滑
+            const transitionEndFrame = 244;
+            const alpha = frameIndex >= transitionEndFrame ? 1.0 : (frameIndex - 225) / (transitionEndFrame - 225);
 
             // 2D 渐隐，在 100% 后直接 display: none 节约重绘开销
             canvas2d.style.opacity = (1 - alpha).toFixed(2);
@@ -429,12 +455,94 @@ document.addEventListener('DOMContentLoaded', () => {
             const translateY = -80 * (1 - alpha);
             canvas3d.style.transform = `translateY(${translateY}px)`; // CSS 姿态同步移动
 
-            // 3D 内部矩阵坐标计算：Y轴平滑落地
-            targetModelY = 0.0; 
-            targetCameraY = 1.0;
+            // ==========================================
+            // 3D 阶段分段穿梭轨迹与大荧幕状态机
+            // ==========================================
+            if (frameIndex >= 225 && frameIndex < 245) {
+                // B1. 3D 芯片降落落地段 (225 - 244)
+                targetModelX = 0.0;
+                targetModelY = 0.0;
+                targetModelZ = 0.0;
+                targetScale = 1.0;
+                targetCameraY = 1.0;
+                targetRotationX = 0.45;
 
-            // 在滚动基本稳定在尾部时，激活 3D 交互
-            if (alpha >= 0.5 && !isRewinding) {
+                // 隐藏大荧幕
+                if (cyberTheater) cyberTheater.classList.remove('active');
+                if (casesVideo) casesVideo.pause();
+                if (bgEl) bgEl.classList.remove('state-case-study');
+            } 
+            else if (frameIndex >= 245 && frameIndex < 280) {
+                // B2. 官网大荧幕展示段 (245 - 279) —— 飞入右上方，侧偏慢转
+                targetModelX = 1.8;
+                targetModelY = 1.2;
+                targetModelZ = -3.5;
+                targetScale = 0.75;
+                targetCameraY = 1.0;
+                targetRotationX = 0.6;
+                // 自转增量
+                targetRotationY = (frameIndex - 245) * 0.022;
+
+                // 淡入大荧幕与控制文字
+                if (cyberTheater) cyberTheater.classList.add('active');
+                if (appleCaseTitle) appleCaseTitle.innerText = "开发官网。";
+                if (appleCaseSubtitle) appleCaseSubtitle.innerText = "极速响应，一镜到底。";
+                
+                if (casesVideo) {
+                    if (casesVideo.paused) {
+                        casesVideo.play().catch(e => console.log("视频播放受阻:", e));
+                    }
+                }
+
+                // 注入背景降噪类
+                if (bgEl) bgEl.classList.add('state-case-study');
+            } 
+            else if (frameIndex >= 280 && frameIndex < 315) {
+                // B3. 小程序大荧幕展示段 (280 - 314) —— 划抛物线下弧线穿梭至左侧
+                targetModelX = -1.8;
+                targetModelY = 0.7;
+                targetModelZ = -3.0;
+                targetScale = 0.75;
+                targetCameraY = 1.0;
+                targetRotationX = 0.5;
+                // 持续慢转
+                targetRotationY = (frameIndex - 280) * 0.022;
+
+                // 保持大荧幕，切换苹果风大字
+                if (cyberTheater) cyberTheater.classList.add('active');
+                if (appleCaseTitle) appleCaseTitle.innerText = "微信小程序。";
+                if (appleCaseSubtitle) appleCaseSubtitle.innerText = "极致加载，安全稳健。";
+                
+                if (casesVideo) {
+                    if (casesVideo.paused) {
+                        casesVideo.play().catch(e => console.log("视频播放受阻:", e));
+                    }
+                }
+
+                // 保持背景降噪
+                if (bgEl) bgEl.classList.add('state-case-study');
+            } 
+            else {
+                // B4. 最终就绪段 (315 - 320) —— 芯片冲向前台归位，大荧幕淡出，激活 3D 自由把玩
+                targetModelX = 0.0;
+                targetModelY = 0.0;
+                targetModelZ = 0.0;
+                targetScale = 1.0;
+                targetCameraY = 1.0;
+                targetRotationX = 0.45;
+
+                // 大荧幕淡出，视频重置
+                if (cyberTheater) cyberTheater.classList.remove('active');
+                if (casesVideo) {
+                    casesVideo.pause();
+                }
+
+                // 背景恢复，网格显现
+                if (bgEl) bgEl.classList.remove('state-case-study');
+            }
+
+            // 在最后一阶段 (>= 315) 且没有在正反向倒带时，激活 3D 自由交互，其余时刻阻断手势以透传滚动
+            if (frameIndex >= 315 && !isRewinding) {
                 canvas3d.style.pointerEvents = 'auto';
             } else {
                 canvas3d.style.pointerEvents = 'none';
@@ -468,10 +576,14 @@ document.addEventListener('DOMContentLoaded', () => {
             activeKey = 'action';
             layerName = 'CHIP_REASSEMBLY';
             activeColor = '#ef4444';
+        } else if (frameIndex >= 225 && frameIndex < 315) {
+            activeKey = 'none'; // 3D 大荧幕展示期间不显示侧边面板
+            layerName = 'CASE_STUDIES';
+            activeColor = '#ffffff';
         } else {
-            activeKey = 'none'; // 3D 阶段不显示任何文字面板，纯享 3D 视觉
-            layerName = 'SYSTEM_3D_QUANTUM';
-            activeColor = '#00fff9';
+            activeKey = 'action3d'; // 最终 3D 结尾专属的苹果风“立即购买”面板
+            layerName = 'HIRE_FULLSTACK';
+            activeColor = '#ffffff';
         }
 
         Object.keys(panels).forEach(key => {
@@ -514,18 +626,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 13. 滚动进度下 3D 芯片自旋转及缩放映射公式
     function update3DTargetPose(progress) {
-        // 3D 阶段起始滚动百分比
-        const startProgress = 225 / (TOTAL_FRAMES - 1); // 约 0.8522
-        if (progress >= startProgress) {
-            const rangeProgress = (progress - startProgress) / (1 - startProgress); // 归一化为 0.0 - 1.0
-            targetRotationY = rangeProgress * Math.PI * 2.5;
-            targetRotationX = 0.45;
-            targetScale = 1.0;
-        } else {
-            targetRotationY = 0;
-            targetRotationX = 0.45;
-            targetScale = 0.8;
-        }
+        // 3D 轨迹调度已统一由 updateStageTransition 帧驱动，此处置空以避免多重状态源冲突
     }
 
     // 14. 自动播放演示控制逻辑 (与双 Canvas 接力 100% 融合)
@@ -750,8 +851,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 loadedModel.scale.y += (scaleTarget - loadedModel.scale.y) * k;
                 loadedModel.scale.z += (scaleTarget - loadedModel.scale.z) * k;
 
-                // 3D 坐标 Y 轴天降动效 Lerp 落地
+                // 3D 坐标 X, Y, Z 轴三维平滑阻尼 Lerp (配合新路径位移)
+                loadedModel.position.x += (targetModelX - loadedModel.position.x) * k;
                 loadedModel.position.y += (targetModelY - loadedModel.position.y) * k;
+                loadedModel.position.z += (targetModelZ - loadedModel.position.z) * k;
 
                 // 摄像机高度 Lerp 变化
                 camera.position.y += (targetCameraY - camera.position.y) * k;
@@ -800,7 +903,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 17. 音频胶囊 UI
+    // 17. 右下角极简赛博音频控制器 UI
     if (audioControl) {
         audioControl.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -827,13 +930,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 首次交互播放音乐
+    // 首次点击任意位置激活音频播放（解禁浏览器安全政策）
     document.addEventListener('click', () => {
         if (demoAudio.paused && !demoAudio.muted) {
             demoAudio.play().catch(() => {});
         }
     }, { once: true });
 
-    // 18. 启动预加载链
+    // 18. 启动并行依赖与序列帧加载
     initPreloader();
 });
