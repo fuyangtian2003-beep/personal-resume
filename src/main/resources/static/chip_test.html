@@ -50,8 +50,9 @@
         <div class="glow-spot glow-spot-2"></div>
     </div>
 
-    <!-- 一镜到底 Canvas 绘图主舞台 -->
+    <!-- 一镜到底 Canvas 绘图双舞台 (2D WebP 与 3D WebGL 接力) -->
     <canvas id="chip-canvas"></canvas>
+    <canvas id="chip-3d-canvas"></canvas>
 
     <!-- 纯净的滚动占位，提供 400vh 的滚动条长度 -->
     <div class="scroll-spacer"></div>
@@ -150,6 +151,15 @@
 
     </div>
 
+    <!-- 极客下滑指示器：当2D合体完毕时显现，引导用户手动划入 3D 断层 -->
+    <div id="scroll-down-hint" class="scroll-down-hint">
+        <span class="hint-text">// WHAT CAN I DO? //</span>
+        <div class="hint-line-container">
+            <span class="hint-line-flow"></span>
+        </div>
+        <span class="hint-text-zh">下滑继续探索</span>
+    </div>
+
     <!-- 右下角极简赛博音频控制器 -->
     <div id="audio-control" class="audio-control">
         <div class="audio-waves">
@@ -189,8 +199,9 @@
         </div>
     </div>
 
-    <!-- 页面核心交互逻辑 -->
-    <script src="js/chip_test.js"></script>
+    <!-- 页面核心数据与融合交互逻辑 -->
+    <script src="js/model_data.js"></script>
+    <script src="js/chip_fusion_viewer.js?v=20260606_v2"></script>
 </body>
 
 </html>

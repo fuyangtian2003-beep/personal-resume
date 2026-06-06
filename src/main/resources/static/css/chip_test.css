@@ -174,7 +174,7 @@ body {
 
 /* 纯占位滚动区间 */
 .scroll-spacer {
-    height: 400vh; /* 4倍视口，提供漫长而优雅的滚动帧 */
+    height: 480vh; /* 4.8倍视口，提供更充裕的滚动帧与3D天降交互空间 */
     width: 100%;
     pointer-events: none;
 }
@@ -638,3 +638,152 @@ body {
         display: none; /* 移动端隐藏 HUD */
     }
 }
+
+/* 3D 融合接力画布舞台 */
+#chip-3d-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1; /* 与 2D Canvas 同层，通过 JS 动态计算 opacity 实现无缝渐变 */
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: translateY(-80px); /* 初始偏上空，实现滚动天降动效 */
+}
+
+/* 赛博量子视频卡槽 (高水准排版预留) */
+.cyber-video-slot {
+    margin-top: 1.5rem;
+    width: 100%;
+    max-width: 460px;
+    height: 180px;
+    position: relative;
+    pointer-events: auto;
+}
+
+.video-border-effect {
+    width: 100%;
+    height: 100%;
+    background-color: rgba(10, 12, 18, 0.65);
+    border: 1px solid rgba(239, 68, 68, 0.18);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.video-border-effect:hover {
+    border-color: rgba(239, 68, 68, 0.5);
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.15);
+}
+
+.video-border-effect .corner {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border: 2px solid #ef4444;
+}
+
+.video-border-effect .corner.tl { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+.video-border-effect .corner.tr { top: -1px; right: -1px; border-left: none; border-bottom: none; }
+.video-border-effect .corner.bl { bottom: -1px; left: -1px; border-right: none; border-top: none; }
+.video-border-effect .corner.br { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+
+.video-placeholder-content {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.45);
+    font-family: 'Fira Code', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+}
+
+.video-placeholder-content i {
+    font-size: 2.2rem;
+    color: rgba(239, 68, 68, 0.45);
+    display: block;
+    margin-bottom: 0.6rem;
+    animation: pulse-hud 2.2s infinite;
+}
+
+.video-placeholder-content .text-glow {
+    color: rgba(255, 255, 255, 0.65);
+    text-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+}
+
+/* 极客科技感下滑指示器 (呼吸与纵向发光流线) */
+.scroll-down-hint {
+    position: fixed;
+    bottom: 5%;
+    left: 50%;
+    transform: translate(-50%, 20px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.scroll-down-hint.active {
+    opacity: 0.85;
+    pointer-events: auto;
+    transform: translate(-50%, 0);
+}
+
+.scroll-down-hint .hint-text {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.72rem;
+    color: var(--primary);
+    text-shadow: 0 0 10px rgba(0, 255, 249, 0.45);
+    letter-spacing: 2px;
+    margin-bottom: 0.45rem;
+}
+
+.scroll-down-hint .hint-text-zh {
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.45);
+    letter-spacing: 1.5px;
+    margin-top: 0.45rem;
+    font-weight: 300;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.1);
+}
+
+.scroll-down-hint .hint-line-container {
+    width: 1.5px;
+    height: 38px;
+    background-color: rgba(0, 255, 249, 0.12);
+    position: relative;
+    overflow: hidden;
+    border-radius: 1px;
+}
+
+.scroll-down-hint .hint-line-flow {
+    position: absolute;
+    top: -20px;
+    left: 0;
+    width: 100%;
+    height: 20px;
+    background: linear-gradient(to bottom, transparent, var(--primary));
+    animation: flow-down-line 2.5s infinite cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes flow-down-line {
+    0% {
+        top: -20px;
+    }
+    30% {
+        top: 0px;
+    }
+    100% {
+        top: 38px;
+    }
+}
+
