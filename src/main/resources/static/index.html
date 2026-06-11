@@ -32,8 +32,17 @@
 
     <!-- 智能静默预加载 Showcase 页面 3D 地球的 CDN 贴图，利用 prefetch 机制避免 preload 几秒内不使用的警告，实现极速秒开 -->
     <link rel="prefetch" href="https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg" crossorigin="anonymous">
-    <!-- 智能静默预加载 3D 物理引擎 Three.js，利用 prefetch 机制在空闲时提前下载，消除点击切换时的加载延迟 -->
+    <!-- 智能静默预加载主屏 3D 地球所需的 3D 物理引擎 Three.js (0.160.0 高饱和色彩版) -->
     <link rel="prefetch" href="https://cdn.bootcdn.net/ajax/libs/three.js/0.160.0/three.min.js">
+    <!-- 智能静默预加载芯片实验室所需的 0.128.0 CDN 依赖，确保进入芯片页面时无延迟秒开 -->
+    <link rel="prefetch" href="https://cdn.bootcdn.net/ajax/libs/three.js/r128/three.min.js">
+    <link rel="prefetch" href="https://cdn.jsdmirror.com/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js">
+    <link rel="prefetch" href="https://cdn.jsdmirror.com/npm/three@0.128.0/examples/js/controls/OrbitControls.js">
+    <!-- 智能静默预加载 18MB 巨无霸芯片模型数据，实现芯片实验室跳转秒开 -->
+    <link rel="prefetch" href="js/model_data.js" as="script">
+    <!-- 智能静默预加载游戏音频 BGM 与核心特效音轨，保障音画零延迟同步 -->
+    <link rel="prefetch" href="assets/bgm.mp3" as="audio">
+    <link rel="prefetch" href="assets/audio/v1.mp3" as="audio">
 
     <!-- 预留 Favicon -->
     <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
@@ -95,6 +104,14 @@
                                     <div class="dropdown-divider"></div>
                                     <a href="chip_model.html" class="dropdown-item" style="color: #a855f7;"><i
                                             class="ri-instance-line"></i> 3D 芯片体验舱</a>
+                                    <div class="dropdown-divider"></div>
+                                    <div class="dropdown-header" style="padding: 0.5rem 1rem; font-size: 0.72rem; color: var(--primary); opacity: 0.85; letter-spacing: 1px; font-weight: 800; text-transform: uppercase;">科幻平行世界 // PARALLEL WORLDS</div>
+                                    <a href="bento.html" class="dropdown-item"><i class="ri-layout-grid-line"></i> Bento 撞色版</a>
+                                    <a href="pixel.html" class="dropdown-item"><i class="ri-gamepad-line"></i> 像素 RPG 冒险版</a>
+                                    <a href="poster.html" class="dropdown-item"><i class="ri-artboard-line"></i> 赛博海报版</a>
+                                    <a href="elegant.html" class="dropdown-item"><i class="ri-quill-pen-line"></i> 极简雅致版</a>
+                                    <a href="world.html" class="dropdown-item"><i class="ri-globe-line"></i> 3D 简历世界</a>
+                                    <a href="minimal.html" class="dropdown-item"><i class="ri-pages-line"></i> 极简白版</a>
                                     <div class="dropdown-divider"></div>
                                     <a href="#home" class="dropdown-item mobile-only">首页</a>
                                     <a href="#about" class="dropdown-item mobile-only">关于</a>

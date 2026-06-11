@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>伏杨天 — 海报集 POSTER DECK</title>
+<meta name="description" content="伏杨天 · 软件工程应届生 · 小程序全栈开发。全屏海报画册式个人主页。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Noto+Sans+SC:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --red:#e8442e;
+  --ink:#121212;
+  --paper:#f4f1ea;
+  --yellow:#ffd400;
+  --blue:#2b50ff;
+  --mono:'JetBrains Mono',monospace;
+  --big:'Anton','Noto Sans SC',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+  font-family:'Noto Sans SC',sans-serif;
+  color:var(--ink);
+  overflow:hidden;
+}
+::selection{background:var(--yellow)}
+
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:300;opacity:.06;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.6'/%3E%3C/svg%3E");
+}
+
+.deck{
+  height:100vh;height:100dvh;overflow-y:auto;
+  scroll-snap-type:y mandatory;
+  scroll-behavior:smooth;
+}
+.deck::-webkit-scrollbar{display:none}
+.slide{
+  height:100vh;height:100dvh;
+  scroll-snap-align:start;scroll-snap-stop:always;
+  position:relative;overflow:hidden;
+  padding:clamp(18px,4vw,56px);
+  display:flex;flex-direction:column;
+}
+
+.cross{position:absolute;font-family:var(--mono);font-size:15px;opacity:.55;z-index:5}
+.cross.tl{top:14px;left:16px}.cross.tr{top:14px;right:16px}
+.cross.bl{bottom:14px;left:16px}.cross.br{bottom:14px;right:16px}
+
+.meta{
+  font-family:var(--mono);font-size:clamp(10px,1.2vw,12.5px);letter-spacing:2px;
+  display:flex;justify-content:space-between;gap:10px;z-index:5;
+}
+
+#dots{
+  position:fixed;right:clamp(10px,2.5vw,28px);top:50%;transform:translateY(-50%);
+  z-index:200;display:flex;flex-direction:column;gap:14px;
+}
+#dots button{
+  width:11px;height:11px;border-radius:50%;cursor:pointer;
+  border:2px solid currentColor;background:transparent;color:inherit;
+  transition:.3s;padding:0;
+}
+#dots button.act{background:currentColor;transform:scale(1.35)}
+
+#counter{
+  position:fixed;left:clamp(12px,3vw,34px);bottom:clamp(12px,3vw,30px);z-index:200;
+  font-family:var(--big);font-size:clamp(22px,3.4vw,38px);letter-spacing:2px;
+  display:flex;align-items:baseline;line-height:1;
+}
+#counter .cur{display:inline-block;min-width:1.3em;transition:transform .35s,opacity .35s}
+#counter .cur.tick{transform:translateY(-12px);opacity:0}
+#counter .tot{font-size:.55em;opacity:.6}
+
+#sideScroll{
+  position:fixed;right:clamp(12px,2.6vw,30px);bottom:clamp(12px,3vw,30px);z-index:200;
+  writing-mode:vertical-rl;font-family:var(--mono);font-size:11px;letter-spacing:4px;opacity:.65;
+  animation:nudge 2s ease-in-out infinite;
+}
+@keyframes nudge{50%{transform:translateY(8px)}}
+
+.mask{overflow:hidden}
+.mask>span{display:block;transform:translateY(112%);transition:transform .95s cubic-bezier(.2,.75,.2,1)}
+.slide.on .mask>span{transform:translateY(0)}
+.rv{opacity:0;transform:translateY(46px);transition:opacity .85s cubic-bezier(.2,.7,.2,1),transform .85s cubic-bezier(.2,.7,.2,1)}
+.slide.on .rv{opacity:1;transform:none}
+.d1{transition-delay:.12s}.d2{transition-delay:.24s}.d3{transition-delay:.36s}.d4{transition-delay:.48s}.d5{transition-delay:.6s}
+
+.s1{background:var(--red);color:var(--ink)}
+.s1 .stage{flex:1;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:2}
+.s1 h1{
+  font-family:var(--big);font-weight:400;
+  font-size:clamp(120px,26vw,420px);line-height:.95;letter-spacing:.02em;
+  color:var(--paper);text-shadow:8px 8px 0 rgba(18,18,18,.9);
+}
+.s1 .sub{
+  display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-top:26px;
+  font-weight:900;font-size:clamp(14px,2vw,21px);letter-spacing:4px;
+}
+.s1 .sub .pill{
+  background:var(--ink);color:var(--paper);padding:7px 20px;border-radius:99px;
+  font-family:var(--mono);font-size:clamp(11px,1.4vw,14px);letter-spacing:2px;
+}
+.s1 .ast{
+  position:absolute;top:6%;right:3%;
+  font-size:clamp(70px,11vw,160px);line-height:1;color:var(--paper);
+  animation:spin 9s linear infinite;z-index:1;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.s1 .strip{
+  position:absolute;left:-5%;right:-5%;bottom:8%;
+  transform:rotate(-2deg);
+  border-top:3px solid var(--ink);border-bottom:3px solid var(--ink);
+  background:var(--paper);overflow:hidden;white-space:nowrap;z-index:3;
+}
+.s1 .strip .trk,
+.s6 .strip .trk{display:inline-flex;width:max-content;animation:mq 16s linear infinite;padding:8px 0}
+.s1 .strip span{
+  font-family:var(--big);font-size:clamp(20px,3.2vw,38px);letter-spacing:3px;
+  padding-right:48px;color:var(--ink);
+}
+.s1 .strip i{font-style:normal;color:var(--red);padding-right:48px}
+@keyframes mq{to{transform:translateX(-50%)}}
+
+.s2{background:var(--ink);color:var(--paper)}
+.s2 .stage{flex:1;display:flex;flex-direction:column;justify-content:center;gap:clamp(18px,3vh,34px)}
+.s2 h2{
+  font-family:var(--big);font-weight:400;
+  font-size:clamp(44px,8.5vw,124px);line-height:1.12;letter-spacing:.03em;
+}
+.s2 h2 em{font-style:normal;color:var(--red)}
+.s2 h2 .out{
+  color:transparent;-webkit-text-stroke:2.5px var(--paper);
+}
+.s2 .blurb{max-width:640px;font-size:clamp(12.5px,1.5vw,15px);line-height:1.9;opacity:.75}
+.s2 .nums{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:14px;
+  border-top:2px solid rgba(244,241,234,.25);padding-top:clamp(14px,2.5vh,26px);
+}
+.s2 .nums .n{font-family:var(--big);font-size:clamp(34px,6vw,78px);line-height:1;color:var(--yellow)}
+.s2 .nums .l{font-family:var(--mono);font-size:clamp(9.5px,1.1vw,12px);letter-spacing:2px;opacity:.65;margin-top:8px}
+
+.s3{background:var(--yellow);color:var(--ink)}
+.s3 .stage{flex:1;display:flex;flex-direction:column;justify-content:center;gap:clamp(8px,1.6vh,18px)}
+.s3 .ttl{
+  font-family:var(--mono);font-size:clamp(11px,1.3vw,14px);letter-spacing:4px;font-weight:700;
+  display:flex;align-items:center;gap:14px;margin-bottom:clamp(8px,1.5vh,16px);
+}
+.s3 .ttl::after{content:'';flex:1;height:2.5px;background:var(--ink)}
+.row{overflow:hidden;white-space:nowrap;border-bottom:2.5px solid var(--ink);padding:clamp(4px,1vh,10px) 0}
+.row:first-of-type{border-top:2.5px solid var(--ink)}
+.row .trk{display:inline-flex;width:max-content;animation:mq var(--spd,22s) linear infinite}
+.row.rev .trk{animation-direction:reverse}
+.row span{
+  font-family:var(--big);font-size:clamp(34px,5.6vw,76px);line-height:1.15;
+  letter-spacing:2px;padding-right:54px;
+}
+.row span.out{color:transparent;-webkit-text-stroke:2px var(--ink)}
+.row i{font-style:normal;color:var(--red);padding-right:54px;font-size:.7em;vertical-align:middle}
+.row:hover .trk{animation-play-state:paused}
+.s3 .foot{font-family:var(--mono);font-size:clamp(10px,1.2vw,12.5px);letter-spacing:2px;opacity:.7;margin-top:clamp(8px,1.5vh,16px)}
+
+.s4{background:var(--paper);color:var(--ink)}
+.s5{background:var(--blue);color:var(--paper)}
+.pj .gno{
+  position:absolute;right:-2%;bottom:-6%;z-index:1;
+  font-family:var(--big);font-size:clamp(200px,38vw,560px);line-height:1;
+  color:transparent;pointer-events:none;
+}
+.s4 .gno{-webkit-text-stroke:3px rgba(18,18,18,.16)}
+.s5 .gno{-webkit-text-stroke:3px rgba(244,241,234,.22)}
+.pj .stage{flex:1;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:2;max-width:880px}
+.pj .tag{
+  font-family:var(--mono);font-size:clamp(10.5px,1.3vw,13px);letter-spacing:3px;
+  display:inline-flex;width:fit-content;gap:10px;align-items:center;
+  border:2.5px solid currentColor;border-radius:99px;padding:6px 18px;font-weight:700;
+}
+.pj h2{
+  font-family:var(--big);font-weight:400;
+  font-size:clamp(52px,9.5vw,140px);line-height:1.05;letter-spacing:.02em;
+  margin:clamp(12px,2.5vh,26px) 0;
+}
+.s4 h2 em{font-style:normal;color:var(--red)}
+.s5 h2 em{font-style:normal;color:var(--yellow)}
+.pj .desc{font-size:clamp(12.5px,1.5vw,15px);line-height:1.95;max-width:620px;opacity:.85}
+.pj .kpis{display:flex;gap:clamp(14px,3vw,40px);flex-wrap:wrap;margin-top:clamp(14px,3vh,30px)}
+.pj .kpi{border-left:3px solid currentColor;padding-left:14px}
+.pj .kpi b{font-family:var(--big);font-size:clamp(20px,3vw,34px);font-weight:400;display:block;line-height:1.1}
+.s4 .kpi b{color:var(--red)}
+.s5 .kpi b{color:var(--yellow)}
+.pj .kpi span{font-family:var(--mono);font-size:clamp(9.5px,1.1vw,11.5px);letter-spacing:1.5px;opacity:.65}
+.pj .stack{
+  margin-top:clamp(14px,3vh,28px);font-family:var(--mono);
+  font-size:clamp(10px,1.2vw,12.5px);letter-spacing:2px;opacity:.7;
+}
+
+.s6{background:var(--ink);color:var(--paper)}
+.s6 .stage{flex:1;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:2}
+.s6 h2{
+  font-family:var(--big);font-weight:400;
+  font-size:clamp(64px,14vw,210px);line-height:1;letter-spacing:.02em;
+}
+.s6 h2 .fill{color:var(--yellow)}
+.s6 h2 .out{color:transparent;-webkit-text-stroke:2.5px var(--paper)}
+.s6 .crows{margin-top:clamp(20px,4vh,40px);border-top:2px solid rgba(244,241,234,.25);max-width:760px}
+.s6 .crow{
+  display:flex;justify-content:space-between;align-items:center;gap:16px;
+  padding:clamp(12px,2vh,18px) 6px;border-bottom:2px solid rgba(244,241,234,.25);
+  cursor:pointer;text-decoration:none;color:var(--paper);transition:.3s;
+}
+.s6 .crow:hover{background:var(--paper);color:var(--ink);padding-left:20px}
+.s6 .crow .k{font-family:var(--mono);font-size:clamp(9.5px,1.1vw,12px);letter-spacing:3px;opacity:.6}
+.s6 .crow .v{font-family:var(--big);font-size:clamp(17px,2.8vw,30px);letter-spacing:1px}
+.s6 .crow .a{font-size:clamp(16px,2vw,24px);color:var(--red)}
+.s6 .crow:hover .a{color:var(--red)}
+.s6 .strip{
+  position:absolute;left:-6%;right:-6%;bottom:-2%;transform:rotate(2deg);
+  border-top:3px solid var(--paper);border-bottom:3px solid var(--paper);
+  background:var(--red);overflow:hidden;white-space:nowrap;z-index:1;
+}
+.s6 .strip span{
+  font-family:var(--big);font-size:clamp(16px,2.4vw,28px);letter-spacing:3px;
+  padding-right:46px;color:var(--paper);
+}
+.s6 .strip i{font-style:normal;color:var(--ink);padding-right:46px}
+
+#toast{
+  position:fixed;bottom:30px;left:50%;transform:translate(-50%,110px);
+  background:var(--yellow);color:var(--ink);border:3px solid var(--ink);
+  font-weight:900;letter-spacing:1px;padding:13px 30px;font-size:14px;z-index:400;
+  box-shadow:6px 6px 0 rgba(0,0,0,.6);
+  transition:transform .4s cubic-bezier(.2,1.4,.4,1);
+}
+#toast.show{transform:translate(-50%,0)}
+
+@media (max-width:700px){
+  .s2 .nums{grid-template-columns:1fr 1fr;gap:20px}
+  .pj .gno{right:-8%;bottom:-3%}
+  #sideScroll{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important}
+  .mask>span,.rv{transform:none;opacity:1}
+}
+</style>
+</head>
+<body>
+
+<div id="dots" aria-label="页码导航"></div>
+<div id="counter"><span class="cur" id="curPage">01</span><span class="tot">/06</span></div>
+<div id="sideScroll">SCROLL ↓</div>
+
+<div class="deck" id="deck">
+
+  <section class="slide s1" data-theme="dark">
+    <span class="cross tl">+</span><span class="cross tr">+</span><span class="cross bl">+</span><span class="cross br">+</span>
+    <div class="meta"><span>PORTFOLIO · 2026 届应届生</span><span>POSTER №1 — COVER</span></div>
+    <div class="stage">
+      <div class="ast">✳</div>
+      <div class="mask"><h1><span>伏杨天</span></h1></div>
+      <div class="sub rv d2">
+        <span class="pill">FULL STACK DEVELOPER</span>
+        <span>小程序全栈 / 后端开发</span>
+        <span class="pill">随时到岗</span>
+      </div>
+    </div>
+    <div class="strip rv d3">
+      <div class="trk">
+        <span>湖南信息学院</span><i>✳</i><span>软件工程</span><i>✳</i><span>中共党员</span><i>✳</i><span>UNI-APP × SPRING BOOT</span><i>✳</i>
+        <span>湖南信息学院</span><i>✳</i><span>软件工程</span><i>✳</i><span>中共党员</span><i>✳</i><span>UNI-APP × SPRING BOOT</span><i>✳</i>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide s2" data-theme="light">
+    <span class="cross tl">+</span><span class="cross tr">+</span><span class="cross bl">+</span><span class="cross br">+</span>
+    <div class="meta"><span>ABOUT — 关于我</span><span>POSTER №2</span></div>
+    <div class="stage">
+      <div class="mask"><h2><span>既写<em>代码</em>，</span></h2></div>
+      <div class="mask"><h2><span class="out" style="font-family:var(--big)">也懂业务。</span></h2></div>
+      <p class="blurb rv d2">
+        软件工程专业背景 × 1688 平台销售实习：我能独立写完一个产品，也能站在用户与业务一侧思考。
+        习惯以产品经理的视角审视功能与实现，熟练运用 Cursor、ChatGPT 等 AI 工具辅助开发，效率显著领先。
+        两次获评县级「优秀志愿者」。
+      </p>
+      <div class="nums rv d3">
+        <div><div class="n">50%+</div><div class="l">首屏加载提速</div></div>
+        <div><div class="n">40+</div><div class="l">业务场景交付</div></div>
+        <div><div class="n">-30%</div><div class="l">长列表内存占用</div></div>
+        <div><div class="n">6%</div><div class="l">新人奖获奖率</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide s3" data-theme="light">
+    <span class="cross tl">+</span><span class="cross tr">+</span><span class="cross bl">+</span><span class="cross br">+</span>
+    <div class="meta"><span>SKILLS — 技术武器库</span><span>POSTER №3</span></div>
+    <div class="stage">
+      <div class="ttl rv">悬停任意一行可暂停 — HOVER TO PAUSE</div>
+      <div class="row rv" style="--spd:20s">
+        <div class="trk">
+          <span>VUE.JS</span><i>✳</i><span class="out">UNI-APP</span><i>✳</i><span>微信小程序</span><i>✳</i><span class="out">HTML5 / CSS3 / JS</span><i>✳</i>
+          <span>VUE.JS</span><i>✳</i><span class="out">UNI-APP</span><i>✳</i><span>微信小程序</span><i>✳</i><span class="out">HTML5 / CSS3 / JS</span><i>✳</i>
+        </div>
+      </div>
+      <div class="row rev rv d1" style="--spd:24s">
+        <div class="trk">
+          <span class="out">JAVA</span><i>✳</i><span>SPRING BOOT</span><i>✳</i><span class="out">REDIS</span><i>✳</i><span>MYSQL</span><i>✳</i><span class="out">COS 安全方案</span><i>✳</i>
+          <span class="out">JAVA</span><i>✳</i><span>SPRING BOOT</span><i>✳</i><span class="out">REDIS</span><i>✳</i><span>MYSQL</span><i>✳</i><span class="out">COS 安全方案</span><i>✳</i>
+        </div>
+      </div>
+      <div class="row rv d2" style="--spd:18s">
+        <div class="trk">
+          <span>LINUX / SSH</span><i>✳</i><span class="out">GIT</span><i>✳</i><span>POSTMAN</span><i>✳</i><span class="out">CURSOR</span><i>✳</i><span>AIGC 辅助开发</span><i>✳</i>
+          <span>LINUX / SSH</span><i>✳</i><span class="out">GIT</span><i>✳</i><span>POSTMAN</span><i>✳</i><span class="out">CURSOR</span><i>✳</i><span>AIGC 辅助开发</span><i>✳</i>
+        </div>
+      </div>
+      <div class="foot rv d3">+ Ps / Word / Excel / PPT · 技术文档与公文撰写 · 普通话二级甲等</div>
+    </div>
+  </section>
+
+  <section class="slide s4 pj" data-theme="light">
+    <span class="cross tl">+</span><span class="cross tr">+</span><span class="cross bl">+</span><span class="cross br">+</span>
+    <div class="meta"><span>PROJECT — 项目</span><span>POSTER №4</span></div>
+    <div class="gno">01</div>
+    <div class="stage">
+      <span class="tag rv">2026.01 — 02 · 独立开发 · 从 0 到 1</span>
+      <div class="mask"><h2><span>腊肉<em>·</em>校园二手市场</span></h2></div>
+      <p class="desc rv d2">
+        Uni-app + Spring Boot 全栈落地。移动端「分包预下载 + 骨架屏缓存」；后端 AOP 审计拦截 +
+        统一状态机底座；管理端独立交付「内容安全巡检 → 阶梯式举报 → 全量级联清理」治理体系；
+        攻坚高并发库存治理与匿名社群全民仲裁状态机，全链路物理脱敏。
+      </p>
+      <div class="kpis rv d3">
+        <div class="kpi"><b>50%+</b><span>首屏提速</span></div>
+        <div class="kpi"><b>40+</b><span>业务场景</span></div>
+        <div class="kpi"><b>秒开</b><span>REDIS 缓存快照</span></div>
+        <div class="kpi"><b>0→1</b><span>独立全栈交付</span></div>
+      </div>
+      <div class="stack rv d4">$ uni-app / spring-boot / redis / aop / cos-private / ssh-atomic-deploy</div>
+    </div>
+  </section>
+
+  <section class="slide s5 pj" data-theme="dark">
+    <span class="cross tl">+</span><span class="cross tr">+</span><span class="cross bl">+</span><span class="cross br">+</span>
+    <div class="meta"><span>PROJECT &amp; PATH — 项目与经历</span><span>POSTER №5</span></div>
+    <div class="gno">02</div>
+    <div class="stage">
+      <span class="tag rv">2023.07 — 09 · 杭州美柿 · 实习 · 商业级项目</span>
+      <div class="mask"><h2><span>美柿<em>·</em>电商小程序</span></h2></div>
+      <p class="desc rv d2">
+        独立开发首页、购物车、消息、我的等 5 个核心 Tab 页面；Vue.js + Element UI 对接 Spring Boot，
+        攻克多规格商品复杂渲染；瀑布流懒加载让长列表内存占用降低 30%。
+      </p>
+      <div class="kpis rv d3">
+        <div class="kpi"><b>2022</b><span>软件工程入学</span></div>
+        <div class="kpi"><b>2023</b><span>美柿实习 + 创新创业组长</span></div>
+        <div class="kpi"><b>2024</b><span>电洋销售实习 · 新人首单奖</span></div>
+        <div class="kpi"><b>2026</b><span>「腊肉」独立交付 · 毕业</span></div>
+      </div>
+      <div class="stack rv d4">$ wechat-mp / vue / element-ui / waterfall-lazyload</div>
+    </div>
+  </section>
+
+  <section class="slide s6" data-theme="light">
+    <span class="cross tl">+</span><span class="cross tr">+</span><span class="cross bl">+</span><span class="cross br">+</span>
+    <div class="meta"><span>CONTACT — 取得联系</span><span>POSTER №6 — FIN</span></div>
+    <div class="stage">
+      <div class="mask"><h2><span><span class="fill">期待</span><span class="out">共事。</span></span></h2></div>
+      <div class="crows rv d2">
+        <a class="crow" id="copyMail">
+          <span class="k">EMAIL · 点击复制</span><span class="v">FYTRESUME@FUYANGTIANBOB.DE5.NET</span><span class="a">⟶</span>
+        </a>
+        <a class="crow" id="copyPhone">
+          <span class="k">WECHAT · 点击复制</span><span class="v">FYTBOB</span><span class="a">⟶</span>
+        </a>
+        <a class="crow" href="https://personal-resume-d41.pages.dev/" target="_blank" rel="noopener">
+          <span class="k">RESUME PAGE</span><span class="v">PERSONAL-RESUME-D41</span><span class="a">↗</span>
+        </a>
+      </div>
+    </div>
+    <div class="strip">
+      <div class="trk">
+        <span>小程序全栈开发工程师</span><i>★</i><span>全栈开发工程师</span><i>★</i><span>后端开发工程师</span><i>★</i><span>5K–10K · 随时到岗</span><i>★</i>
+        <span>小程序全栈开发工程师</span><i>★</i><span>全栈开发工程师</span><i>★</i><span>后端开发工程师</span><i>★</i><span>5K–10K · 随时到岗</span><i>★</i>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div id="toast">已复制到剪贴板 ✊</div>
+
+<script>
+const deck = document.getElementById('deck');
+const slides = [...document.querySelectorAll('.slide')];
+const dotsBox = document.getElementById('dots');
+const curPage = document.getElementById('curPage');
+const counter = document.getElementById('counter');
+const sideScroll = document.getElementById('sideScroll');
+const dots = [];
+let current = 0;
+
+slides.forEach((s, i) => {
+  const b = document.createElement('button');
+  b.setAttribute('aria-label', '第' + (i+1) + '页');
+  b.addEventListener('click', () => slides[i].scrollIntoView({behavior:'smooth'}));
+  dotsBox.appendChild(b);
+  dots.push(b);
+});
+
+function setUI(i){
+  if(i === current && curPage.textContent !== '01') {}
+  current = i;
+  dots.forEach((d, k) => d.classList.toggle('act', k === i));
+  curPage.classList.add('tick');
+  setTimeout(() => {
+    curPage.textContent = String(i+1).padStart(2,'0');
+    curPage.classList.remove('tick');
+  }, 180);
+  const dark = slides[i].dataset.theme === 'dark';
+  const col = dark ? '#f4f1ea' : '#121212';
+  dotsBox.style.color = col;
+  counter.style.color = col;
+  sideScroll.style.color = col;
+  sideScroll.style.opacity = (i === slides.length-1) ? '0' : '.65';
+}
+
+const so = new IntersectionObserver(entries => {
+  entries.forEach(en => {
+    const idx = slides.indexOf(en.target);
+    if(en.isIntersecting){
+      en.target.classList.add('on');
+      setUI(idx);
+    } else {
+      en.target.classList.remove('on');
+    }
+  });
+}, {root: deck, threshold: .55});
+slides.forEach(s => so.observe(s));
+
+addEventListener('keydown', e => {
+  if(['ArrowDown','PageDown',' '].includes(e.key)){
+    e.preventDefault();
+    slides[Math.min(current+1, slides.length-1)].scrollIntoView({behavior:'smooth'});
+  }
+  if(['ArrowUp','PageUp'].includes(e.key)){
+    e.preventDefault();
+    slides[Math.max(current-1, 0)].scrollIntoView({behavior:'smooth'});
+  }
+});
+
+const toast = document.getElementById('toast');
+function fallbackCopy(text){
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); }catch(err){}
+  ta.remove();
+}
+function copyTxt(text){
+  const done = () => {
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 1700);
+  };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(() => { fallbackCopy(text); done(); });
+  } else { fallbackCopy(text); done(); }
+}
+document.getElementById('copyMail').addEventListener('click', () => copyTxt('FYTResume@fuyangtianbob.de5.net'));
+document.getElementById('copyPhone').addEventListener('click', () => copyTxt('FYTBob'));
+</script>
+    <!-- 悬浮返回科技主版传送门 -->
+    <div id="metaverse-back-btn" class="metaverse-back-btn">
+        <a href="index.html" class="back-link">
+            <i class="ri-planet-line"></i>
+            <span>返回科幻平行世界</span>
+        </a>
+    </div>
+    <style>
+    .metaverse-back-btn {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 99999;
+    }
+    .metaverse-back-btn .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 18px;
+        background: rgba(15, 23, 42, 0.65);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 30px;
+        color: #ffffff;
+        text-decoration: none;
+        font-family: system-ui, -apple-system, sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 1px;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    .metaverse-back-btn .back-link i {
+        font-size: 16px;
+        color: #00fff9;
+        text-shadow: 0 0 8px rgba(0, 255, 249, 0.5);
+        transition: transform 0.6s ease;
+    }
+    .metaverse-back-btn .back-link:hover {
+        background: rgba(15, 23, 42, 0.85);
+        border-color: #00fff9;
+        box-shadow: 0 0 20px rgba(0, 255, 249, 0.4);
+        transform: translateY(-2px);
+    }
+    .metaverse-back-btn .back-link:hover i {
+        transform: rotate(360deg);
+    }
+    @media (max-width: 768px) {
+        .metaverse-back-btn {
+            top: 15px;
+            right: 15px;
+        }
+        .metaverse-back-btn .back-link span {
+            display: none;
+        }
+        .metaverse-back-btn .back-link {
+            padding: 10px;
+            border-radius: 50%;
+        }
+    }
+    </style>
+    <!-- 智能引入 Remixicon 图标库 -->
+    <script>
+        if (!document.querySelector('link[href*="remixicon"]')) {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css';
+            document.head.appendChild(link);
+        }
+    </script>
+</body>
+</html>

@@ -2,16 +2,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. 3D 核心依赖本地包及 CDN 容灾降级配置
     const LIBS = {
         three: {
-            primary: "js/lib/three.min.js",
-            fallback: "https://cdn.jsdmirror.com/npm/three@0.128.0/build/three.min.js"
+            primary: "https://cdn.bootcdn.net/ajax/libs/three.js/r128/three.min.js",
+            fallback: "js/lib/three.min.js"
         },
         gltf: {
-            primary: "js/lib/GLTFLoader.js",
-            fallback: "https://cdn.jsdmirror.com/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"
+            primary: "https://cdn.jsdmirror.com/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js",
+            fallback: "js/lib/GLTFLoader.js"
         },
         controls: {
-            primary: "js/lib/OrbitControls.js",
-            fallback: "https://cdn.jsdmirror.com/npm/three@0.128.0/examples/js/controls/OrbitControls.js"
+            primary: "https://cdn.jsdmirror.com/npm/three@0.128.0/examples/js/controls/OrbitControls.js",
+            fallback: "js/lib/OrbitControls.js"
         }
     };
 
@@ -309,6 +309,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => {
                     if (loadingScreen) {
                         loadingScreen.classList.add('hidden');
+                    }
+                    // 3D核心与225帧图全部就位后，后置触发大荧幕视频的静默缓冲，防止抢夺首屏并发网络通道
+                    if (casesVideo) {
+                        casesVideo.preload = 'auto';
+                        casesVideo.load();
+                        console.log("%c🎬 [Lazy Load Video] Video stream buffered silently in background.", "color: #3b82f6;");
                     }
                 }, 300);
 

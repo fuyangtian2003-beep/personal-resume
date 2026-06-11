@@ -3,16 +3,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // CDN 双路加速与容灾配置 (首选本地离线包保证秒开，备选国内高速镜像源容灾)
     const LIBS = {
         three: {
-            primary: "js/lib/three.min.js",
-            fallback: "https://cdn.jsdmirror.com/npm/three@0.128.0/build/three.min.js"
+            primary: "https://cdn.bootcdn.net/ajax/libs/three.js/r128/three.min.js",
+            fallback: "js/lib/three.min.js"
         },
         gltf: {
-            primary: "js/lib/GLTFLoader.js",
-            fallback: "https://cdn.jsdmirror.com/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"
+            primary: "https://cdn.jsdmirror.com/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js",
+            fallback: "js/lib/GLTFLoader.js"
         },
         controls: {
-            primary: "js/lib/OrbitControls.js",
-            fallback: "https://cdn.jsdmirror.com/npm/three@0.128.0/examples/js/controls/OrbitControls.js"
+            primary: "https://cdn.jsdmirror.com/npm/three@0.128.0/examples/js/controls/OrbitControls.js",
+            fallback: "js/lib/OrbitControls.js"
         }
     };
     const progressEl = document.getElementById('loading-progress');

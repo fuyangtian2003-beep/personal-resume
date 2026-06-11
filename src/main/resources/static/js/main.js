@@ -105,16 +105,99 @@ document.addEventListener('DOMContentLoaded', () => {
         document.head.appendChild(script);
     }
 
-    // 页面空闲时静默预加载并挂载 Three.js 引擎，实现切换 3D Showcase 时的零延迟秒开
+    // 页面空闲时静默预加载并挂载 Three.js 引擎，并启动 WebP 序列帧后台流式下载
     window.addEventListener('load', () => {
         setTimeout(() => {
             if (typeof window.THREE === 'undefined') {
                 loadThreeJS(() => {
                     console.log("%c📦 Three.js Engine Preloaded silently in background.", "color: #10b981; font-weight: bold;");
+                    // 引擎预加载完后，低优先级流式拉取 225 帧 WebP 序列帧
+                    if ('requestIdleCallback' in window) {
+                        requestIdleCallback(preloadWebPFrames);
+                    } else {
+                        setTimeout(preloadWebPFrames, 1000);
+                    }
                 });
+            } else {
+                // 如果已经有 window.THREE，直接开启流式图片预加载
+                if ('requestIdleCallback' in window) {
+                    requestIdleCallback(preloadWebPFrames);
+                } else {
+                    setTimeout(preloadWebPFrames, 1000);
+                }
             }
+            // 初始化 Hover-based 菜单悬停感知瞬时预拉取
+            initHoverPreload();
         }, 1500); // 延迟 1.5 秒避开首屏交互网络和 CPU 峰值
     });
+
+    // 225 帧 WebP 序列帧图片后台流式分批下载 (防拥塞控制)
+    function preloadWebPFrames() {
+        console.log("%c🖼️ Starting background streaming preload of 225 WebP sequence frames...", "color: #8b5cf6;");
+        let loadedCount = 0;
+        const batchSize = 10; // 每批拉取 10 张
+        const total = 225;
+
+        function loadBatch(startIdx) {
+            const endIdx = Math.min(startIdx + batchSize, total);
+            for (let i = startIdx; i < endIdx; i++) {
+                const img = new Image();
+                const frameStr = String(i).padStart(3, '0');
+                img.src = `assets/xinpian/frame_${frameStr}_delay-0.041s.webp`;
+                img.onload = img.onerror = () => {
+                    loadedCount++;
+                    if (loadedCount === total) {
+                        console.log("%c🖼️ [Success] All 225 WebP frames preloaded silently.", "color: #10b981; font-weight: bold;");
+                    }
+                };
+            }
+            if (endIdx < total) {
+                // 批次间隔 100ms 投递，杜绝网络通道瞬间拥塞，给用户其它点击预留完全通路
+                setTimeout(() => loadBatch(endIdx), 100);
+            }
+        }
+        loadBatch(0);
+    }
+
+    // 导航菜单 Hover 感知智能预拉取
+    function initHoverPreload() {
+        const hoverTargets = [
+            { selector: 'a[href="lab.html"]', resources: ['lab.html', 'js/lab.js'] },
+            { selector: 'a[href="chip_test.html"]', resources: ['chip_test.html', 'js/chip_fusion_viewer.js'] },
+            { selector: 'a[href="chip_model.html"]', resources: ['chip_model.html', 'js/chip_model_viewer.js'] },
+            { selector: 'a[href="bento.html"]', resources: ['bento.html'] },
+            { selector: 'a[href="pixel.html"]', resources: ['pixel.html'] },
+            { selector: 'a[href="poster.html"]', resources: ['poster.html'] },
+            { selector: 'a[href="elegant.html"]', resources: ['elegant.html'] },
+            { selector: 'a[href="world.html"]', resources: ['world.html'] },
+            { selector: 'a[href="minimal.html"]', resources: ['minimal.html'] }
+        ];
+
+        const preloadedUrls = new Set();
+
+        hoverTargets.forEach(target => {
+            const elements = document.querySelectorAll(target.selector);
+            elements.forEach(el => {
+                el.addEventListener('mouseenter', () => {
+                    target.resources.forEach(url => {
+                        if (!preloadedUrls.has(url)) {
+                            preloadedUrls.add(url);
+                            const link = document.createElement('link');
+                            link.rel = 'prefetch';
+                            link.href = url;
+                            if (url.endsWith('.js')) {
+                                link.as = 'script';
+                            } else if (url.endsWith('.html')) {
+                                link.as = 'document';
+                            }
+                            document.head.appendChild(link);
+                            console.log(`%c[Hover Preload] Prefetching resource: ${url}`, "color: #3b82f6;");
+                        }
+                    });
+                }, { once: true }); // 每个菜单项只触发一次，避免鼠标反复移入时重复预加载
+            });
+        });
+    }
 
     arrowRight.addEventListener('click', () => {
         showcasePage.style.visibility = 'visible';

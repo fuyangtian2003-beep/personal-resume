@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>伏杨天 — RESUME QUEST · 像素RPG</title>
+<meta name="description" content="伏杨天 · 软件工程应届生 · 小程序全栈开发。像素RPG游戏风个人主页。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+SC:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a23;
+  --win:#14142e;
+  --win2:#1c1c40;
+  --wt:#e8e8f0;
+  --dim:#8a8ab0;
+  --gold:#ffd866;
+  --hp:#5ae15a;
+  --mp:#5ab9ff;
+  --red:#ff6b6b;
+  --pink:#ff8fc1;
+  --px:'Press Start 2P','Noto Sans SC',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--wt);
+  font-family:var(--px);
+  font-size:13px;line-height:1.9;
+  overflow-x:hidden;
+}
+::selection{background:var(--gold);color:#000}
+::-webkit-scrollbar{width:14px}
+::-webkit-scrollbar-track{background:#000}
+::-webkit-scrollbar-thumb{background:var(--win2);border:3px solid #000}
+
+#crt{
+  position:fixed;inset:0;pointer-events:none;z-index:500;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 2px,transparent 2px 4px);
+}
+#crt::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at center,transparent 58%,rgba(0,0,10,.5) 100%);
+}
+
+#title{
+  position:fixed;inset:0;background:#000;z-index:600;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;
+  cursor:pointer;text-align:center;padding:20px;
+}
+#title .logo{
+  font-size:clamp(22px,5.5vw,52px);color:var(--gold);
+  text-shadow:4px 4px 0 #7a4a00,8px 8px 0 rgba(0,0,0,.6);
+  letter-spacing:4px;line-height:1.6;
+  animation:bob 2.4s ease-in-out infinite;
+}
+@keyframes bob{50%{transform:translateY(-8px)}}
+#title .sub{color:var(--dim);font-size:clamp(9px,1.6vw,12px);letter-spacing:3px}
+#title .start{
+  font-size:clamp(12px,2.4vw,18px);color:#fff;letter-spacing:3px;
+  animation:blink 1.1s steps(1) infinite;
+}
+@keyframes blink{50%{opacity:0}}
+#title .coin{color:var(--dim);font-size:clamp(8px,1.4vw,10px);letter-spacing:2px}
+#title.off{animation:crtOff .45s forwards}
+@keyframes crtOff{
+  0%{transform:scaleY(1);filter:brightness(1)}
+  60%{transform:scaleY(.006);filter:brightness(3)}
+  100%{transform:scaleY(.006) scaleX(0);filter:brightness(6);opacity:0}
+}
+
+.hud{
+  position:sticky;top:0;z-index:100;
+  background:#000;border-bottom:4px solid var(--wt);
+  display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+  padding:10px clamp(12px,3vw,30px);font-size:10px;
+}
+.hud .nm{color:var(--gold);font-size:12px}
+.hud .lv{color:var(--pink)}
+.hud .bars{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.hud .blabel{font-size:9px;color:var(--dim);margin-right:5px}
+.minibar{display:inline-flex;gap:2px;vertical-align:middle}
+.minibar b{width:9px;height:12px;background:#222;border:1px solid #000}
+.minibar b.on.hp{background:var(--hp)}
+.minibar b.on.mp{background:var(--mp)}
+.hud .gold{color:var(--gold)}
+.hud .gold .c{display:inline-block;animation:coinspin 1.6s linear infinite}
+@keyframes coinspin{0%,100%{transform:scaleX(1)}50%{transform:scaleX(.15)}}
+#sndBtn{
+  margin-left:auto;background:var(--win2);color:var(--wt);border:3px solid var(--wt);
+  font-family:var(--px);font-size:9px;padding:6px 12px;cursor:pointer;letter-spacing:1px;
+}
+#sndBtn:hover{background:var(--wt);color:#000}
+
+.stage{max-width:1080px;margin:0 auto;padding:34px clamp(12px,3vw,30px) 60px;position:relative;z-index:2}
+
+.win{
+  background:var(--win);border:4px solid var(--wt);
+  box-shadow:0 0 0 4px #000,8px 8px 0 4px rgba(0,0,0,.55);
+  margin-bottom:42px;position:relative;
+  opacity:0;transform:translateY(30px);transition:.6s cubic-bezier(.2,.8,.3,1);
+}
+.win.in{opacity:1;transform:none}
+.win .hd{
+  background:var(--wt);color:#000;font-size:clamp(10px,1.6vw,13px);
+  padding:9px 16px;letter-spacing:2px;display:flex;justify-content:space-between;gap:10px;
+}
+.win .hd span:last-child{color:#555;font-size:9px}
+.win .bd{padding:clamp(16px,3vw,28px)}
+
+.status-grid{display:grid;grid-template-columns:auto 1fr;gap:clamp(18px,4vw,40px);align-items:start}
+.char{
+  text-align:center;background:var(--win2);border:3px solid var(--wt);
+  padding:18px 24px 12px;
+}
+#sprite{image-rendering:pixelated;width:144px;height:168px;animation:idle 1.6s steps(2) infinite}
+@keyframes idle{50%{transform:translateY(-5px)}}
+.char .cname{color:var(--gold);font-size:12px;margin-top:8px}
+.char .ctitle{color:var(--dim);font-size:9px;margin-top:4px}
+.stable{width:100%;border-collapse:collapse;font-size:clamp(10px,1.5vw,12px)}
+.stable td{padding:8px 6px;border-bottom:2px dashed #33335c;vertical-align:top}
+.stable td:first-child{color:var(--dim);white-space:nowrap;width:1%;padding-right:22px}
+.stable .gd{color:var(--gold)}
+.buffs{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px}
+.buff{
+  font-size:9px;background:var(--win2);border:2px solid var(--hp);color:var(--hp);
+  padding:5px 10px;letter-spacing:1px;
+}
+
+.skill{margin-bottom:18px}
+.skill .top{display:flex;justify-content:space-between;font-size:clamp(10px,1.5vw,12px);margin-bottom:7px;gap:8px;flex-wrap:wrap}
+.skill .top b{font-weight:400}
+.skill .top span{color:var(--gold);font-size:10px}
+.segbar{display:flex;gap:4px}
+.segbar i{
+  flex:1;height:18px;background:#222;border:2px solid #000;
+  transition:background .12s;
+}
+.segbar i.on{background:var(--mp);box-shadow:inset -3px -3px 0 rgba(0,0,0,.3)}
+.equip{margin-top:26px;border-top:3px solid #33335c;padding-top:20px}
+.equip h4{font-size:11px;color:var(--dim);letter-spacing:2px;margin-bottom:14px}
+.eq-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.eq{
+  background:var(--win2);border:3px solid #44447a;padding:12px;text-align:center;
+  font-size:9.5px;line-height:1.7;transition:.15s;cursor:default;
+}
+.eq:hover{border-color:var(--gold);transform:translateY(-3px)}
+.eq .ico{font-size:22px;display:block;margin-bottom:6px}
+.eq .rar{color:var(--gold);font-size:8px;display:block}
+
+.quest{
+  border:3px solid #44447a;background:var(--win2);
+  padding:clamp(14px,2.5vw,22px);margin-bottom:18px;position:relative;
+  transition:.15s;cursor:default;
+}
+.quest:hover{border-color:var(--gold);transform:translate(-3px,-3px);box-shadow:5px 5px 0 #000}
+.quest::before{
+  content:'▶';position:absolute;left:-26px;top:18px;color:var(--gold);font-size:13px;
+  opacity:0;transition:.15s;animation:blink 1s steps(1) infinite;
+}
+.quest:hover::before{opacity:1}
+.quest .qtop{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.quest .qtype{font-size:9px;letter-spacing:2px;padding:4px 10px;border:2px solid}
+.quest .qtype.main{color:var(--gold);border-color:var(--gold)}
+.quest .qtype.side{color:var(--mp);border-color:var(--mp)}
+.quest .qtype.sp{color:var(--pink);border-color:var(--pink)}
+.quest .rank{font-size:clamp(18px,3vw,26px);color:var(--gold)}
+.quest h3{font-size:clamp(12px,2vw,16px);line-height:1.7;margin-bottom:8px}
+.quest .qmeta{font-size:9px;color:var(--dim);letter-spacing:1px;margin-bottom:10px}
+.quest p{font-size:clamp(10px,1.5vw,11.5px);color:#c9c9e0;line-height:2;font-family:'Noto Sans SC';font-weight:400}
+.quest .reward{margin-top:12px;font-size:9.5px;color:var(--hp);letter-spacing:1px;line-height:2}
+.quest .reward b{color:var(--gold);font-weight:400}
+.done{color:var(--hp);font-size:9px;letter-spacing:1px}
+
+.map{position:relative;padding:30px 0 10px;overflow-x:auto}
+.map-track{display:flex;align-items:flex-start;min-width:760px;position:relative;padding:0 10px}
+.map-track::before{
+  content:'';position:absolute;top:21px;left:40px;right:40px;height:0;
+  border-top:4px dashed #44447a;
+}
+.node{flex:1;text-align:center;position:relative;z-index:2}
+.node .pt{
+  width:26px;height:26px;margin:8px auto 12px;background:var(--win2);
+  border:4px solid var(--mp);transform:rotate(45deg);
+}
+.node.fin .pt{border-color:var(--gold);background:var(--gold)}
+.node .yr{color:var(--gold);font-size:10px}
+.node .nm2{font-size:10px;margin-top:8px;line-height:1.8}
+.node .ds{font-size:8.5px;color:var(--dim);margin-top:4px;line-height:1.8;font-family:'Noto Sans SC';font-weight:400}
+.node .here{
+  color:var(--red);font-size:8.5px;margin-top:8px;letter-spacing:1px;
+  animation:bob 1.2s ease-in-out infinite;
+}
+
+.ach-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.ach{
+  background:var(--win2);border:3px solid #44447a;padding:16px;
+  display:flex;gap:13px;align-items:center;transition:.15s;
+  opacity:.35;filter:grayscale(1);
+}
+.ach.unlock{opacity:1;filter:none;border-color:var(--gold)}
+.ach .aico{font-size:26px;flex-shrink:0}
+.ach b{font-size:10.5px;display:block;line-height:1.7;font-weight:400}
+.ach span{font-size:8.5px;color:var(--dim);line-height:1.7;display:block;font-family:'Noto Sans SC';font-weight:400}
+
+.npc{display:flex;gap:18px;align-items:flex-start}
+.npc-face{
+  flex-shrink:0;width:84px;height:84px;background:var(--win2);border:3px solid var(--wt);
+  display:flex;align-items:center;justify-content:center;font-size:40px;
+}
+.dialog{
+  flex:1;background:#000;border:4px solid var(--wt);padding:18px 20px;
+  min-height:120px;cursor:pointer;position:relative;
+}
+.dialog .who{color:var(--gold);font-size:10px;margin-bottom:10px;letter-spacing:2px}
+.dialog .txt{font-size:clamp(10.5px,1.6vw,12.5px);line-height:2.1;min-height:54px}
+.dialog .nxt{
+  position:absolute;right:14px;bottom:8px;color:var(--gold);
+  animation:bob 1s ease-in-out infinite;font-size:12px;
+}
+.cbtns{display:flex;gap:14px;flex-wrap:wrap;margin-top:22px}
+.cbtn{
+  flex:1;min-width:200px;background:var(--win2);border:4px solid var(--wt);
+  color:var(--wt);font-family:var(--px);font-size:10.5px;letter-spacing:1px;
+  padding:15px 18px;cursor:pointer;text-align:left;line-height:1.9;text-decoration:none;
+  transition:.12s;
+}
+.cbtn small{display:block;color:var(--dim);font-size:8px;letter-spacing:2px}
+.cbtn:hover{background:var(--gold);color:#000;border-color:var(--gold)}
+.cbtn:hover small{color:#333}
+.cbtn:active{transform:translate(2px,2px)}
+
+footer{
+  text-align:center;padding:30px 16px 44px;font-size:9px;color:var(--dim);
+  letter-spacing:2px;line-height:2.4;position:relative;z-index:2;
+}
+footer .gg{color:var(--gold)}
+
+#toast{
+  position:fixed;bottom:30px;left:50%;transform:translate(-50%,120px);
+  background:#000;border:4px solid var(--gold);color:var(--gold);
+  padding:14px 26px;font-size:11px;letter-spacing:1px;z-index:700;
+  transition:transform .35s cubic-bezier(.2,1.3,.4,1);text-align:center;line-height:1.9;
+}
+#toast.show{transform:translate(-50%,0)}
+
+.star{position:fixed;background:#fff;z-index:0;animation:tw 3s infinite}
+@keyframes tw{0%,100%{opacity:.15}50%{opacity:.9}}
+
+@media (max-width:760px){
+  .status-grid{grid-template-columns:1fr}
+  .char{max-width:240px;margin:0 auto}
+  .quest::before{display:none}
+  .hud{gap:10px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important}
+  .win{opacity:1;transform:none}
+}
+
+/* ===== 手机端虚拟摇杆 / D-PAD ===== */
+#pad{
+  position:fixed;left:18px;bottom:20px;z-index:400;
+  width:128px;height:128px;display:none;touch-action:none;user-select:none;
+  -webkit-user-select:none;
+}
+#pad .ring{
+  position:absolute;inset:0;background:rgba(20,20,46,.78);
+  border:4px solid var(--wt);box-shadow:0 0 0 4px #000,inset 0 0 0 2px #000;
+}
+#pad .arr{
+  position:absolute;color:var(--dim);font-size:13px;left:50%;top:50%;
+}
+#pad .au{transform:translate(-50%,-54px)}
+#pad .ad{transform:translate(-50%,42px)}
+#pad .al{transform:translate(-56px,-50%)}
+#pad .ar{transform:translate(40px,-50%)}
+#pad .knob{
+  position:absolute;left:50%;top:50%;width:50px;height:50px;
+  margin:-25px 0 0 -25px;background:var(--gold);
+  border:4px solid #000;box-shadow:0 0 0 3px var(--wt);
+  transition:transform .04s linear;
+}
+#pad.live .knob{background:var(--pink)}
+
+#abtns{
+  position:fixed;right:16px;bottom:24px;z-index:400;display:none;
+  flex-direction:column;gap:14px;align-items:center;
+}
+.gbtn{
+  width:62px;height:62px;border-radius:50%;font-family:var(--px);
+  font-size:18px;color:#000;border:4px solid #000;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  line-height:1;box-shadow:0 5px 0 #000;touch-action:manipulation;
+}
+.gbtn small{font-size:6.5px;letter-spacing:1px;margin-top:3px;font-family:var(--px)}
+.gbtn:active{transform:translateY(4px);box-shadow:0 1px 0 #000}
+.gbtn.a{background:var(--red);box-shadow:0 5px 0 #000,0 0 0 3px var(--wt)}
+.gbtn.b{background:var(--mp);box-shadow:0 5px 0 #000,0 0 0 3px var(--wt)}
+body.mobilectrl .stage{padding-bottom:150px}
+body.mobilectrl footer{padding-bottom:150px}
+</style>
+</head>
+<body>
+
+<div id="crt"></div>
+
+<div id="title">
+  <div class="logo">RESUME<br>QUEST</div>
+  <div class="sub">— 伏杨天 · 全栈开发者の冒险 —</div>
+  <div class="start">▶ PRESS START / 点击开始</div>
+  <div class="coin">INSERT COIN · ©2026 FUYANGTIAN STUDIO</div>
+</div>
+
+<div class="hud">
+  <span class="nm">伏杨天</span>
+  <span class="lv">LV.23 全栈开发者</span>
+  <span class="bars">
+    <span><span class="blabel">HP</span><span class="minibar" id="hpbar"></span></span>
+    <span><span class="blabel">MP</span><span class="minibar" id="mpbar"></span></span>
+  </span>
+  <span class="gold"><span class="c">●</span> 5K–10K</span>
+  <button id="sndBtn">♪ SOUND: OFF</button>
+</div>
+
+<div class="stage">
+
+  <div class="win">
+    <div class="hd"><span>◆ STATUS — 角色面板</span><span>P.1</span></div>
+    <div class="bd">
+      <div class="status-grid">
+        <div class="char">
+          <canvas id="sprite" width="12" height="14"></canvas>
+          <div class="cname">伏杨天</div>
+          <div class="ctitle">「既写代码 也懂业务」</div>
+        </div>
+        <div>
+          <table class="stable">
+            <tr><td>职业</td><td>小程序全栈开发工程师（可转职：全栈 / 后端）</td></tr>
+            <tr><td>公会</td><td>湖南信息学院 · 软件工程（本科 · 2026 届）</td></tr>
+            <tr><td>阵营</td><td class="gd">中共党员</td></tr>
+            <tr><td>出生</td><td>2003.03</td></tr>
+            <tr><td>状态</td><td class="gd">随时可加入新队伍（随时到岗）</td></tr>
+            <tr><td>特性</td><td>以产品经理视角写代码 · AI 工具流加持 · 销售实战经验</td></tr>
+          </table>
+          <div class="buffs">
+            <span class="buff">责任心 +10</span>
+            <span class="buff">抗压 +10</span>
+            <span class="buff">沟通 +8</span>
+            <span class="buff">同理心 +8</span>
+            <span class="buff">学习速度 +9</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="win">
+    <div class="hd"><span>◆ SKILLS — 技能树</span><span>P.2</span></div>
+    <div class="bd">
+      <div class="skill"><div class="top"><b>前端 · Vue.js / Uni-app / 微信小程序</b><span>LV 9</span></div><div class="segbar" data-lv="9"></div></div>
+      <div class="skill"><div class="top"><b>后端 · Java / Spring Boot</b><span>LV 8</span></div><div class="segbar" data-lv="8"></div></div>
+      <div class="skill"><div class="top"><b>数据 · Redis / MySQL / SQL</b><span>LV 8</span></div><div class="segbar" data-lv="8"></div></div>
+      <div class="skill"><div class="top"><b>运维 · COS 安全 / Linux / SSH</b><span>LV 7</span></div><div class="segbar" data-lv="7"></div></div>
+      <div class="skill"><div class="top"><b>AI 工具流 · Cursor / ChatGPT</b><span>LV 10 MAX</span></div><div class="segbar" data-lv="10"></div></div>
+      <div class="skill"><div class="top"><b>文书 · Ps / Office / 公文</b><span>LV 8</span></div><div class="segbar" data-lv="8"></div></div>
+      <div class="equip">
+        <h4>▼ 装备栏 EQUIPMENT</h4>
+        <div class="eq-grid">
+          <div class="eq"><span class="ico">⚔️</span>Cursor 之剑<span class="rar">★ 传说 · 攻速+50%</span></div>
+          <div class="eq"><span class="ico">🛡️</span>Spring Boot 重盾<span class="rar">★ 史诗 · 稳定+40</span></div>
+          <div class="eq"><span class="ico">👢</span>Redis 疾风靴<span class="rar">★ 史诗 · 秒开</span></div>
+          <div class="eq"><span class="ico">⏱️</span>Git 时光怀表<span class="rar">★ 稀有 · 可回溯</span></div>
+          <div class="eq"><span class="ico">🗝️</span>COS 私钥<span class="rar">★ 稀有 · 防御+30</span></div>
+          <div class="eq"><span class="ico">📜</span>AIGC 认证卷轴<span class="rar">★ 认证 · 智力+20</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="win">
+    <div class="hd"><span>◆ QUEST LOG — 任务记录</span><span>P.3</span></div>
+    <div class="bd">
+      <div class="quest">
+        <div class="qtop">
+          <span class="qtype main">主线任务 · MAIN</span>
+          <span class="done">✔ CLEAR · 2026.01-02</span>
+          <span class="rank">RANK S</span>
+        </div>
+        <h3>「腊肉」校园二手市场小程序</h3>
+        <div class="qmeta">独立开发者 · 从 0 到 1 全栈交付 · 难度 ★★★★★</div>
+        <p>
+          Uni-app + Spring Boot 全栈落地；分包预下载 + 骨架屏缓存；AOP 审计拦截 + 统一状态机底座；
+          攻坚高并发库存治理与匿名社群「全民仲裁状态机」；内容安全巡检 → 阶梯式举报 → 全量级联清理；
+          COS 私有桶临时签名 + VO 物理脱敏 + SSH 原子部署。
+        </p>
+        <div class="reward">⊳ 战利品：<b>首屏提速 50%+</b> / <b>40+ 业务场景</b> / 数据秒开 / EXP +9999</div>
+      </div>
+      <div class="quest">
+        <div class="qtop">
+          <span class="qtype side">支线任务 · SIDE</span>
+          <span class="done">✔ CLEAR · 2023.07-09</span>
+          <span class="rank">RANK A</span>
+        </div>
+        <h3>「美柿」电商小程序商城</h3>
+        <div class="qmeta">杭州美柿科技 · 前后端开发实习 · 难度 ★★★☆☆</div>
+        <p>
+          独立开发首页 / 购物车 / 消息 / 我的等 5 个核心 Tab 页面；Vue.js + Element UI 对接 Spring Boot；
+          攻克多规格商品复杂渲染；瀑布流懒加载优化。
+        </p>
+        <div class="reward">⊳ 战利品：<b>长列表内存 -30%</b> / 商业级项目经验</div>
+      </div>
+      <div class="quest">
+        <div class="qtop">
+          <span class="qtype sp">特殊任务 · EX</span>
+          <span class="done">✔ CLEAR · 2024.06-08</span>
+          <span class="rank">RANK A</span>
+        </div>
+        <h3>1688 销售修行（长沙电洋）</h3>
+        <div class="qmeta">跨职业试炼 · 阿里巴巴 1688 平台 · 难度 ★★★★☆</div>
+        <p>客户对接与销售推广，打通 B2B 交易全链路的业务理解，为开发电商系统点亮商业视野。</p>
+        <div class="reward">⊳ 战利品：<b>「新人首月首单突破奖」</b>（掉落率仅 6%）</div>
+      </div>
+      <div class="quest">
+        <div class="qtop">
+          <span class="qtype side">支线任务 · SIDE</span>
+          <span class="done">✔ CLEAR · 2023.09-12</span>
+          <span class="rank">RANK B+</span>
+        </div>
+        <h3>创新创业 · 屏幕实时翻译计划</h3>
+        <div class="qmeta">项目组长 · 队伍指挥首秀</div>
+        <p>针对漫画、游戏缺乏汉化的痛点提出屏幕实时翻译方案，分组投票荣获「优秀项目」称号。</p>
+        <div class="reward">⊳ 战利品：称号<b>「优秀项目」</b> / 领导力 +5</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="win">
+    <div class="hd"><span>◆ WORLD MAP — 冒险地图</span><span>P.4</span></div>
+    <div class="bd">
+      <div class="map">
+        <div class="map-track">
+          <div class="node"><div class="yr">2022</div><div class="pt"></div><div class="nm2">新手村</div><div class="ds">入学 · 软件工程</div></div>
+          <div class="node"><div class="yr">2023</div><div class="pt"></div><div class="nm2">美柿城</div><div class="ds">开发实习</div></div>
+          <div class="node"><div class="yr">2023</div><div class="pt"></div><div class="nm2">创新之塔</div><div class="ds">项目组长</div></div>
+          <div class="node"><div class="yr">2024</div><div class="pt"></div><div class="nm2">电洋港</div><div class="ds">销售试炼</div></div>
+          <div class="node"><div class="yr">2026</div><div class="pt"></div><div class="nm2">腊肉王国</div><div class="ds">独立开发</div></div>
+          <div class="node fin"><div class="yr">2026.06</div><div class="pt"></div><div class="nm2">毕业之门</div><div class="ds">等待新征程</div><div class="here">▼ YOU ARE HERE</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="win">
+    <div class="hd"><span>◆ ACHIEVEMENTS — 成就殿堂</span><span>P.5</span></div>
+    <div class="bd">
+      <div class="ach-grid">
+        <div class="ach"><span class="aico">🤖</span><div><b>AI 驯兽师</b><span>AIGC 辅助开发专项认证</span></div></div>
+        <div class="ach"><span class="aico">🎖️</span><div><b>人民的伙伴 ×2</b><span>2022 / 2024 县级优秀志愿者</span></div></div>
+        <div class="ach"><span class="aico">🏆</span><div><b>欧皇签单手</b><span>新人首月首单奖 · 获奖率 6%</span></div></div>
+        <div class="ach"><span class="aico">🗣️</span><div><b>吟游诗人</b><span>普通话二级甲等</span></div></div>
+        <div class="ach"><span class="aico">🏎️</span><div><b>坐骑解锁</b><span>C1 驾照</span></div></div>
+        <div class="ach"><span class="aico">⛷️</span><div><b>体力满格</b><span>游泳 · 羽毛球 · 滑雪</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="win">
+    <div class="hd"><span>◆ TALK — 村口的招募告示</span><span>P.6</span></div>
+    <div class="bd">
+      <div class="npc">
+        <div class="npc-face">🧙</div>
+        <div class="dialog" id="dialog">
+          <div class="who">向导 NPC：</div>
+          <div class="txt" id="dlgTxt"></div>
+          <div class="nxt" id="dlgNext">▼</div>
+        </div>
+      </div>
+      <div class="cbtns">
+        <a class="cbtn" id="copyMail"><small>EMAIL · 点击复制</small>FYTResume@fuyangtianbob.de5.net</a>
+        <a class="cbtn" id="copyPhone"><small>WECHAT · 点击复制</small>FYTBob</a>
+        <a class="cbtn" href="https://personal-resume-d41.pages.dev/" target="_blank" rel="noopener"><small>在线简历 · LINK</small>personal-resume-d41 ↗</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  © 2026 伏杨天 · RESUME QUEST<br>
+  <span class="gg">CONTINUE? 期待与你组队 — 5K~10K · 随时到岗</span><br>
+  <span style="opacity:.5">隐藏成就提示：↑↑↓↓←→←→BA</span>
+</footer>
+
+<div id="toast"></div>
+
+<!-- 手机端虚拟摇杆 -->
+<div id="pad" aria-label="移动摇杆">
+  <div class="ring"></div>
+  <span class="arr au">▲</span><span class="arr ad">▼</span>
+  <span class="arr al">◀</span><span class="arr ar">▶</span>
+  <div class="knob" id="knob"></div>
+</div>
+<!-- 手机端动作按钮 -->
+<div id="abtns">
+  <button class="gbtn a" id="btnA" aria-label="交流 / 联系">A<small>交流</small></button>
+  <button class="gbtn b" id="btnB" aria-label="下一段对话">B<small>对话</small></button>
+</div>
+
+<script>
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const SPRITE = [
+  '...hhhhhh...',
+  '..hhhhhhhh..',
+  '..hssssssh..',
+  '..ssssssss..',
+  '..sggsggss..',
+  '..ssssssss..',
+  '...ssmmss...',
+  '..uuuwwuuu..',
+  '.uuuuttuuuu.',
+  '.uuuuttuuuu.',
+  '.uuuuuuuuuu.',
+  '..uuuuuuuu..',
+  '...pp..pp...',
+  '..bbb..bbb..'
+];
+const PAL = {h:'#1c1c24',s:'#f0c8a0',g:'#16161e',m:'#c98b6e',u:'#2a3a5e',w:'#f4f4f4',t:'#c0392b',p:'#1f2430',b:'#111118'};
+const sc = document.getElementById('sprite').getContext('2d');
+SPRITE.forEach((row,y) => [...row].forEach((ch,x) => {
+  if(PAL[ch]){ sc.fillStyle = PAL[ch]; sc.fillRect(x,y,1,1); }
+}));
+
+function fillBar(id, n, cls){
+  const el = document.getElementById(id);
+  for(let i = 0; i < 10; i++){
+    const b = document.createElement('b');
+    if(i < n) b.className = 'on ' + cls;
+    el.appendChild(b);
+  }
+}
+fillBar('hpbar', 10, 'hp');
+fillBar('mpbar', 9, 'mp');
+
+for(let i = 0; i < 70; i++){
+  const s = document.createElement('div');
+  s.className = 'star';
+  const sz = Math.random() < .3 ? 4 : 2;
+  s.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}vw;top:${Math.random()*100}vh;animation-delay:${Math.random()*3}s;animation-duration:${2+Math.random()*3}s`;
+  document.body.appendChild(s);
+}
+
+let sndOn = false, actx;
+const sndBtn = document.getElementById('sndBtn');
+sndBtn.addEventListener('click', () => {
+  sndOn = !sndOn;
+  sndBtn.textContent = '♪ SOUND: ' + (sndOn ? 'ON' : 'OFF');
+  if(sndOn) beep(660, .06);
+});
+function beep(freq, dur, type){
+  if(!sndOn) return;
+  try{
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = type || 'square'; o.frequency.value = freq;
+    g.gain.setValueAtTime(.04, actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001, actx.currentTime + dur);
+    o.connect(g); g.connect(actx.destination);
+    o.start(); o.stop(actx.currentTime + dur);
+  }catch(e){}
+}
+document.querySelectorAll('.quest, .eq, .cbtn, .ach').forEach(el => {
+  el.addEventListener('mouseenter', () => beep(440, .04));
+});
+
+const title = document.getElementById('title');
+function startGame(){
+  if(title.classList.contains('off')) return;
+  beep(523, .08); setTimeout(() => beep(784, .12), 90);
+  title.classList.add('off');
+  setTimeout(() => title.remove(), 500);
+}
+title.addEventListener('click', startGame);
+addEventListener('keydown', e => { if(e.key === 'Enter' && document.getElementById('title')) startGame(); }, {once:false});
+
+const wio = new IntersectionObserver(entries => {
+  entries.forEach(en => {
+    if(en.isIntersecting){
+      en.target.classList.add('in');
+      en.target.querySelectorAll('.segbar').forEach(bar => {
+        if(bar.dataset.done) return;
+        bar.dataset.done = 1;
+        const lv = +bar.dataset.lv;
+        for(let i = 0; i < 10; i++){
+          const seg = document.createElement('i');
+          bar.appendChild(seg);
+          if(i < lv) setTimeout(() => { seg.classList.add('on'); beep(330 + i*40, .03); }, 200 + i*90);
+        }
+      });
+      en.target.querySelectorAll('.ach').forEach((a, i) => {
+        setTimeout(() => { a.classList.add('unlock'); beep(587, .06); }, 250 + i*180);
+      });
+      wio.unobserve(en.target);
+    }
+  });
+}, {threshold:.15});
+document.querySelectorAll('.win').forEach(w => wio.observe(w));
+
+const LINES = [
+  '欢迎来到「RESUME QUEST」，冒险者。眼前这位 LV.23 的全栈开发者，正在寻找下一个队伍……',
+  '他刚独立通关了 S 级主线「腊肉」：从 0 到 1，全栈交付，首屏提速 50%+。是个能独当一面的家伙。',
+  '更难得的是，他还修过「销售」这条副职业线——既写代码，也懂业务，6% 掉率的新人奖都被他拿下了。',
+  '如果你的公会正在招募【小程序全栈 / 全栈 / 后端】，点击下方按钮即可与他建立通讯。祝你们冒险顺利！'
+];
+const dlgTxt = document.getElementById('dlgTxt');
+const dlgNext = document.getElementById('dlgNext');
+let li = 0, typing = false, timer;
+function showLine(idx){
+  typing = true; dlgNext.style.visibility = 'hidden';
+  dlgTxt.textContent = '';
+  let ci = 0;
+  clearInterval(timer);
+  timer = setInterval(() => {
+    dlgTxt.textContent = LINES[idx].slice(0, ++ci);
+    if(ci % 3 === 0) beep(880, .015, 'sine');
+    if(ci >= LINES[idx].length){
+      clearInterval(timer); typing = false; dlgNext.style.visibility = 'visible';
+    }
+  }, reduced ? 0 : 45);
+}
+document.getElementById('dialog').addEventListener('click', () => {
+  if(typing){
+    clearInterval(timer);
+    dlgTxt.textContent = LINES[li];
+    typing = false; dlgNext.style.visibility = 'visible';
+  } else {
+    li = (li + 1) % LINES.length;
+    showLine(li);
+  }
+});
+const dio = new IntersectionObserver(entries => {
+  entries.forEach(en => {
+    if(en.isIntersecting){ showLine(0); dio.unobserve(en.target); }
+  });
+}, {threshold:.4});
+dio.observe(document.getElementById('dialog'));
+
+const toast = document.getElementById('toast');
+function showToast(msg){
+  toast.innerHTML = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2200);
+}
+function fallbackCopy(text){
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); }catch(err){}
+  ta.remove();
+}
+function copyTxt(text){
+  const done = () => { beep(659,.07); setTimeout(()=>beep(880,.1),80); showToast('✔ 已复制！通讯水晶已就绪'); };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(() => { fallbackCopy(text); done(); });
+  } else { fallbackCopy(text); done(); }
+}
+document.getElementById('copyMail').addEventListener('click', () => copyTxt('FYTResume@fuyangtianbob.de5.net'));
+document.getElementById('copyPhone').addEventListener('click', () => copyTxt('FYTBob'));
+
+/* ===== 手机端识别 + 虚拟摇杆 ===== */
+const isMobile = matchMedia('(pointer:coarse)').matches
+  || /Android|iPhone|iPad|iPod|Mobile|HarmonyOS/i.test(navigator.userAgent)
+  || (('ontouchstart' in window) && innerWidth < 1024);
+
+if(isMobile){
+  document.body.classList.add('mobilectrl');
+  const pad = document.getElementById('pad');
+  const knob = document.getElementById('knob');
+  const abtns = document.getElementById('abtns');
+  pad.style.display = 'block';
+  abtns.style.display = 'flex';
+
+  // 摇杆状态
+  let padId = null, cx = 0, cy = 0, vy = 0, dirX = 0, lastStep = 0;
+  const MAXR = 38;
+  let scrollVel = 0, raf = null;
+
+  function panels(){ return [...document.querySelectorAll('.win, footer')]; }
+  function nearestIndex(){
+    const ps = panels(); const mid = scrollY + innerHeight/2; let bi = 0, bd = 1e9;
+    ps.forEach((p,i) => { const r = p.getBoundingClientRect(); const c = scrollY + r.top + r.height/2;
+      const d = Math.abs(c - mid); if(d < bd){ bd = d; bi = i; } });
+    return bi;
+  }
+  function jumpPanel(delta){
+    const ps = panels(); let i = Math.min(Math.max(nearestIndex()+delta,0),ps.length-1);
+    ps[i].scrollIntoView({behavior:'smooth', block:'center'});
+    beep(523,.05); setTimeout(()=>beep(700,.05),70);
+  }
+
+  function loop(){
+    if(Math.abs(scrollVel) > 0.5){
+      scrollBy(0, scrollVel);
+      raf = requestAnimationFrame(loop);
+    } else { scrollVel = 0; raf = null; }
+  }
+  function setKnob(dx, dy){
+    knob.style.transform = `translate(${dx}px,${dy}px)`;
+  }
+  function reset(){
+    padId = null; pad.classList.remove('live'); setKnob(0,0);
+    scrollVel = 0; vy = 0; dirX = 0;
+  }
+
+  pad.addEventListener('touchstart', e => {
+    const t = e.changedTouches[0]; padId = t.identifier;
+    const r = pad.getBoundingClientRect(); cx = r.left + r.width/2; cy = r.top + r.height/2;
+    pad.classList.add('live'); move(t); e.preventDefault();
+  }, {passive:false});
+
+  pad.addEventListener('touchmove', e => {
+    for(const t of e.changedTouches){ if(t.identifier === padId){ move(t); e.preventDefault(); } }
+  }, {passive:false});
+
+  pad.addEventListener('touchend', e => {
+    for(const t of e.changedTouches){ if(t.identifier === padId){ reset(); } }
+  });
+  pad.addEventListener('touchcancel', reset);
+
+  function move(t){
+    let dx = t.clientX - cx, dy = t.clientY - cy;
+    const len = Math.hypot(dx,dy);
+    if(len > MAXR){ dx = dx/len*MAXR; dy = dy/len*MAXR; }
+    setKnob(dx,dy);
+    // 纵向 → 滚动视角
+    vy = dy / MAXR;
+    scrollVel = vy * 16;
+    if(scrollVel !== 0 && !raf) raf = requestAnimationFrame(loop);
+    // 横向 → 切换面板(带防抖)
+    const nx = dx / MAXR;
+    const now = Date.now();
+    if(Math.abs(nx) > 0.7 && Math.abs(nx) > Math.abs(vy) && now - lastStep > 450){
+      lastStep = now; jumpPanel(nx > 0 ? 1 : -1);
+    }
+  }
+
+  // A 键:跳到招募告示并展开联系
+  let contactPulse = false;
+  document.getElementById('btnA').addEventListener('click', () => {
+    beep(660,.06); setTimeout(()=>beep(990,.1),80);
+    const talk = panels().find(p => p.querySelector('#dialog'));
+    if(talk){
+      talk.scrollIntoView({behavior:'smooth', block:'center'});
+      if(!contactPulse){
+        contactPulse = true;
+        setTimeout(() => {
+          document.querySelectorAll('.cbtn').forEach((b,i) => {
+            setTimeout(() => { b.style.transition='.2s'; b.style.background='var(--gold)'; b.style.color='#000';
+              setTimeout(()=>{ b.style.background=''; b.style.color=''; }, 360); }, i*140);
+          });
+        }, 500);
+      }
+      showToast('🧙 已带你到「招募告示」<br><span style="font-size:9px;color:#8a8ab0">点按钮即可复制联系方式</span>');
+    }
+  });
+
+  // B 键:推进 NPC 对话
+  document.getElementById('btnB').addEventListener('click', () => {
+    beep(440,.05);
+    document.getElementById('dialog').click();
+  });
+}
+
+const KONAMI = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+let kbuf = [];
+addEventListener('keydown', e => {
+  kbuf.push(e.key.length === 1 ? e.key.toLowerCase() : e.key);
+  kbuf = kbuf.slice(-10);
+  if(KONAMI.every((k, i) => kbuf[i] === k)){
+    kbuf = [];
+    beep(523,.08);setTimeout(()=>beep(659,.08),100);setTimeout(()=>beep(784,.08),200);setTimeout(()=>beep(1047,.18),300);
+    showToast('🏅 隐藏成就解锁：「传说的指令」<br><span style="font-size:9px;color:#8a8ab0">连细节都会试的人，值得一个 offer</span>');
+  }
+});
+</script>
+    <!-- 悬浮返回科技主版传送门 -->
+    <div id="metaverse-back-btn" class="metaverse-back-btn">
+        <a href="index.html" class="back-link">
+            <i class="ri-planet-line"></i>
+            <span>返回科幻平行世界</span>
+        </a>
+    </div>
+    <style>
+    .metaverse-back-btn {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 99999;
+    }
+    .metaverse-back-btn .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 18px;
+        background: rgba(15, 23, 42, 0.65);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 30px;
+        color: #ffffff;
+        text-decoration: none;
+        font-family: system-ui, -apple-system, sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 1px;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    .metaverse-back-btn .back-link i {
+        font-size: 16px;
+        color: #00fff9;
+        text-shadow: 0 0 8px rgba(0, 255, 249, 0.5);
+        transition: transform 0.6s ease;
+    }
+    .metaverse-back-btn .back-link:hover {
+        background: rgba(15, 23, 42, 0.85);
+        border-color: #00fff9;
+        box-shadow: 0 0 20px rgba(0, 255, 249, 0.4);
+        transform: translateY(-2px);
+    }
+    .metaverse-back-btn .back-link:hover i {
+        transform: rotate(360deg);
+    }
+    @media (max-width: 768px) {
+        .metaverse-back-btn {
+            top: 15px;
+            right: 15px;
+        }
+        .metaverse-back-btn .back-link span {
+            display: none;
+        }
+        .metaverse-back-btn .back-link {
+            padding: 10px;
+            border-radius: 50%;
+        }
+    }
+    </style>
+    <!-- 智能引入 Remixicon 图标库 -->
+    <script>
+        if (!document.querySelector('link[href*="remixicon"]')) {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css';
+            document.head.appendChild(link);
+        }
+    </script>
+</body>
+</html>

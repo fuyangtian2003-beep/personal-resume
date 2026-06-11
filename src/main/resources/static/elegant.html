@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>伏杨天 — 作品与简历</title>
+<meta name="description" content="伏杨天 · 软件工程应届生 · 小程序全栈开发。雅致作品集风格个人主页。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f7f4ee;
+  --paper2:#efeae0;
+  --ink:#23201c;
+  --muted:#8a8377;
+  --line:rgba(35,32,28,.14);
+  --seal:#b5452f;
+  --serif:'Noto Serif SC',serif;
+  --sans:'Noto Sans SC',sans-serif;
+  --en:'Cormorant Garamond',serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--paper);color:var(--ink);
+  font-family:var(--sans);font-weight:300;line-height:1.9;
+  overflow-x:hidden;
+  cursor:none;
+}
+@media (pointer:coarse){body{cursor:auto}}
+::selection{background:rgba(181,69,47,.18)}
+::-webkit-scrollbar{width:8px}
+::-webkit-scrollbar-track{background:var(--paper)}
+::-webkit-scrollbar-thumb{background:#cfc8ba;border-radius:8px}
+
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:999;opacity:.05;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+}
+
+#dot,#ring{position:fixed;border-radius:50%;pointer-events:none;z-index:1001;transform:translate(-50%,-50%)}
+#dot{width:6px;height:6px;background:var(--seal)}
+#ring{width:34px;height:34px;border:1px solid rgba(181,69,47,.5);transition:width .25s,height .25s,border-color .25s}
+body.hovering #ring{width:54px;height:54px;border-color:rgba(181,69,47,.9)}
+@media (pointer:coarse){#dot,#ring{display:none}}
+
+#progress{position:fixed;top:0;left:0;height:2px;width:0;background:var(--seal);z-index:1000}
+
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:900;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:26px clamp(22px,6vw,72px);
+  transition:.4s;
+}
+nav.scrolled{background:rgba(247,244,238,.88);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding-top:16px;padding-bottom:16px}
+.logo{font-family:var(--serif);font-weight:900;font-size:19px;letter-spacing:4px;text-decoration:none;color:var(--ink)}
+.logo i{font-style:normal;color:var(--seal)}
+.nav-links{display:flex;gap:34px;list-style:none}
+.nav-links a{
+  color:var(--ink);text-decoration:none;font-size:13.5px;letter-spacing:2px;position:relative;padding:4px 0;
+}
+.nav-links a::after{
+  content:'';position:absolute;left:0;bottom:0;height:1px;width:100%;background:var(--seal);
+  transform:scaleX(0);transform-origin:right;transition:transform .45s cubic-bezier(.6,0,.2,1);
+}
+.nav-links a:hover::after,.nav-links a.active::after{transform:scaleX(1);transform-origin:left}
+#menuBtn{display:none;background:none;border:none;font-size:24px;color:var(--ink);cursor:pointer}
+
+main{max-width:1180px;margin:0 auto;padding:0 clamp(22px,6vw,72px)}
+section{padding-top:130px}
+
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;position:relative;padding-top:80px}
+.hero .eyebrow{
+  font-family:var(--en);font-style:italic;font-size:clamp(16px,2vw,20px);color:var(--muted);
+  letter-spacing:2px;
+}
+.hero h1{
+  font-family:var(--serif);font-weight:900;
+  font-size:clamp(64px,13vw,168px);line-height:1.08;letter-spacing:.04em;
+  margin:10px 0 26px;
+}
+.hero h1 .word{display:inline-block;overflow:hidden;vertical-align:bottom}
+.hero h1 .word span{display:inline-block;transform:translateY(110%);animation:rise 1s cubic-bezier(.2,.7,.2,1) forwards}
+.hero h1 .word:nth-child(2) span{animation-delay:.12s}
+.hero h1 .word:nth-child(3) span{animation-delay:.24s}
+@keyframes rise{to{transform:translateY(0)}}
+.hero .roles{
+  display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+  font-size:clamp(14px,1.8vw,17px);letter-spacing:3px;color:var(--ink);
+  opacity:0;animation:fade 1.2s .55s forwards;
+}
+.hero .roles i{font-style:normal;color:var(--seal)}
+@keyframes fade{to{opacity:1}}
+.hero .intro{
+  max-width:560px;color:var(--muted);font-size:15px;margin-top:34px;
+  opacity:0;animation:fade 1.2s .75s forwards;
+}
+.hero .cta{margin-top:46px;display:flex;gap:30px;align-items:center;opacity:0;animation:fade 1.2s .95s forwards}
+.lnk{
+  font-size:14px;letter-spacing:3px;color:var(--ink);text-decoration:none;
+  padding-bottom:6px;border-bottom:1px solid var(--ink);transition:.35s;
+}
+.lnk:hover{color:var(--seal);border-color:var(--seal);letter-spacing:5px}
+.lnk.red{color:var(--seal);border-color:var(--seal)}
+.lnk.red:hover{letter-spacing:5px}
+
+.seal{
+  position:absolute;right:clamp(0px,6vw,80px);top:50%;transform:translateY(-58%) rotate(6deg);
+  width:clamp(90px,12vw,150px);height:clamp(90px,12vw,150px);
+  border:3px solid var(--seal);border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--serif);font-weight:900;color:var(--seal);
+  font-size:clamp(40px,6vw,68px);
+  box-shadow:inset 0 0 0 2px rgba(181,69,47,.25);
+  opacity:0;animation:stamp .7s 1.15s cubic-bezier(.2,1.6,.4,1) forwards;
+  background:rgba(181,69,47,.04);
+}
+@keyframes stamp{0%{opacity:0;transform:translateY(-58%) rotate(6deg) scale(1.8)}100%{opacity:.92;transform:translateY(-58%) rotate(6deg) scale(1)}}
+.scroll-line{
+  position:absolute;bottom:0;left:50%;width:1px;height:90px;background:var(--line);overflow:hidden;
+}
+.scroll-line::after{
+  content:'';position:absolute;top:-40%;left:0;width:100%;height:40%;
+  background:var(--seal);animation:drop 2s ease-in-out infinite;
+}
+@keyframes drop{to{top:140%}}
+
+.marquee{
+  margin-top:90px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  overflow:hidden;padding:16px 0;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);
+  mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);
+}
+.marquee-track{display:flex;gap:0;width:max-content;animation:slide 36s linear infinite}
+.marquee span{
+  font-family:var(--en);font-style:italic;font-size:17px;color:var(--muted);
+  white-space:nowrap;letter-spacing:2px;padding-right:60px;
+}
+.marquee span i{font-style:normal;color:var(--seal);padding:0 26px}
+@keyframes slide{to{transform:translateX(-50%)}}
+
+.sec-head{display:flex;align-items:baseline;gap:26px;margin-bottom:70px;border-bottom:1px solid var(--line);padding-bottom:26px}
+.sec-head .no{font-family:var(--en);font-style:italic;font-size:20px;color:var(--seal)}
+.sec-head h2{font-family:var(--serif);font-weight:900;font-size:clamp(30px,5vw,46px);letter-spacing:6px}
+.sec-head .en{margin-left:auto;font-family:var(--en);font-style:italic;color:var(--muted);font-size:16px;letter-spacing:2px}
+
+.reveal{opacity:0;transform:translateY(34px);transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+
+.about-grid{display:grid;grid-template-columns:1.25fr .8fr;gap:clamp(40px,6vw,90px)}
+.about-grid .lead{
+  font-family:var(--serif);font-size:clamp(20px,2.6vw,27px);font-weight:600;line-height:1.85;
+}
+.about-grid .lead em{font-style:normal;color:var(--seal)}
+.about-grid .body{color:var(--muted);font-size:15px;margin-top:26px}
+.facts{list-style:none;border-top:1px solid var(--line)}
+.facts li{
+  display:flex;justify-content:space-between;gap:18px;
+  padding:15px 2px;border-bottom:1px solid var(--line);font-size:14px;
+}
+.facts li b{font-weight:400;color:var(--muted);letter-spacing:2px;flex-shrink:0}
+.facts li span{text-align:right}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-top:80px}
+.stat{background:var(--paper);padding:38px 20px;text-align:center;transition:background .4s}
+.stat:hover{background:var(--paper2)}
+.stat .num{font-family:var(--en);font-size:54px;line-height:1;color:var(--ink)}
+.stat .num i{font-style:normal;color:var(--seal);font-size:30px}
+.stat .lbl{font-size:12.5px;color:var(--muted);letter-spacing:2px;margin-top:12px}
+
+.skill-cols{display:grid;grid-template-columns:1fr 1fr;gap:clamp(40px,6vw,90px)}
+.skill-group h3{
+  font-family:var(--serif);font-weight:700;font-size:18px;letter-spacing:4px;
+  margin-bottom:22px;display:flex;align-items:center;gap:14px;
+}
+.skill-group h3::after{content:'';flex:1;height:1px;background:var(--line)}
+.srow{display:flex;justify-content:space-between;align-items:baseline;gap:14px;padding:11px 0;border-bottom:1px dashed var(--line);font-size:14.5px}
+.srow .lv{font-family:var(--en);font-style:italic;color:var(--muted);font-size:14px;flex-shrink:0}
+.srow b{font-weight:400}
+.skill-group{margin-bottom:48px}
+
+.proj-list{display:flex;flex-direction:column}
+.proj{
+  display:grid;grid-template-columns:90px 1fr auto;gap:clamp(18px,4vw,50px);align-items:start;
+  padding:54px 10px;border-bottom:1px solid var(--line);position:relative;
+  transition:background .45s,padding-left .45s;
+}
+.proj:first-child{border-top:1px solid var(--line)}
+.proj:hover{background:var(--paper2);padding-left:26px}
+.proj .pno{font-family:var(--en);font-style:italic;font-size:30px;color:var(--muted);transition:color .4s}
+.proj:hover .pno{color:var(--seal)}
+.proj h3{font-family:var(--serif);font-weight:900;font-size:clamp(22px,3.4vw,34px);letter-spacing:2px;line-height:1.4}
+.proj .role{font-family:var(--en);font-style:italic;color:var(--seal);font-size:16px;letter-spacing:1px}
+.proj p{color:var(--muted);font-size:14.5px;max-width:680px;margin-top:14px}
+.proj .ptags{margin-top:18px;font-size:12.5px;letter-spacing:2px;color:var(--muted)}
+.proj .ptags i{font-style:normal;color:var(--seal);padding:0 10px}
+.proj .year{font-family:var(--en);font-style:italic;font-size:17px;color:var(--muted);white-space:nowrap}
+.proj .arrow{
+  position:absolute;right:18px;bottom:46px;font-size:26px;color:var(--seal);
+  opacity:0;transform:translateX(-14px);transition:.45s;
+}
+.proj:hover .arrow{opacity:1;transform:none}
+.proj-detail{margin-top:16px;border-left:2px solid rgba(181,69,47,.35);padding-left:20px}
+.proj-detail li{list-style:none;color:var(--muted);font-size:13.8px;margin-bottom:8px}
+.proj-detail li b{font-weight:500;color:var(--ink)}
+
+.tl{list-style:none}
+.tl li{
+  display:grid;grid-template-columns:210px 1fr;gap:clamp(20px,4vw,60px);
+  padding:34px 6px;border-bottom:1px solid var(--line);
+}
+.tl li:first-child{border-top:1px solid var(--line)}
+.tl .date{font-family:var(--en);font-style:italic;font-size:17px;color:var(--muted)}
+.tl h3{font-family:var(--serif);font-weight:700;font-size:19px;letter-spacing:1px}
+.tl .sub{color:var(--seal);font-size:13.5px;letter-spacing:1px;margin:4px 0 8px}
+.tl p{color:var(--muted);font-size:14px;max-width:660px}
+.tl .medal{
+  display:inline-block;margin-top:10px;font-size:12.5px;letter-spacing:1px;color:var(--seal);
+  border:1px solid rgba(181,69,47,.4);padding:4px 14px;border-radius:99px;
+}
+
+.honors{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line)}
+.honor{background:var(--paper);padding:36px 28px;transition:background .4s}
+.honor:hover{background:var(--paper2)}
+.honor .hn{font-family:var(--en);font-style:italic;color:var(--seal);font-size:15px}
+.honor h3{font-family:var(--serif);font-weight:700;font-size:17px;margin:10px 0 6px;letter-spacing:1px}
+.honor p{color:var(--muted);font-size:13px}
+
+.contact{padding-bottom:40px}
+.contact .big{
+  font-family:var(--serif);font-weight:900;font-size:clamp(44px,9vw,110px);
+  letter-spacing:8px;line-height:1.25;
+}
+.contact .big em{font-style:normal;color:var(--seal)}
+.contact .note{color:var(--muted);font-size:14.5px;max-width:520px;margin:26px 0 50px}
+.c-rows{border-top:1px solid var(--line)}
+.c-row{
+  display:flex;justify-content:space-between;align-items:center;gap:20px;
+  padding:26px 8px;border-bottom:1px solid var(--line);
+  text-decoration:none;color:var(--ink);transition:padding-left .4s,background .4s;cursor:pointer;
+}
+.c-row:hover{padding-left:26px;background:var(--paper2)}
+.c-row .k{font-size:12.5px;letter-spacing:3px;color:var(--muted)}
+.c-row .v{font-family:var(--en);font-size:clamp(17px,3vw,24px);letter-spacing:1px}
+.c-row .a{color:var(--seal);font-size:20px}
+
+footer{
+  border-top:1px solid var(--line);margin-top:110px;
+  padding:30px clamp(22px,6vw,72px);
+  display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;
+  font-size:12.5px;color:var(--muted);letter-spacing:2px;
+}
+footer .en{font-family:var(--en);font-style:italic}
+
+#toast{
+  position:fixed;bottom:34px;left:50%;transform:translate(-50%,90px);
+  background:var(--ink);color:var(--paper);padding:12px 30px;border-radius:99px;
+  font-size:13.5px;letter-spacing:2px;z-index:1002;transition:transform .45s cubic-bezier(.2,.7,.2,1);
+}
+#toast.show{transform:translate(-50%,0)}
+
+@media (max-width:920px){
+  .about-grid,.skill-cols{grid-template-columns:1fr}
+  .stats{grid-template-columns:1fr 1fr}
+  .honors{grid-template-columns:1fr}
+  .proj{grid-template-columns:1fr;gap:10px}
+  .proj .year{order:-1}
+  .tl li{grid-template-columns:1fr;gap:6px}
+  .nav-links{
+    position:fixed;top:0;right:-300px;width:270px;height:100vh;
+    flex-direction:column;background:var(--paper);border-left:1px solid var(--line);
+    padding:100px 34px;gap:18px;transition:right .4s;
+  }
+  .nav-links.open{right:0}
+  #menuBtn{display:block;position:relative;z-index:10}
+  .seal{position:static;transform:rotate(6deg);margin-top:30px;animation-name:stampM}
+  @keyframes stampM{0%{opacity:0;transform:rotate(6deg) scale(1.8)}100%{opacity:.92;transform:rotate(6deg) scale(1)}}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important}
+  html{scroll-behavior:auto}
+  body{cursor:auto}
+  #dot,#ring{display:none}
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+<div id="dot"></div>
+<div id="ring"></div>
+
+<nav id="nav">
+  <a class="logo" href="#top">伏<i>·</i>杨天</a>
+  <button id="menuBtn" aria-label="菜单">☰</button>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#top" class="active">首页</a></li>
+    <li><a href="#about">关于</a></li>
+    <li><a href="#skills">技能</a></li>
+    <li><a href="#projects">项目</a></li>
+    <li><a href="#timeline">经历</a></li>
+    <li><a href="#contact">联系</a></li>
+  </ul>
+</nav>
+
+<main id="top">
+
+  <section class="hero">
+    <div class="eyebrow">Portfolio &amp; Résumé — 2026</div>
+    <h1>
+      <span class="word"><span>伏</span></span><span class="word"><span>杨</span></span><span class="word"><span>天</span></span>
+    </h1>
+    <div class="roles">小程序全栈开发 <i>/</i> 全栈开发 <i>/</i> 后端开发 <i>·</i> 2026 届 · 软件工程</div>
+    <p class="intro">
+      以工程的严谨落地产品，以产品的眼光打磨工程。独立完成「腊肉」校园二手市场小程序从 0 到 1 的
+      全栈交付，兼具技术深度与电商业务的理解力。
+    </p>
+    <div class="cta">
+      <a class="lnk red" href="#projects">查看项目</a>
+      <a class="lnk" href="#contact">取得联系</a>
+    </div>
+    <div class="seal">伏</div>
+    <div class="scroll-line"></div>
+  </section>
+
+  <div class="marquee">
+    <div class="marquee-track">
+      <span>Vue.js <i>·</i> Uni-app <i>·</i> WeChat Mini Program <i>·</i> Spring Boot <i>·</i> Java <i>·</i> Redis <i>·</i> MySQL <i>·</i> Linux / SSH <i>·</i> Git <i>·</i> AIGC Driven <i>·</i></span>
+      <span>Vue.js <i>·</i> Uni-app <i>·</i> WeChat Mini Program <i>·</i> Spring Boot <i>·</i> Java <i>·</i> Redis <i>·</i> MySQL <i>·</i> Linux / SSH <i>·</i> Git <i>·</i> AIGC Driven <i>·</i></span>
+    </div>
+  </div>
+
+  <section id="about">
+    <div class="sec-head reveal">
+      <span class="no">01</span><h2>关于我</h2><span class="en">About</span>
+    </div>
+    <div class="about-grid">
+      <div class="reveal">
+        <p class="lead">
+          既能<em>独立写完一个产品</em>，也能站在用户与业务一侧思考 ——
+          技术与商业的交叉点，是我最舒服的位置。
+        </p>
+        <p class="body">
+          软件工程专业背景让我具备小程序全栈开发的完整能力；一段 1688 平台的销售实习，让我深入理解了
+          B2B 交易的全链路逻辑，入职首月即获「新人首月首单突破奖」（获奖率仅 6%）。
+          我习惯以产品经理的视角审视功能与实现，也熟练运用 Cursor、ChatGPT 等 AI 工具辅助重构与调试，
+          开发效率显著领先。作为中共党员，两次获评县级「优秀志愿者」，责任心与同理心并重。
+        </p>
+      </div>
+      <ul class="facts reveal" style="transition-delay:.15s">
+        <li><b>出生年月</b><span>2003 年 03 月</span></li>
+        <li><b>毕业院校</b><span>湖南信息学院</span></li>
+        <li><b>专业学历</b><span>软件工程 · 本科 · 应届</span></li>
+        <li><b>政治面貌</b><span>中共党员</span></li>
+        <li><b>求职意向</b><span>全栈 / 后端 / 小程序开发</span></li>
+        <li><b>期望薪资</b><span>5K – 10K</span></li>
+        <li><b>到岗时间</b><span>随时</span></li>
+      </ul>
+    </div>
+    <div class="stats reveal">
+      <div class="stat"><div class="num"><span class="count" data-to="50">0</span><i>%+</i></div><div class="lbl">首屏加载提速</div></div>
+      <div class="stat"><div class="num"><span class="count" data-to="40">0</span><i>+</i></div><div class="lbl">业务场景交付</div></div>
+      <div class="stat"><div class="num"><span class="count" data-to="30">0</span><i>%</i></div><div class="lbl">内存占用降低</div></div>
+      <div class="stat"><div class="num"><span class="count" data-to="2">0</span><i>×</i></div><div class="lbl">县级优秀志愿者</div></div>
+    </div>
+  </section>
+
+  <section id="skills">
+    <div class="sec-head reveal">
+      <span class="no">02</span><h2>专业技能</h2><span class="en">Skills</span>
+    </div>
+    <div class="skill-cols">
+      <div>
+        <div class="skill-group reveal">
+          <h3>前端开发</h3>
+          <div class="srow"><b>Vue.js / Uni-app</b><span class="lv">Proficient</span></div>
+          <div class="srow"><b>微信小程序原生开发</b><span class="lv">Proficient</span></div>
+          <div class="srow"><b>HTML5 / CSS3 / JavaScript</b><span class="lv">Skilled</span></div>
+        </div>
+        <div class="skill-group reveal">
+          <h3>工具与效率</h3>
+          <div class="srow"><b>Cursor / ChatGPT / Antigravity 辅助开发</b><span class="lv">Expert</span></div>
+          <div class="srow"><b>Git 版本管理 / Postman</b><span class="lv">Proficient</span></div>
+        </div>
+      </div>
+      <div>
+        <div class="skill-group reveal" style="transition-delay:.1s">
+          <h3>后端与数据库</h3>
+          <div class="srow"><b>Java / Spring Boot</b><span class="lv">Skilled</span></div>
+          <div class="srow"><b>Redis / MySQL / SQL</b><span class="lv">Skilled</span></div>
+          <div class="srow"><b>COS 安全方案 / Linux / SSH 部署</b><span class="lv">Skilled</span></div>
+        </div>
+        <div class="skill-group reveal" style="transition-delay:.1s">
+          <h3>办公与文档</h3>
+          <div class="srow"><b>Ps / Word / Excel / PPT</b><span class="lv">Proficient</span></div>
+          <div class="srow"><b>技术文档 / 公文撰写</b><span class="lv">Skilled</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="projects">
+    <div class="sec-head reveal">
+      <span class="no">03</span><h2>项目经历</h2><span class="en">Selected Works</span>
+    </div>
+    <div class="proj-list">
+      <article class="proj reveal">
+        <div class="pno">№1</div>
+        <div>
+          <h3>腊肉 · 校园二手市场小程序</h3>
+          <div class="role">Independent Developer — 独立开发 · 从 0 到 1</div>
+          <p>
+            Uni-app + Spring Boot 全栈落地。移动端实践「分包预下载 + 骨架屏缓存」，首屏加载缩短 50% 以上；
+            后端以 AOP 审计拦截与统一状态机支撑 40+ 业务场景快速交付。
+          </p>
+          <ul class="proj-detail">
+            <li><b>治理：</b>内容安全巡检 → 阶梯式举报处理 → 全量级联清理的垂直治理体系</li>
+            <li><b>攻坚：</b>高并发库存治理 · 匿名社群全民仲裁状态机 · 全链路物理脱敏</li>
+            <li><b>架构：</b>Redis 缓存快照秒开 · COS 私有桶临时签名 · SSH 原子部署</li>
+          </ul>
+          <div class="ptags">UNI-APP<i>/</i>SPRING BOOT<i>/</i>REDIS<i>/</i>AOP<i>/</i>COS<i>/</i>高并发</div>
+        </div>
+        <div class="year">2026.01 — 02</div>
+        <span class="arrow">⟶</span>
+      </article>
+      <article class="proj reveal">
+        <div class="pno">№2</div>
+        <div>
+          <h3>美柿 · 电商小程序商城</h3>
+          <div class="role">Full-stack Intern — 前后端开发 · 商业级项目</div>
+          <p>
+            独立开发首页、购物车、消息、我的等 5 个核心 Tab 页面及商品详情等次级页面；
+            负责瀑布流商品列表与购物车逻辑，Vue.js + Element UI 对接 Spring Boot 接口。
+          </p>
+          <ul class="proj-detail">
+            <li><b>难点：</b>解决多规格商品数据的复杂渲染问题</li>
+            <li><b>优化：</b>瀑布流组件懒加载，长列表渲染内存占用降低 30%</li>
+          </ul>
+          <div class="ptags">微信小程序<i>/</i>VUE.JS<i>/</i>ELEMENT UI<i>/</i>瀑布流<i>/</i>懒加载</div>
+        </div>
+        <div class="year">2023.07 — 09</div>
+        <span class="arrow">⟶</span>
+      </article>
+    </div>
+  </section>
+
+  <section id="timeline">
+    <div class="sec-head reveal">
+      <span class="no">04</span><h2>成长经历</h2><span class="en">Experience</span>
+    </div>
+    <ul class="tl">
+      <li class="reveal">
+        <span class="date">2026.01 — 2026.02</span>
+        <div>
+          <h3>「腊肉」校园二手市场小程序</h3>
+          <div class="sub">独立开发者</div>
+          <p>从 0 到 1 独立完成全栈开发、安全治理与生产部署，实现业务、治理、运维的闭环交付。</p>
+        </div>
+      </li>
+      <li class="reveal">
+        <span class="date">2024.06 — 2024.08</span>
+        <div>
+          <h3>长沙电洋有限公司 · 销售实习</h3>
+          <div class="sub">阿里巴巴 1688 平台</div>
+          <p>负责客户对接与销售推广，深入理解 B2B 交易全链路，为开发电商系统奠定业务基础。</p>
+          <span class="medal">新人首月首单突破奖 · 获奖率仅 6%</span>
+        </div>
+      </li>
+      <li class="reveal">
+        <span class="date">2023.09 — 2023.12</span>
+        <div>
+          <h3>创新创业项目 · 屏幕实时翻译</h3>
+          <div class="sub">项目组长</div>
+          <p>针对漫画、游戏作品缺乏汉化的痛点提出屏幕实时翻译方案，分组投票获评「优秀项目」。</p>
+        </div>
+      </li>
+      <li class="reveal">
+        <span class="date">2023.07 — 2023.09</span>
+        <div>
+          <h3>杭州美柿科技有限公司 · 开发实习</h3>
+          <div class="sub">电商微信小程序</div>
+          <p>参与登录注册、瀑布流商品列表、购物车与个人中心开发，完成接口联调与首屏性能优化。</p>
+        </div>
+      </li>
+      <li class="reveal">
+        <span class="date">2022.09 — 2026.06</span>
+        <div>
+          <h3>湖南信息学院 · 软件工程（本科）</h3>
+          <div class="sub">主修 Java · 数据结构 · 数据库原理 · 移动应用开发</div>
+          <p>成绩优异，深入理解面向对象编程思想，积极参与编程实战。</p>
+        </div>
+      </li>
+    </ul>
+  </section>
+
+  <section id="honors">
+    <div class="sec-head reveal">
+      <span class="no">05</span><h2>荣誉证书</h2><span class="en">Honors</span>
+    </div>
+    <div class="honors reveal">
+      <div class="honor"><div class="hn">Certification</div><h3>AIGC 辅助开发专项认证</h3><p>AI 驱动开发能力专项认证</p></div>
+      <div class="honor"><div class="hn">Honor × 2</div><h3>优秀志愿者</h3><p>2022 湘阴县民政局 · 2024 湘阴县宣传部</p></div>
+      <div class="honor"><div class="hn">Award</div><h3>新人首月首单突破奖</h3><p>长沙电洋 · 获奖率仅 6%</p></div>
+      <div class="honor"><div class="hn">Language</div><h3>普通话二级甲等</h3><p>清晰流畅的沟通表达</p></div>
+      <div class="honor"><div class="hn">License</div><h3>C1 驾照</h3><p>适应出行需要</p></div>
+      <div class="honor"><div class="hn">Lifestyle</div><h3>游泳 · 羽毛球 · 滑雪</h3><p>热爱运动，保持充沛精力</p></div>
+    </div>
+  </section>
+
+  <section id="contact" class="contact">
+    <div class="sec-head reveal">
+      <span class="no">06</span><h2>取得联系</h2><span class="en">Contact</span>
+    </div>
+    <div class="reveal">
+      <div class="big">期待与你<br><em>共事一场</em></div>
+      <p class="note">小程序全栈 / 全栈 / 后端开发工程师 · 期望薪资 5K–10K · 随时到岗。欢迎随时与我联系。</p>
+    </div>
+    <div class="c-rows reveal">
+      <a class="c-row" id="copyMail">
+        <span class="k">EMAIL · 点击复制</span>
+        <span class="v">FYTResume@fuyangtianbob.de5.net</span>
+        <span class="a">⟶</span>
+      </a>
+      <a class="c-row" id="copyPhone">
+        <span class="k">WECHAT · 点击复制</span>
+        <span class="v">FYTBob</span>
+        <span class="a">⟶</span>
+      </a>
+      <a class="c-row" href="https://personal-resume-d41.pages.dev/" target="_blank" rel="noopener">
+        <span class="k">RESUME PAGE</span>
+        <span class="v">personal-resume-d41.pages.dev</span>
+        <span class="a">↗</span>
+      </a>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <span>© 2026 伏杨天</span>
+  <span class="en">Crafted with care &amp; intention.</span>
+</footer>
+
+<div id="toast">已复制到剪贴板</div>
+
+<script>
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const dot = document.getElementById('dot');
+const ring = document.getElementById('ring');
+let mx = -100, my = -100, rx = -100, ry = -100;
+addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; dot.style.left = mx+'px'; dot.style.top = my+'px'; });
+(function followRing(){
+  rx += (mx - rx) * .14; ry += (my - ry) * .14;
+  ring.style.left = rx+'px'; ring.style.top = ry+'px';
+  requestAnimationFrame(followRing);
+})();
+document.querySelectorAll('a, button, .c-row, .proj').forEach(el => {
+  el.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
+  el.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
+});
+
+const nav = document.getElementById('nav');
+const progress = document.getElementById('progress');
+addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', scrollY > 40);
+  const max = document.documentElement.scrollHeight - innerHeight;
+  progress.style.width = (scrollY / max * 100) + '%';
+}, {passive:true});
+
+const menuBtn = document.getElementById('menuBtn');
+const navLinks = document.getElementById('navLinks');
+menuBtn.addEventListener('click', () => navLinks.classList.toggle('open'));
+navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navLinks.classList.remove('open')));
+
+const io = new IntersectionObserver(entries => {
+  entries.forEach(en => {
+    if(en.isIntersecting){
+      en.target.classList.add('in');
+      en.target.querySelectorAll('.count').forEach(c => {
+        if(c.dataset.done) return;
+        c.dataset.done = 1;
+        const to = +c.dataset.to, t0 = performance.now(), dur = 1300;
+        (function tick(t){
+          const k = Math.min(1, (t - t0)/dur);
+          c.textContent = Math.round(to * (1 - Math.pow(1-k, 3)));
+          if(k < 1) requestAnimationFrame(tick);
+        })(t0);
+      });
+      io.unobserve(en.target);
+    }
+  });
+}, {threshold:.16});
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+const secs = document.querySelectorAll('section[id], main[id]');
+const linkMap = {};
+navLinks.querySelectorAll('a').forEach(a => linkMap[a.getAttribute('href').slice(1)] = a);
+const spy = new IntersectionObserver(entries => {
+  entries.forEach(en => {
+    if(en.isIntersecting && linkMap[en.target.id]){
+      navLinks.querySelectorAll('a').forEach(a => a.classList.remove('active'));
+      linkMap[en.target.id].classList.add('active');
+    }
+  });
+}, {rootMargin:'-45% 0px -45% 0px'});
+secs.forEach(s => spy.observe(s));
+
+const toast = document.getElementById('toast');
+function copy(text){
+  navigator.clipboard.writeText(text).then(() => {
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 1700);
+  });
+}
+document.getElementById('copyPhone').addEventListener('click', () => copy('FYTBob'));
+document.getElementById('copyMail').addEventListener('click', () => copy('FYTResume@fuyangtianbob.de5.net'));
+</script>
+    <!-- 悬浮返回科技主版传送门 -->
+    <div id="metaverse-back-btn" class="metaverse-back-btn">
+        <a href="index.html" class="back-link">
+            <i class="ri-planet-line"></i>
+            <span>返回科幻平行世界</span>
+        </a>
+    </div>
+    <style>
+    .metaverse-back-btn {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 99999;
+    }
+    .metaverse-back-btn .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 18px;
+        background: rgba(15, 23, 42, 0.65);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 30px;
+        color: #ffffff;
+        text-decoration: none;
+        font-family: system-ui, -apple-system, sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 1px;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    .metaverse-back-btn .back-link i {
+        font-size: 16px;
+        color: #00fff9;
+        text-shadow: 0 0 8px rgba(0, 255, 249, 0.5);
+        transition: transform 0.6s ease;
+    }
+    .metaverse-back-btn .back-link:hover {
+        background: rgba(15, 23, 42, 0.85);
+        border-color: #00fff9;
+        box-shadow: 0 0 20px rgba(0, 255, 249, 0.4);
+        transform: translateY(-2px);
+    }
+    .metaverse-back-btn .back-link:hover i {
+        transform: rotate(360deg);
+    }
+    @media (max-width: 768px) {
+        .metaverse-back-btn {
+            top: 15px;
+            right: 15px;
+        }
+        .metaverse-back-btn .back-link span {
+            display: none;
+        }
+        .metaverse-back-btn .back-link {
+            padding: 10px;
+            border-radius: 50%;
+        }
+    }
+    </style>
+    <!-- 智能引入 Remixicon 图标库 -->
+    <script>
+        if (!document.querySelector('link[href*="remixicon"]')) {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css';
+            document.head.appendChild(link);
+        }
+    </script>
+</body>
+</html>

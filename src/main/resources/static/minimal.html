@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>伏杨天 · 全栈开发工程师 | 个人主页</title>
+<meta name="description" content="伏杨天 — 软件工程应届生，小程序全栈开发工程师。Uni-app / Vue.js / Spring Boot / Redis。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#05070f;
+  --bg2:#0a0e1d;
+  --card:rgba(255,255,255,.04);
+  --line:rgba(255,255,255,.09);
+  --txt:#e8ecf8;
+  --muted:#8b93ab;
+  --cyan:#22d3ee;
+  --violet:#8b5cf6;
+  --pink:#ec4899;
+  --grad:linear-gradient(120deg,#22d3ee,#8b5cf6 55%,#ec4899);
+  --radius:18px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--txt);
+  font-family:'Noto Sans SC',system-ui,sans-serif;
+  overflow-x:hidden;
+  line-height:1.7;
+}
+::selection{background:rgba(139,92,246,.45);color:#fff}
+::-webkit-scrollbar{width:9px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:linear-gradient(#22d3ee,#8b5cf6);border-radius:9px}
+
+#progress{position:fixed;top:0;left:0;height:3px;width:0;background:var(--grad);z-index:1000;box-shadow:0 0 12px rgba(139,92,246,.8)}
+
+#cursorGlow{
+  position:fixed;width:520px;height:520px;border-radius:50%;
+  background:radial-gradient(circle,rgba(34,211,238,.10),rgba(139,92,246,.06) 40%,transparent 70%);
+  pointer-events:none;z-index:1;transform:translate(-50%,-50%);
+  transition:opacity .4s;
+}
+
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:900;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px clamp(20px,5vw,64px);
+  transition:.4s;
+}
+nav.scrolled{
+  background:rgba(5,7,15,.72);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border-bottom:1px solid var(--line);
+  padding-top:12px;padding-bottom:12px;
+}
+.logo{font-family:'Space Grotesk';font-weight:700;font-size:20px;letter-spacing:.5px;text-decoration:none;color:var(--txt)}
+.logo b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.nav-links{display:flex;gap:6px;list-style:none}
+.nav-links a{
+  color:var(--muted);text-decoration:none;font-size:14px;padding:7px 14px;border-radius:99px;
+  transition:.3s;position:relative;
+}
+.nav-links a:hover,.nav-links a.active{color:#fff;background:rgba(255,255,255,.06)}
+#menuBtn{display:none;background:none;border:none;color:var(--txt);font-size:24px;cursor:pointer}
+
+#heroCanvas{position:fixed;inset:0;z-index:0;opacity:.9}
+.orb{position:fixed;border-radius:50%;filter:blur(110px);z-index:0;pointer-events:none;animation:float 14s ease-in-out infinite}
+.orb1{width:480px;height:480px;background:rgba(34,211,238,.13);top:-120px;left:-120px}
+.orb2{width:560px;height:560px;background:rgba(139,92,246,.13);bottom:-180px;right:-140px;animation-delay:-7s}
+@keyframes float{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,-50px) scale(1.08)}}
+
+main{position:relative;z-index:2}
+section{max-width:1120px;margin:0 auto;padding:110px clamp(20px,5vw,48px) 30px}
+
+.hero{
+  min-height:100vh;display:flex;flex-direction:column;justify-content:center;
+  padding-top:140px;position:relative;
+}
+.badge{
+  display:inline-flex;align-items:center;gap:8px;width:fit-content;
+  border:1px solid var(--line);border-radius:99px;padding:7px 18px;
+  font-size:13px;color:var(--muted);background:rgba(255,255,255,.03);
+  backdrop-filter:blur(8px);
+}
+.badge .dot{width:7px;height:7px;border-radius:50%;background:#34d399;box-shadow:0 0 10px #34d399;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.hero h1{
+  font-size:clamp(46px,9vw,104px);font-weight:900;line-height:1.12;margin:26px 0 8px;
+  letter-spacing:2px;
+}
+.hero h1 .grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.typer-line{
+  font-family:'Space Grotesk','Noto Sans SC';font-size:clamp(18px,3vw,28px);color:var(--muted);
+  min-height:46px;display:flex;align-items:center;gap:10px;
+}
+.typer-line::before{content:'>';color:var(--cyan);font-weight:700}
+#typer{color:#fff;font-weight:500}
+.caret{display:inline-block;width:3px;height:1.2em;background:var(--cyan);margin-left:4px;animation:blink 1s steps(1) infinite;vertical-align:text-bottom}
+@keyframes blink{50%{opacity:0}}
+.hero p.sub{max-width:640px;color:var(--muted);margin:22px 0 36px;font-size:16px}
+.hero-cta{display:flex;gap:16px;flex-wrap:wrap}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:14px 32px;border-radius:99px;font-size:15px;font-weight:500;
+  text-decoration:none;transition:.35s;cursor:pointer;border:none;font-family:inherit;
+}
+.btn-primary{
+  background:var(--grad);color:#fff;background-size:160% 160%;
+  box-shadow:0 8px 30px rgba(139,92,246,.35);
+}
+.btn-primary:hover{background-position:100% 50%;transform:translateY(-3px);box-shadow:0 14px 40px rgba(139,92,246,.5)}
+.btn-ghost{border:1px solid var(--line);color:var(--txt);background:rgba(255,255,255,.03)}
+.btn-ghost:hover{border-color:var(--cyan);color:var(--cyan);transform:translateY(-3px)}
+.scroll-hint{
+  position:absolute;bottom:34px;left:50%;transform:translateX(-50%);
+  color:var(--muted);font-size:12px;letter-spacing:3px;text-align:center;
+}
+.scroll-hint .mouse{
+  width:24px;height:40px;border:2px solid var(--muted);border-radius:14px;margin:0 auto 8px;position:relative;
+}
+.scroll-hint .mouse::after{
+  content:'';position:absolute;top:7px;left:50%;width:4px;height:8px;margin-left:-2px;
+  border-radius:4px;background:var(--cyan);animation:wheel 1.6s infinite;
+}
+@keyframes wheel{0%{transform:translateY(0);opacity:1}100%{transform:translateY(12px);opacity:0}}
+
+.marquee{
+  overflow:hidden;border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  padding:18px 0;background:rgba(255,255,255,.02);
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);
+  mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);
+}
+.marquee-track{display:flex;gap:56px;width:max-content;animation:scrollX 30s linear infinite}
+.marquee span{
+  font-family:'Space Grotesk';font-size:15px;color:var(--muted);white-space:nowrap;
+  display:flex;align-items:center;gap:56px;
+}
+.marquee span i{font-style:normal;color:var(--cyan);opacity:.6}
+@keyframes scrollX{to{transform:translateX(-50%)}}
+
+.sec-head{margin-bottom:56px}
+.sec-head .kicker{
+  font-family:'Space Grotesk';font-size:13px;letter-spacing:4px;color:var(--cyan);
+  text-transform:uppercase;display:flex;align-items:center;gap:12px;
+}
+.sec-head .kicker::before{content:'';width:36px;height:1px;background:var(--cyan)}
+.sec-head h2{font-size:clamp(30px,5vw,44px);font-weight:900;margin-top:10px}
+.sec-head h2 em{font-style:normal;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+.reveal{opacity:0;transform:translateY(36px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+
+.about-grid{display:grid;grid-template-columns:340px 1fr;gap:48px;align-items:start}
+.avatar-wrap{position:relative;width:280px;height:280px;margin:0 auto}
+.avatar-ring{
+  position:absolute;inset:-12px;border-radius:50%;
+  background:conic-gradient(from 0deg,#22d3ee,#8b5cf6,#ec4899,#22d3ee);
+  animation:spin 7s linear infinite;
+  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 2px));
+  mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#000 calc(100% - 2px));
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.avatar{
+  position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(circle at 30% 25%,#1b2240,#0a0e1d 70%);
+  display:flex;align-items:center;justify-content:center;
+  font-size:96px;font-weight:900;
+  border:1px solid var(--line);
+  box-shadow:inset 0 0 60px rgba(139,92,246,.2),0 20px 60px rgba(0,0,0,.5);
+}
+.avatar span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.about-text p{color:var(--muted);margin-bottom:16px;font-size:15.5px}
+.about-text p strong{color:var(--txt);font-weight:500}
+.info-chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.chip{
+  border:1px solid var(--line);border-radius:99px;padding:7px 16px;font-size:13px;color:var(--muted);
+  background:rgba(255,255,255,.03);transition:.3s;
+}
+.chip:hover{border-color:var(--violet);color:#fff;transform:translateY(-2px)}
+.chip b{color:var(--cyan);font-weight:500;margin-right:4px}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:64px}
+.stat{
+  border:1px solid var(--line);border-radius:var(--radius);padding:28px 22px;text-align:center;
+  background:var(--card);backdrop-filter:blur(8px);transition:.4s;position:relative;overflow:hidden;
+}
+.stat::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),rgba(139,92,246,.14),transparent 45%);
+  opacity:0;transition:opacity .4s;
+}
+.stat:hover::before{opacity:1}
+.stat:hover{transform:translateY(-6px);border-color:rgba(139,92,246,.5)}
+.stat .num{
+  font-family:'Space Grotesk';font-size:42px;font-weight:700;
+  background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.stat .lbl{color:var(--muted);font-size:13px;margin-top:6px}
+
+.skills-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:22px}
+.skill-card{
+  border:1px solid var(--line);border-radius:var(--radius);padding:30px;
+  background:var(--card);backdrop-filter:blur(8px);transition:.4s;
+}
+.skill-card:hover{transform:translateY(-6px);border-color:rgba(34,211,238,.45);box-shadow:0 18px 50px rgba(0,0,0,.45)}
+.skill-card h3{font-size:18px;display:flex;align-items:center;gap:12px;margin-bottom:6px}
+.skill-card h3 .ico{
+  width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,rgba(34,211,238,.16),rgba(139,92,246,.16));
+  border:1px solid var(--line);font-size:20px;
+}
+.skill-card .desc{color:var(--muted);font-size:13.5px;margin-bottom:18px}
+.bar{margin-bottom:14px}
+.bar .bar-top{display:flex;justify-content:space-between;font-size:13px;margin-bottom:7px}
+.bar .bar-top b{font-weight:500}
+.bar .bar-top span{color:var(--muted);font-family:'Space Grotesk'}
+.bar .track{height:7px;border-radius:99px;background:rgba(255,255,255,.07);overflow:hidden}
+.bar .fill{
+  height:100%;width:0;border-radius:99px;background:var(--grad);
+  transition:width 1.4s cubic-bezier(.2,.7,.2,1);
+  box-shadow:0 0 12px rgba(139,92,246,.6);
+}
+
+.projects{display:flex;flex-direction:column;gap:26px}
+.proj{
+  border:1px solid var(--line);border-radius:22px;padding:40px;
+  background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.015));
+  backdrop-filter:blur(10px);
+  position:relative;overflow:hidden;
+  transform-style:preserve-3d;transition:border-color .4s,box-shadow .4s;
+}
+.proj::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(600px circle at var(--mx,50%) var(--my,50%),rgba(34,211,238,.10),transparent 45%);
+  opacity:0;transition:opacity .4s;pointer-events:none;
+}
+.proj:hover::before{opacity:1}
+.proj:hover{border-color:rgba(34,211,238,.4);box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.proj-top{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap}
+.proj h3{font-size:clamp(20px,3vw,28px);font-weight:700}
+.proj h3 small{
+  display:block;font-size:13px;font-weight:400;color:var(--cyan);
+  font-family:'Space Grotesk','Noto Sans SC';letter-spacing:1px;margin-top:4px;
+}
+.proj .date{
+  font-family:'Space Grotesk';font-size:13px;color:var(--muted);
+  border:1px solid var(--line);padding:6px 14px;border-radius:99px;white-space:nowrap;
+}
+.proj ul{margin:20px 0 24px;padding-left:0;list-style:none}
+.proj ul li{
+  color:var(--muted);font-size:14.5px;margin-bottom:12px;padding-left:24px;position:relative;
+}
+.proj ul li::before{content:'▹';position:absolute;left:0;color:var(--cyan)}
+.proj ul li strong{color:var(--txt);font-weight:500}
+.tags{display:flex;flex-wrap:wrap;gap:9px}
+.tag{
+  font-family:'Space Grotesk','Noto Sans SC';font-size:12px;letter-spacing:.5px;
+  border:1px solid rgba(34,211,238,.3);color:var(--cyan);
+  padding:5px 13px;border-radius:99px;background:rgba(34,211,238,.06);
+}
+
+.timeline{position:relative;padding-left:32px}
+.timeline::before{
+  content:'';position:absolute;left:7px;top:6px;bottom:6px;width:2px;
+  background:linear-gradient(#22d3ee,#8b5cf6,#ec4899);
+  box-shadow:0 0 14px rgba(139,92,246,.5);
+}
+.tl-item{position:relative;padding-bottom:46px}
+.tl-item:last-child{padding-bottom:0}
+.tl-item::before{
+  content:'';position:absolute;left:-32px;top:7px;width:16px;height:16px;border-radius:50%;
+  background:var(--bg);border:3px solid var(--cyan);box-shadow:0 0 14px rgba(34,211,238,.8);
+}
+.tl-item .when{font-family:'Space Grotesk';font-size:13px;color:var(--cyan);letter-spacing:1px}
+.tl-item h3{font-size:19px;margin:6px 0 4px}
+.tl-item .where{color:var(--violet);font-size:14px;margin-bottom:10px}
+.tl-item p{color:var(--muted);font-size:14.5px;max-width:760px}
+.tl-item .award{
+  display:inline-flex;align-items:center;gap:7px;margin-top:10px;
+  font-size:13px;color:#fbbf24;border:1px solid rgba(251,191,36,.3);
+  background:rgba(251,191,36,.07);padding:5px 14px;border-radius:99px;
+}
+
+.honor-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.honor{
+  border:1px solid var(--line);border-radius:var(--radius);padding:28px;
+  background:var(--card);backdrop-filter:blur(8px);transition:.4s;text-align:center;
+}
+.honor:hover{transform:translateY(-6px) scale(1.02);border-color:rgba(236,72,153,.45)}
+.honor .ico{font-size:34px;margin-bottom:14px}
+.honor h3{font-size:16px;margin-bottom:6px}
+.honor p{color:var(--muted);font-size:13px}
+
+.contact-box{
+  border:1px solid var(--line);border-radius:28px;padding:clamp(36px,6vw,72px);
+  text-align:center;position:relative;overflow:hidden;
+  background:linear-gradient(160deg,rgba(34,211,238,.07),rgba(139,92,246,.07) 50%,rgba(236,72,153,.07));
+}
+.contact-box::before{
+  content:'';position:absolute;inset:-2px;border-radius:30px;padding:1px;
+  background:linear-gradient(120deg,rgba(34,211,238,.5),rgba(139,92,246,.5),rgba(236,72,153,.5));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;
+  opacity:.5;pointer-events:none;
+}
+.contact-box h2{font-size:clamp(26px,5vw,40px);font-weight:900;margin-bottom:14px}
+.contact-box h2 em{font-style:normal;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.contact-box>p{color:var(--muted);max-width:560px;margin:0 auto 34px;font-size:15px}
+.contact-row{display:flex;justify-content:center;gap:16px;flex-wrap:wrap}
+.contact-card{
+  display:flex;align-items:center;gap:12px;text-decoration:none;
+  border:1px solid var(--line);border-radius:16px;padding:16px 26px;
+  background:rgba(5,7,15,.55);color:var(--txt);transition:.35s;cursor:pointer;
+}
+.contact-card:hover{transform:translateY(-4px);border-color:var(--cyan);box-shadow:0 12px 36px rgba(34,211,238,.18)}
+.contact-card .ci{font-size:22px}
+.contact-card .cd{text-align:left}
+.contact-card .cd small{display:block;color:var(--muted);font-size:11.5px;letter-spacing:1px}
+.contact-card .cd b{font-family:'Space Grotesk','Noto Sans SC';font-weight:500;font-size:15px}
+
+footer{
+  border-top:1px solid var(--line);margin-top:110px;padding:34px clamp(20px,5vw,64px);
+  display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;
+  color:var(--muted);font-size:13px;position:relative;z-index:2;background:rgba(5,7,15,.6);
+}
+footer a{color:var(--muted);text-decoration:none;transition:.3s}
+footer a:hover{color:var(--cyan)}
+
+#toast{
+  position:fixed;bottom:34px;left:50%;transform:translate(-50%,80px);
+  background:rgba(10,14,29,.95);border:1px solid rgba(34,211,238,.4);color:#fff;
+  padding:12px 26px;border-radius:99px;font-size:14px;z-index:1001;
+  transition:transform .45s cubic-bezier(.2,.7,.2,1);backdrop-filter:blur(10px);
+  box-shadow:0 12px 40px rgba(0,0,0,.5);
+}
+#toast.show{transform:translate(-50%,0)}
+
+@media (max-width:900px){
+  .about-grid{grid-template-columns:1fr}
+  .skills-grid{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .honor-grid{grid-template-columns:1fr 1fr}
+  .nav-links{
+    position:fixed;top:0;right:-280px;width:260px;height:100vh;
+    flex-direction:column;background:rgba(8,11,24,.97);backdrop-filter:blur(20px);
+    padding:90px 28px;gap:8px;transition:right .4s;border-left:1px solid var(--line);
+  }
+  .nav-links.open{right:0}
+  .nav-links a{display:block;font-size:16px;padding:12px 16px}
+  #menuBtn{display:block;z-index:10}
+}
+@media (max-width:560px){
+  .stats{grid-template-columns:1fr 1fr}
+  .honor-grid{grid-template-columns:1fr}
+  .proj{padding:26px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+<div id="cursorGlow"></div>
+<canvas id="heroCanvas"></canvas>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<nav id="nav">
+  <a class="logo" href="#top">FU<b>YANGTIAN</b><span style="color:var(--cyan)">.</span></a>
+  <button id="menuBtn" aria-label="菜单">☰</button>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#top" class="active">首页</a></li>
+    <li><a href="#about">关于</a></li>
+    <li><a href="#skills">技能</a></li>
+    <li><a href="#projects">项目</a></li>
+    <li><a href="#timeline">经历</a></li>
+    <li><a href="#honors">荣誉</a></li>
+    <li><a href="#contact">联系</a></li>
+  </ul>
+</nav>
+
+<main id="top">
+
+  <section class="hero">
+    <span class="badge"><span class="dot"></span>2026 届应届生 · 随时到岗 · 中共党员</span>
+    <h1>你好，我是<span class="grad">伏杨天</span></h1>
+    <div class="typer-line"><span id="typer"></span><span class="caret"></span></div>
+    <p class="sub">
+      软件工程本科 · 湖南信息学院。专注小程序全栈开发，独立完成从 0 到 1 的产品落地：
+      Uni-app + Spring Boot + Redis 全链路实践，兼具产品思维与电商业务理解。
+    </p>
+    <div class="hero-cta">
+      <a class="btn btn-primary" href="#projects">查看我的项目 →</a>
+      <a class="btn btn-ghost" href="#contact">联系我</a>
+    </div>
+    <div class="scroll-hint">
+      <div class="mouse"></div>SCROLL
+    </div>
+  </section>
+
+  <div class="marquee">
+    <div class="marquee-track">
+      <span>Vue.js <i>◆</i> Uni-app <i>◆</i> 微信小程序 <i>◆</i> Spring Boot <i>◆</i> Java <i>◆</i> Redis <i>◆</i> MySQL <i>◆</i> COS 安全方案 <i>◆</i> Linux / SSH <i>◆</i> Git <i>◆</i> AIGC 辅助开发 <i>◆</i></span>
+      <span>Vue.js <i>◆</i> Uni-app <i>◆</i> 微信小程序 <i>◆</i> Spring Boot <i>◆</i> Java <i>◆</i> Redis <i>◆</i> MySQL <i>◆</i> COS 安全方案 <i>◆</i> Linux / SSH <i>◆</i> Git <i>◆</i> AIGC 辅助开发 <i>◆</i></span>
+    </div>
+  </div>
+
+  <section id="about">
+    <div class="sec-head reveal">
+      <div class="kicker">About Me</div>
+      <h2>关于<em>我</em></h2>
+    </div>
+    <div class="about-grid">
+      <div class="reveal">
+        <div class="avatar-wrap">
+          <div class="avatar-ring"></div>
+          <div class="avatar"><span>伏</span></div>
+        </div>
+      </div>
+      <div class="about-text reveal" style="transition-delay:.12s">
+        <p>
+          <strong>既写代码，也懂业务。</strong>软件工程专业背景让我能独立完成小程序的全栈开发；
+          一段 1688 平台的销售实习经历，让我比纯技术出身的同学更理解电商业务的流转逻辑 ——
+          入职首月即获得「新人首月首单突破奖」（获奖率仅 6%）。
+        </p>
+        <p>
+          我习惯以<strong>产品经理的视角</strong>审视功能与实现逻辑，换位思考用户体验；
+          同时熟练运用 Cursor、ChatGPT 等 AI 工具辅助代码重构与调试，开发效率显著领先。
+        </p>
+        <p>
+          作为中共党员，责任心与抗压能力是我的底色；业余坚持志愿服务，两次获评县级「优秀志愿者」。
+        </p>
+        <div class="info-chips">
+          <span class="chip"><b>出生</b>2003.03</span>
+          <span class="chip"><b>院校</b>湖南信息学院</span>
+          <span class="chip"><b>专业</b>软件工程（本科）</span>
+          <span class="chip"><b>政治面貌</b>中共党员</span>
+          <span class="chip"><b>期望</b>全栈 / 后端 / 小程序开发</span>
+          <span class="chip"><b>到岗</b>随时</span>
+        </div>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat reveal"><div class="num"><span class="count" data-to="50">0</span>%+</div><div class="lbl">首屏加载耗时缩短</div></div>
+      <div class="stat reveal" style="transition-delay:.08s"><div class="num"><span class="count" data-to="40">0</span>+</div><div class="lbl">业务场景快速交付</div></div>
+      <div class="stat reveal" style="transition-delay:.16s"><div class="num"><span class="count" data-to="30">0</span>%</div><div class="lbl">长列表内存占用降低</div></div>
+      <div class="stat reveal" style="transition-delay:.24s"><div class="num"><span class="count" data-to="6">0</span>%</div><div class="lbl">销售新人奖获奖率</div></div>
+    </div>
+  </section>
+
+  <section id="skills">
+    <div class="sec-head reveal">
+      <div class="kicker">Skills</div>
+      <h2>专业<em>技能</em></h2>
+    </div>
+    <div class="skills-grid">
+      <div class="skill-card reveal">
+        <h3><span class="ico">🖥️</span>前端开发</h3>
+        <p class="desc">移动端与小程序生态深度实践</p>
+        <div class="bar"><div class="bar-top"><b>Vue.js / Uni-app</b><span>90%</span></div><div class="track"><div class="fill" data-w="90"></div></div></div>
+        <div class="bar"><div class="bar-top"><b>微信小程序原生开发</b><span>88%</span></div><div class="track"><div class="fill" data-w="88"></div></div></div>
+        <div class="bar"><div class="bar-top"><b>HTML5 / CSS3 / JavaScript</b><span>85%</span></div><div class="track"><div class="fill" data-w="85"></div></div></div>
+      </div>
+      <div class="skill-card reveal" style="transition-delay:.1s">
+        <h3><span class="ico">⚙️</span>后端与数据库</h3>
+        <p class="desc">高并发治理与安全架构落地经验</p>
+        <div class="bar"><div class="bar-top"><b>Java / Spring Boot</b><span>85%</span></div><div class="track"><div class="fill" data-w="85"></div></div></div>
+        <div class="bar"><div class="bar-top"><b>Redis / MySQL / SQL</b><span>82%</span></div><div class="track"><div class="fill" data-w="82"></div></div></div>
+        <div class="bar"><div class="bar-top"><b>COS 安全方案 / Linux / SSH 部署</b><span>80%</span></div><div class="track"><div class="fill" data-w="80"></div></div></div>
+      </div>
+      <div class="skill-card reveal" style="transition-delay:.05s">
+        <h3><span class="ico">🚀</span>工具与效率</h3>
+        <p class="desc">AI 驱动的现代化开发工作流</p>
+        <div class="bar"><div class="bar-top"><b>Cursor / ChatGPT / Antigravity</b><span>92%</span></div><div class="track"><div class="fill" data-w="92"></div></div></div>
+        <div class="bar"><div class="bar-top"><b>Git 版本管理 / Postman</b><span>88%</span></div><div class="track"><div class="fill" data-w="88"></div></div></div>
+      </div>
+      <div class="skill-card reveal" style="transition-delay:.15s">
+        <h3><span class="ico">📊</span>办公与文档</h3>
+        <p class="desc">技术文档与数据汇报高效产出</p>
+        <div class="bar"><div class="bar-top"><b>Ps / Word / Excel / PPT</b><span>85%</span></div><div class="track"><div class="fill" data-w="85"></div></div></div>
+        <div class="bar"><div class="bar-top"><b>技术文档 / 公文撰写</b><span>83%</span></div><div class="track"><div class="fill" data-w="83"></div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="projects">
+    <div class="sec-head reveal">
+      <div class="kicker">Projects</div>
+      <h2>项目<em>经历</em></h2>
+    </div>
+    <div class="projects">
+      <article class="proj reveal tilt">
+        <div class="proj-top">
+          <h3>腊肉 · 校园二手市场小程序<small>独立开发者 / 从 0 到 1 全栈落地</small></h3>
+          <span class="date">2026.01 — 2026.02</span>
+        </div>
+        <ul>
+          <li><strong>全栈开发：</strong>采用 Uni-app + Spring Boot 体系主导工程化落地。移动端深度实践「分包预下载 + 骨架屏缓存」，<strong>首屏加载耗时缩短 50% 以上</strong>；后端构建基于 AOP 的审计拦截与统一状态机管理底座，支撑 <strong>40+ 业务场景</strong>的快速交付与闭环运维。</li>
+          <li><strong>治理体系：</strong>管理端独立落地「内容安全巡检 → 阶梯式举报处理 → 全量级联清理」垂直治理体系，实现业务、治理、运维的闭环交付。</li>
+          <li><strong>核心攻坚：</strong>系统性解决高并发场景下的「库存治理」与匿名社群「全民仲裁状态机」逻辑闭环，辅以全链路物理脱敏，实现安全与性能双重突破。</li>
+          <li><strong>架构成果：</strong>Redis 缓存快照 + 骨架屏实现数据秒开；COS 私有桶临时签名 + VO 物理脱敏筑牢安全底座；SSH 原子部署流保障生产环境闭环运维。</li>
+        </ul>
+        <div class="tags">
+          <span class="tag">Uni-app</span><span class="tag">Spring Boot</span><span class="tag">Redis</span>
+          <span class="tag">AOP</span><span class="tag">状态机</span><span class="tag">COS 私有桶</span>
+          <span class="tag">SSH 原子部署</span><span class="tag">高并发</span>
+        </div>
+      </article>
+      <article class="proj reveal tilt">
+        <div class="proj-top">
+          <h3>美柿 · 电商小程序商城<small>前后端开发 / 商业级项目</small></h3>
+          <span class="date">2023.07 — 2023.09</span>
+        </div>
+        <ul>
+          <li><strong>核心页面：</strong>独立开发首页、购物车、消息、我的等 <strong>5 个核心 Tab 页面</strong>及商品详情等次级页面。</li>
+          <li><strong>商业逻辑：</strong>参与商业级电商小程序开发，负责商品列表瀑布流展示与购物车逻辑实现。</li>
+          <li><strong>接口对接：</strong>使用 Vue.js + Element UI 配合后端 Spring Boot 接口，解决多规格商品数据的复杂渲染问题。</li>
+          <li><strong>性能优化：</strong>通过瀑布流组件懒加载优化首屏速度，<strong>长列表渲染内存占用降低 30%</strong>。</li>
+        </ul>
+        <div class="tags">
+          <span class="tag">微信小程序</span><span class="tag">Vue.js</span><span class="tag">Element UI</span>
+          <span class="tag">Spring Boot</span><span class="tag">瀑布流</span><span class="tag">懒加载</span>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section id="timeline">
+    <div class="sec-head reveal">
+      <div class="kicker">Experience</div>
+      <h2>成长<em>轨迹</em></h2>
+    </div>
+    <div class="timeline">
+      <div class="tl-item reveal">
+        <div class="when">2026.01 — 2026.02</div>
+        <h3>「腊肉」校园二手市场小程序</h3>
+        <div class="where">独立开发者</div>
+        <p>从 0 到 1 独立完成全栈开发、安全治理与生产部署，实现业务-治理-运维闭环交付。</p>
+      </div>
+      <div class="tl-item reveal">
+        <div class="when">2024.06 — 2024.08</div>
+        <h3>长沙电洋有限公司</h3>
+        <div class="where">销售实习 · 阿里巴巴 1688 平台</div>
+        <p>负责客户对接与销售推广，深入理解 B2B 交易全链路逻辑，为开发电商系统奠定业务基础。</p>
+        <span class="award">🏆 新人首月首单突破奖（获奖率仅 6%）</span>
+      </div>
+      <div class="tl-item reveal">
+        <div class="when">2023.09 — 2023.12</div>
+        <h3>创新创业项目 · 屏幕实时翻译</h3>
+        <div class="where">项目组长</div>
+        <p>针对漫画、游戏作品缺乏汉化的痛点，提出屏幕实时翻译解决方案，在分组投票中获评「优秀项目」。</p>
+        <span class="award">🏅 优秀项目</span>
+      </div>
+      <div class="tl-item reveal">
+        <div class="when">2023.07 — 2023.09</div>
+        <h3>杭州美柿科技有限公司</h3>
+        <div class="where">前后端开发实习</div>
+        <p>参与电商微信小程序的登录注册、瀑布流商品列表、购物车与个人中心开发，完成接口联调与首屏性能优化。</p>
+      </div>
+      <div class="tl-item reveal">
+        <div class="when">2022.09 — 2026.06</div>
+        <h3>湖南信息学院 · 软件工程（本科）</h3>
+        <div class="where">主修：Java、数据结构、计算机组成原理、数据库原理、移动应用开发</div>
+        <p>成绩优异，深入理解面向对象编程思想，积极参与编程实战。</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="honors">
+    <div class="sec-head reveal">
+      <div class="kicker">Honors & Certificates</div>
+      <h2>荣誉与<em>证书</em></h2>
+    </div>
+    <div class="honor-grid">
+      <div class="honor reveal"><div class="ico">🤖</div><h3>AIGC 辅助开发专项认证</h3><p>AI 驱动开发能力专项认证</p></div>
+      <div class="honor reveal" style="transition-delay:.07s"><div class="ico">🎖️</div><h3>优秀志愿者 × 2</h3><p>2022 湘阴县民政局 · 2024 湘阴县宣传部</p></div>
+      <div class="honor reveal" style="transition-delay:.14s"><div class="ico">🏆</div><h3>新人首月首单突破奖</h3><p>长沙电洋 · 获奖率仅 6%</p></div>
+      <div class="honor reveal"><div class="ico">🗣️</div><h3>普通话二级甲等</h3><p>清晰流畅的沟通表达</p></div>
+      <div class="honor reveal" style="transition-delay:.07s"><div class="ico">🚗</div><h3>C1 驾照</h3><p>可适应出行需要</p></div>
+      <div class="honor reveal" style="transition-delay:.14s"><div class="ico">⛷️</div><h3>运动爱好</h3><p>游泳 · 羽毛球 · 滑雪</p></div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="contact-box reveal">
+      <h2>期待与你<em>共事</em></h2>
+      <p>求职意向：小程序全栈开发工程师 / 全栈开发工程师 / 后端开发工程师 · 期望薪资 5K–10K · 随时到岗</p>
+      <div class="contact-row">
+        <a class="contact-card" id="copyPhone">
+          <span class="ci">💬</span>
+          <span class="cd"><small>WECHAT · 点击复制</small><b>FYTBob</b></span>
+        </a>
+        <a class="contact-card" id="copyMail">
+          <span class="ci">✉️</span>
+          <span class="cd"><small>EMAIL · 点击复制</small><b>FYTResume@fuyangtianbob.de5.net</b></span>
+        </a>
+        <a class="contact-card" href="https://personal-resume-d41.pages.dev/" target="_blank" rel="noopener">
+          <span class="ci">🔗</span>
+          <span class="cd"><small>RESUME PAGE</small><b>在线简历主页</b></span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div>© 2026 伏杨天 · Crafted with passion</div>
+  <div>
+    <a href="https://personal-resume-d41.pages.dev/" target="_blank" rel="noopener">个人主页</a>
+  </div>
+</footer>
+
+<div id="toast">已复制到剪贴板 ✓</div>
+
+<script>
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const canvas = document.getElementById('heroCanvas');
+const ctx = canvas.getContext('2d');
+let W, H, particles = [], mouse = {x:-9999, y:-9999};
+function resize(){ W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
+resize();
+addEventListener('resize', resize);
+const COUNT = Math.min(110, Math.floor(innerWidth / 14));
+for(let i = 0; i < COUNT; i++){
+  particles.push({
+    x: Math.random()*innerWidth, y: Math.random()*innerHeight,
+    vx: (Math.random()-.5)*.45, vy: (Math.random()-.5)*.45,
+    r: Math.random()*1.8 + .6
+  });
+}
+function drawParticles(){
+  ctx.clearRect(0,0,W,H);
+  for(const p of particles){
+    p.x += p.vx; p.y += p.vy;
+    if(p.x < 0 || p.x > W) p.vx *= -1;
+    if(p.y < 0 || p.y > H) p.vy *= -1;
+    const dm = Math.hypot(p.x - mouse.x, p.y - mouse.y);
+    if(dm < 140 && dm > 0.001){ p.x += (p.x - mouse.x)/dm * .6; p.y += (p.y - mouse.y)/dm * .6; }
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(148,163,224,.55)';
+    ctx.fill();
+  }
+  for(let i = 0; i < particles.length; i++){
+    for(let j = i+1; j < particles.length; j++){
+      const a = particles[i], b = particles[j];
+      const d = Math.hypot(a.x-b.x, a.y-b.y);
+      if(d < 130){
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+        ctx.strokeStyle = `rgba(120,140,220,${(1 - d/130) * .22})`;
+        ctx.lineWidth = .7;
+        ctx.stroke();
+      }
+    }
+  }
+  requestAnimationFrame(drawParticles);
+}
+if(!reduced) drawParticles();
+
+const glow = document.getElementById('cursorGlow');
+addEventListener('mousemove', e => {
+  mouse.x = e.clientX; mouse.y = e.clientY;
+  glow.style.left = e.clientX + 'px';
+  glow.style.top = e.clientY + 'px';
+});
+
+const roles = ['小程序全栈开发工程师', '全栈开发工程师', '后端开发工程师', '独立开发者 · 从 0 到 1'];
+const typer = document.getElementById('typer');
+let ri = 0, ci = 0, deleting = false;
+function type(){
+  const word = roles[ri];
+  typer.textContent = word.slice(0, ci);
+  if(!deleting){
+    if(ci < word.length){ ci++; setTimeout(type, 90); }
+    else { deleting = true; setTimeout(type, 2000); }
+  } else {
+    if(ci > 0){ ci--; setTimeout(type, 38); }
+    else { deleting = false; ri = (ri+1) % roles.length; setTimeout(type, 400); }
+  }
+}
+type();
+
+const nav = document.getElementById('nav');
+const progress = document.getElementById('progress');
+addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', scrollY > 40);
+  const max = document.documentElement.scrollHeight - innerHeight;
+  progress.style.width = (scrollY / max * 100) + '%';
+}, {passive:true});
+
+const menuBtn = document.getElementById('menuBtn');
+const navLinks = document.getElementById('navLinks');
+menuBtn.addEventListener('click', () => navLinks.classList.toggle('open'));
+navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', () => navLinks.classList.remove('open')));
+
+const io = new IntersectionObserver(entries => {
+  entries.forEach(en => {
+    if(en.isIntersecting){
+      en.target.classList.add('in');
+      en.target.querySelectorAll('.fill').forEach(f => f.style.width = f.dataset.w + '%');
+      en.target.querySelectorAll('.count').forEach(c => {
+        if(c.dataset.done) return;
+        c.dataset.done = 1;
+        const to = +c.dataset.to, t0 = performance.now(), dur = 1400;
+        (function tick(t){
+          const k = Math.min(1, (t - t0)/dur);
+          c.textContent = Math.round(to * (1 - Math.pow(1-k, 3)));
+          if(k < 1) requestAnimationFrame(tick);
+        })(t0);
+      });
+      io.unobserve(en.target);
+    }
+  });
+}, {threshold: .18});
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+const secs = document.querySelectorAll('section[id], main[id]');
+const linkMap = {};
+navLinks.querySelectorAll('a').forEach(a => linkMap[a.getAttribute('href').slice(1)] = a);
+const spy = new IntersectionObserver(entries => {
+  entries.forEach(en => {
+    if(en.isIntersecting && linkMap[en.target.id]){
+      navLinks.querySelectorAll('a').forEach(a => a.classList.remove('active'));
+      linkMap[en.target.id].classList.add('active');
+    }
+  });
+}, {rootMargin: '-45% 0px -45% 0px'});
+secs.forEach(s => spy.observe(s));
+
+document.querySelectorAll('.tilt, .stat, .proj').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const r = card.getBoundingClientRect();
+    card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+    card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    if(card.classList.contains('tilt') && !reduced){
+      const rx = ((e.clientY - r.top)/r.height - .5) * -4;
+      const ry = ((e.clientX - r.left)/r.width - .5) * 4;
+      card.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-4px)`;
+    }
+  });
+  card.addEventListener('mouseleave', () => { if(card.classList.contains('tilt')) card.style.transform = ''; });
+});
+
+const toast = document.getElementById('toast');
+function copy(text){
+  navigator.clipboard.writeText(text).then(() => {
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 1800);
+  });
+}
+document.getElementById('copyPhone').addEventListener('click', () => copy('FYTBob'));
+document.getElementById('copyMail').addEventListener('click', () => copy('FYTResume@fuyangtianbob.de5.net'));
+</script>
+    <!-- 悬浮返回科技主版传送门 -->
+    <div id="metaverse-back-btn" class="metaverse-back-btn">
+        <a href="index.html" class="back-link">
+            <i class="ri-planet-line"></i>
+            <span>返回科幻平行世界</span>
+        </a>
+    </div>
+    <style>
+    .metaverse-back-btn {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 99999;
+    }
+    .metaverse-back-btn .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 18px;
+        background: rgba(15, 23, 42, 0.65);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 30px;
+        color: #ffffff;
+        text-decoration: none;
+        font-family: system-ui, -apple-system, sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 1px;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    .metaverse-back-btn .back-link i {
+        font-size: 16px;
+        color: #00fff9;
+        text-shadow: 0 0 8px rgba(0, 255, 249, 0.5);
+        transition: transform 0.6s ease;
+    }
+    .metaverse-back-btn .back-link:hover {
+        background: rgba(15, 23, 42, 0.85);
+        border-color: #00fff9;
+        box-shadow: 0 0 20px rgba(0, 255, 249, 0.4);
+        transform: translateY(-2px);
+    }
+    .metaverse-back-btn .back-link:hover i {
+        transform: rotate(360deg);
+    }
+    @media (max-width: 768px) {
+        .metaverse-back-btn {
+            top: 15px;
+            right: 15px;
+        }
+        .metaverse-back-btn .back-link span {
+            display: none;
+        }
+        .metaverse-back-btn .back-link {
+            padding: 10px;
+            border-radius: 50%;
+        }
+    }
+    </style>
+    <!-- 智能引入 Remixicon 图标库 -->
+    <script>
+        if (!document.querySelector('link[href*="remixicon"]')) {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css';
+            document.head.appendChild(link);
+        }
+    </script>
+</body>
+</html>
