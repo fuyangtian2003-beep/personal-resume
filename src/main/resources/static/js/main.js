@@ -2439,6 +2439,19 @@ function initStarshipGame() {
         });
     });
 
+    // 手机端简历多重宇宙二级子菜单折叠逻辑
+    const submenuTrigger = document.getElementById('submenu-trigger');
+    const submenuWrapper = document.getElementById('submenu-wrapper');
+    if (submenuTrigger && submenuWrapper) {
+        submenuTrigger.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768) {
+                e.stopPropagation(); // 阻止冒泡，防止意外关闭整个下拉菜单
+                submenuWrapper.classList.toggle('open');
+                submenuTrigger.classList.toggle('active');
+            }
+        });
+    }
+
     // 打开成就 Modal
     if (viewAchievementsBtn && achievementModal) {
         viewAchievementsBtn.addEventListener('click', (e) => {

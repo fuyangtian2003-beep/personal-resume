@@ -2634,3 +2634,41 @@ body .galaxy-container .showcase-header .subtitle {
     }
 }
 
+/* ============================================
+   简历多重宇宙二级菜单手机端折叠样式
+   ============================================ */
+/* PC端默认全部展开，隐藏折叠箭头 */
+.submenu-arrow {
+    display: none;
+}
+
+.submenu-wrapper {
+    display: block;
+    height: auto;
+    overflow: visible;
+}
+
+/* 手机端（视口宽度 <= 768px）响应式折叠逻辑 */
+@media (max-width: 768px) {
+    .submenu-arrow {
+        display: inline-block;
+    }
+    
+    .submenu-wrapper {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        padding-left: 0.5rem; /* 子菜单内缩以区分层级 */
+    }
+    
+    /* 展开激活状态 */
+    .submenu-wrapper.open {
+        max-height: 400px; /* 给予足够容纳6个风格的高度阈值 */
+    }
+    
+    .submenu-trigger.active .submenu-arrow {
+        transform: rotate(180deg);
+        color: var(--primary);
+    }
+}
+
