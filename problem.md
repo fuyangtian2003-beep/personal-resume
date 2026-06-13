@@ -121,4 +121,15 @@
 - **解决办法**：**看门狗行内化解耦**：将超时监控、防溢出高度隐藏（隐藏 `.loader-spinner` 和 `.loader-progress-bar-container` 等以确保移动端垂直不截断）、自动复制当前 URL 及事件委托绑定手动复制按钮等事件，彻底封装到 HTML `<body>` 顶部的行内 `<script>` 中。行内脚本一进入就立即启动 10s 计时与全局 fallback 函数，外部大 JS 就绪时只需修改 `window.isChip3DReady = true` 并调用 `window.clearWatchdog()` 即可。
 - **教训**：在设计极重度资源的加载降级机制时，容错看门狗与降级 UI 的绑定必须写在最顶级的“行内脚本”中以获得最高优先级运行，决不能依赖任何需要网络下载的外部大文件或常规 DOMContentLoaded 事件。
 
+### 17. 动态详情弹窗大图未就绪导致的旧图残留闪烁与异步竞争 (2026-06-14)
+- **问题描述**：在“精选作品”卡片点击“查看详情”弹窗时，图片加载慢导致先显示文字，且在多项目切换时，新图完全下载就绪前弹窗中会突兀地残留并渲染“上一个项目的历史旧图”，等新图加载完才突然闪烁切换，体验极其突兀。
+- **原因分析**：
+  1. 浏览器执行 `detailImg.src = project.detailImg` 时，图片下载属于异步请求。在新图流未完全解码前，`detailImg` DOM 元素保留了旧图的 src 渲染状态，导致旧图残留。
+  2. 1MB+ 的大 PNG 在非 prefetch 覆盖的其他网络环境下仍需要时间载入，由于没有 Loading 占位，导致排版发生“文字已就绪、图片白屏慢半拍”的割裂感。
+- **解决办法**：
+  1. **图片状态原子重置**：在赋值新 src 前，立刻将 `detailImg.src` 改为 1px 的极简透明 Base64 GIF 占位 (`data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7`)，彻底擦除上一张图片的痕迹。
+  2. **三点发光骨架预载与淡入**：在 `project-detail-img-wrapper` 中置入绝对定位的科幻青色发光呼吸圆点加载器，并为 `detailImg` 默认挂载 `.loading` 类（设置 `opacity: 0`）。通过 `detailImg.onload` 事件触发时再移除 `.loading` 并将加载器设为 `.hidden`，利用 CSS `transition: opacity 0.3s ease` 达成高清原图的无缝平滑淡入。
+- **教训**：在设计带有动态图片内容更替的模态窗交互时，必须遵守“先清空旧图、加装骨架占位、监听 onload 渐现”的黄金法则，彻底绝杀旧缓存残留与异步加载的闪烁缺陷。
+
+
 

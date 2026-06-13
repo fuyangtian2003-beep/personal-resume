@@ -204,3 +204,12 @@
   - **高度防溢出防截断**：一旦触发超时或 ERROR，行内脚本立即将进度条容器 `.loader-progress-bar-container`、旋转动画 `.loader-spinner` 以及副文本 `.loader-subtext` 设置为 `display: none`。彻底清空多余高度，为橙红色警告提示面板腾出垂直高度，确保在所有小屏手机视口内 100% 完整展示，绝不发生物理截断。
   - **极简化解耦联动**：外部 JS 加载并渲染就绪时，只需将 `window.isChip3DReady` 置为 `true` 并调用 `window.clearWatchdog()` 即可。而在依赖抛错或 model parse 异常时，可直接呼叫 `window.triggerLoaderFallback("ERROR")`，实现双路无缝闭环。
 
+## 24. 模态窗图片原子占位重置与科幻呼吸点加载过渡 (2026-06-14)
+- **状态**：✅ 已实装 (2026-06-14)
+- **描述**：解决在频繁切换查看不同项目详情时，新图正在下载的过程中弹窗内突兀残留并显示“上一个项目的历史图片”的闪烁缺陷，以及新图加载慢导致版面空缺的问题。
+- **技术点**：
+  - **1px 透明 GIF 强力擦除**：点击时立即给 `detailImg.src` 赋予 `data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7`，零延迟清除上个项目的旧缓存，保证旧图片物理隐身。
+  - **科幻青色呼吸点 Loading (GPU 加速)**：在图片区域绝对定位三个极客青色（Cyan）发光的微缩呼吸圆点 loading。利用 CSS `@keyframes` 触发三点依次缩放脉冲，以最轻的 DOM 架构提供满血科技感。
+  - **Onload 监听平滑淡入**：大图绑定 `onload` 事件，触发后移除 `loading` 类并隐藏 loader。结合 `transition: opacity 0.3s ease`，实现大图的高保真平滑淡入，彻底消灭渲染白屏和残留。
+
+

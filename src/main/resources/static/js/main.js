@@ -920,7 +920,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 const project = RESUME_DATA.projects[index];
 
                 if (project) {
-                    // 填充模态框内容
+                    // 1. 瞬间重置大图状态并显现 Loading，彻底斩断上一个项目的图片残留 Bug
+                    const loader = document.getElementById('project-detail-loader');
+                    if (loader) loader.classList.remove('hidden');
+                    
+                    detailImg.classList.add('loading');
+                    // 使用 1px 极简透明 GIF 占位，确保旧图立刻在视口中消失
+                    detailImg.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+                    
+                    // 2. 绑定高优先级 onload/onerror 事件以控制平滑淡入
+                    detailImg.onload = () => {
+                        detailImg.classList.remove('loading');
+                        if (loader) loader.classList.add('hidden');
+                    };
+                    detailImg.onerror = () => {
+                        detailImg.classList.remove('loading');
+                        if (loader) loader.classList.add('hidden');
+                    };
+
+                    // 3. 填充模态框内容并开始载入真图
                     detailImg.src = project.detailImg;
                     detailImg.alt = project.detailTitle;
                     detailTitle.textContent = project.detailTitle;
