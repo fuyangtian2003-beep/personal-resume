@@ -2921,9 +2921,30 @@ body .galaxy-container .showcase-header .subtitle {
         border-top-left-radius: 20px;
         border-top-right-radius: 20px;
         border-bottom-left-radius: 0;
-        height: 400px; /* 调高锁定高度至 400px，让竖屏小程序大图展示更完整 */
+        height: auto; /* 放弃固定高度，改为高度自适应 */
+        min-height: 380px; /* 大图未就绪时的保底占位高度，确保 Loader 完美居中不塌陷 */
         display: flex; /* 确保 display */
+        align-items: center;
+        justify-content: center;
         flex: none; /* 彻底阻止 flex 压缩导致的图片高度塌陷 */
+    }
+
+    .project-detail-img-wrapper {
+        width: 100%;
+        height: auto; /* 覆盖桌面端的 100% 高度，由图片自适应撑开 */
+        flex-grow: 0; /* 移除 flex 自动拉伸 */
+        display: block; /* 采用块级流式排版，避免 flex 居中拉伸 */
+    }
+
+    .project-detail-img-wrapper img {
+        width: 100%;
+        height: auto !important; /* 强制高度自适应，按物理长宽比展现 */
+        object-fit: fill; /* 完全显示整张图片不裁剪 */
+    }
+
+    .project-detail-img-wrapper img.loading {
+        opacity: 0 !important;
+        height: 0 !important; /* 加载时高度归零，防止 base64 占位图撑起高度，此时由 min-height 锁定 Loader 区域 */
     }
 
     .project-detail-right {

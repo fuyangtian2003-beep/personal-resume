@@ -140,6 +140,6 @@
   1. 移动端竖屏将 `.project-detail-body` 设为 `flex-direction: column`。
   2. 左侧图片容器 `.project-detail-left` 从桌面端继承了 `flex: 1.2` 弹性声明（等价于 `flex: 1.2 1 0%`，即允许 `flex-shrink` 压缩，且 `flex-basis` 默认为 `0%`）。
   3. 首张图加载前，JS 用 1x1 的 Base64 GIF 占位，容器内部缺乏物理尺寸支撑。由于没有锁定压缩，Flex 引擎在分配空间时判定该元素可压缩且基础高度为 0，便将其高度直接压瘪为 0px。当有真实大图加载完后，浏览器记录了图片的物理高宽，便不再将其压扁。
-- **解决办法**：在 `@media (max-width: 768px)` 媒体查询下为 `.project-detail-left` 添加 `flex: none;`（即 `flex-grow: 0; flex-shrink: 0; flex-basis: auto;`）。彻底脱离 Flex 弹性压缩机制，强行锁死 `height: 400px` 刚性绝对高度，从而保证首次大图加载时 loading 动画依然完美居中。
-- **教训**：在 Flex 容器中，如果子元素拥有明确定义的物理宽高（如 `height: 400px`），但容器可能触发 `flex-direction` 变更或在特定状态下内部无流式内容支撑，务必显式声明 `flex-shrink: 0` 或 `flex: none` 强行锁定尺寸，防止被 Flex 布局引擎无情压缩为 0px。
+- **解决办法**：在 `@media (max-width: 768px)` 媒体查询下，将 `.project-detail-left` 的 `height` 设置为 `auto`，并设置最小保底高度 `min-height: 380px`，同时声明 `flex: none;`。此外，将 `img` 设为 `height: auto !important` 以按宽高比自适应伸缩，且在 `img.loading` 状态下强设 `height: 0 !important`。这能在大图加载前通过 `min-height` 稳固占位，加载完后由图片真实高宽比自然撑开，实现无边界自适应呈现。
+- **教训**：在 Flex 容器中，如果子元素需要实现高度自适应，但由于异步加载在初始时缺乏流式内容支撑，应结合 `min-height`（保底占位）+ `height: auto`（自适应撑开）+ `flex: none`（禁止压缩）三轨联控机制，并对 loading 状态下的图片高度归零，方能完美实现无塌陷的弹性自适应布局。
 
