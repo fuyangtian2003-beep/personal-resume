@@ -933,22 +933,38 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     detailImg.classList.add('loading');
                     
-                    // 2. 瞬间解绑并赋予 Base64 占位。在此期间 Base64 触发的同步/极速 onload 会被忽略，防止抢跑隐藏 loader
+                    // 2. 瞬间解绑并赋予 Base64 占位。在此期间 Base64 触发的极速 onload 会被忽略，防止抢跑隐藏 loader
                     detailImg.onload = null;
                     detailImg.onerror = null;
                     detailImg.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
                     
-                    // 3. 此时再绑定针对真图请求的高优先级 onload/onerror 事件以控制平滑淡入
+                    // 3. 引入弹窗 350ms 动效缓冲锁，避免缓存秒开导致 Loading 瞬间被关且画面慢半拍淡出
+                    let isAnimationDone = false;
+                    let isImageLoaded = false;
+                    
+                    const revealImage = () => {
+                        if (isAnimationDone && isImageLoaded) {
+                            detailImg.classList.remove('loading');
+                            if (loader) loader.classList.add('hidden');
+                        }
+                    };
+                    
+                    setTimeout(() => {
+                        isAnimationDone = true;
+                        revealImage();
+                    }, 350); // 配合 CSS 0.4s 的弹窗 show 动画黄金比例
+
+                    // 4. 绑定针对真图加载的高优先级监听器
                     detailImg.onload = () => {
-                        detailImg.classList.remove('loading');
-                        if (loader) loader.classList.add('hidden');
+                        isImageLoaded = true;
+                        revealImage();
                     };
                     detailImg.onerror = () => {
                         detailImg.classList.remove('loading');
                         if (loader) loader.classList.add('hidden');
                     };
 
-                    // 4. 填充模态框内容并正式发起真实大图异步载入
+                    // 5. 填充模态框内容并正式发起真实大图异步载入
                     detailImg.src = project.detailImg;
                     detailImg.alt = project.detailTitle;
                     detailTitle.textContent = project.detailTitle;
