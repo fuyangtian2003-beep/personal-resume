@@ -43,6 +43,8 @@
     <!-- 智能静默预加载游戏音频 BGM 与核心特效音轨，保障音画零延迟同步 -->
     <link rel="prefetch" href="assets/bgm.mp3" as="audio">
     <link rel="prefetch" href="assets/audio/v1.mp3" as="audio">
+    <!-- 智能静默预加载芯片实验室的演示视频，防止滑动至视频区域时出现短暂黑屏 -->
+    <link rel="prefetch" href="assets/video/guanwangyans.mp4" as="video">
 
     <!-- 预留 Favicon -->
     <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
@@ -61,7 +63,7 @@
     <!-- 左右导航箭头 -->
     <div id="slide-arrow-right" class="slide-btn">
         <div class="btn-inner">
-            <span class="hint">炫技空间</span>
+            <span class="hint">我的空间</span>
             <i class="ri-arrow-right-s-line"></i>
         </div>
     </div>
@@ -365,6 +367,32 @@
             </div>
             <div class="modal-footer">
                 <p class="status-hint">已解锁 <span id="unlocked-count">0</span> / <span id="total-count">0</span></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 项目详情弹窗 Modal -->
+    <div id="project-detail-modal" class="modal-overlay">
+        <div class="modal-content project-detail-content glass">
+            <button class="modal-close" id="close-project-modal">&times;</button>
+            <div class="project-detail-body">
+                <div class="project-detail-left">
+                    <div class="project-detail-img-wrapper">
+                        <img src="" id="project-detail-img" alt="项目效果图">
+                    </div>
+                </div>
+                <div class="project-detail-right">
+                    <h2 id="project-detail-title" class="text-gradient">项目名称</h2>
+                    <div class="project-detail-desc" id="project-detail-desc">
+                        项目详细描述
+                    </div>
+                    <div class="project-detail-highlights-wrapper">
+                        <h4><i class="ri-flashlight-line" style="color: var(--primary);"></i> 核心技术突破 // HIGHLIGHTS</h4>
+                        <ul class="project-detail-highlights" id="project-detail-highlights">
+                            <!-- 由 JS 渲染 -->
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

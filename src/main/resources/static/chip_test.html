@@ -40,6 +40,22 @@
                 <div id="loader-progress-bar" class="loader-progress-bar"></div>
             </div>
             <p class="loader-subtext">正在静默构建芯片三维神经元映射，请稍候...</p>
+            <!-- 容错机制：加载超时与移动端防卡死提示面板 -->
+            <div id="loader-error-tip" class="loader-error-tip hidden" style="margin-top: 2rem; color: #ef4444; font-size: 0.85rem; max-width: 450px; margin-left: auto; margin-right: auto; text-align: left; background: rgba(239, 68, 68, 0.05); border: 1px dashed rgba(239, 68, 68, 0.3); padding: 1.2rem; border-radius: 8px; font-family: var(--font-body); opacity: 0; transition: opacity 0.5s ease;">
+                <div style="font-weight: 800; font-family: var(--font-heading); margin-bottom: 0.5rem; letter-spacing: 1.5px; display: flex; align-items: center; gap: 6px;">
+                    <i class="ri-alert-line"></i> SYSTEM LATENCY DETECTED // 链路响应异常
+                </div>
+                <p style="color: #94a3b8; font-size: 0.8rem; line-height: 1.6; margin-bottom: 1rem;">
+                    检测到三维量子网络装载异常或延迟。部分移动端/手机端浏览器对 WebGL 核心与大体积模型存在强烈的内存及缓存限制，可能导致加载中断。
+                </p>
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; border-top: 1px dashed rgba(255,255,255,0.05); padding-top: 0.8rem; font-size: 0.75rem;">
+                    <span id="copy-status-text" style="color: #10b981; font-weight: 600;"><i class="ri-checkbox-circle-line"></i> 页面链接已自动复制至剪贴板</span>
+                    <button id="btn-copy-link" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.4); color: #10b981; padding: 4px 10px; border-radius: 4px; cursor: pointer; transition: all 0.3s; font-size: 0.75rem; pointer-events: auto;">手动复制</button>
+                </div>
+                <p style="color: #64748b; font-size: 0.72rem; margin-top: 0.8rem; border-top: 1px dashed rgba(255,255,255,0.05); padding-top: 0.6rem; text-align: center;">
+                    📌 推荐使用电脑端现代浏览器（如 Chrome / Edge）打开，以解锁极致的一镜到底体验。
+                </p>
+            </div>
         </div>
     </div>
 
@@ -168,7 +184,7 @@
         </div>
         <div id="cyber-theater-slot" class="apple-theater-card">
             <div class="theater-border-effect">
-                <video id="cases-video" src="assets/video/guanwangyans.mp4" loop muted playsinline preload="none"></video>
+                <video id="cases-video" src="assets/video/guanwangyans.mp4" loop muted playsinline preload="auto"></video>
             </div>
         </div>
     </div>

@@ -961,7 +961,7 @@ h1 {
 }
 
 /* ============================================================
-   Showcase Page (炫技空间) - 实验室风格
+   Showcase Page (我的空间) - 实验室风格
    ============================================================ */
 
 .showcase-wrapper {
@@ -2671,4 +2671,211 @@ body .galaxy-container .showcase-header .subtitle {
         color: var(--primary);
     }
 }
+
+
+/* ============================================================
+   Project Detail Modal (项目详情弹窗样式)
+   ============================================================ */
+.project-detail-content {
+    position: fixed !important; /* 脱离文档流，强行锁死在视口正中央，免疫重排与拉扯 */
+    top: 50% !important;
+    left: 50% !important;
+    width: 900px !important;
+    max-width: 95% !important;
+    max-height: 85vh !important; /* 锁死最大高度不超过视口的 85% */
+    background: rgba(10, 12, 18, 0.95) !important;
+    border: 1px solid rgba(0, 240, 255, 0.3) !important;
+    box-shadow: 0 0 100px rgba(0, 240, 255, 0.25) !important;
+    border-radius: 20px;
+    padding: 0 !important;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    z-index: 20005 !important;
+    
+    /* 配合 translate(-50%, -50%) 进行平滑缩放动画，防冲突 */
+    transform: translate(-50%, -50%) scale(0.8) !important;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* 显示时强制以 translate(-50%, -50%) 为基准放大 */
+.modal-overlay.show .project-detail-content {
+    transform: translate(-50%, -50%) scale(1) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+.project-detail-body {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    max-height: 75vh;
+}
+
+.project-detail-left {
+    flex: 1.2;
+    background: rgba(0, 0, 0, 0.2);
+    border-right: 1px solid var(--glass-border);
+    display: flex;
+    align-items: stretch;
+    justify-content: stretch;
+    padding: 0 !important; /* 彻底去除内边距，让图片无缝撑满 */
+    transition: background 0.3s ease; /* 切换底色时的平滑淡入淡出 */
+    border-top-left-radius: 20px;
+    border-bottom-left-radius: 20px;
+    overflow: hidden; /* 保证子元素不会溢出圆角 */
+}
+
+.project-detail-img-wrapper {
+    width: 100%;
+    height: 100%; /* 占满容器高度 */
+    max-height: none !important; /* 去除最大高度限制 */
+    overflow: hidden;
+    border-radius: 0; /* 贴合边缘，不再需要内部圆角 */
+    box-shadow: none; /* 贴合边缘，不需要投影 */
+    border: none; /* 不需要内部边框 */
+}
+
+.project-detail-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* 撑满并裁剪，保证完美比例 */
+    object-position: top center; /* 优先展示小程序顶部，通常是最核心的部分 */
+    display: block;
+    transition: transform 0.5s ease;
+}
+
+.project-detail-img-wrapper img:hover {
+    transform: scale(1.02);
+}
+
+.project-detail-right {
+    flex: 1;
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    text-align: left;
+}
+
+.project-detail-right::-webkit-scrollbar {
+    width: 6px;
+}
+
+.project-detail-right::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.project-detail-right::-webkit-scrollbar-thumb {
+    background: rgba(0, 240, 255, 0.2);
+    border-radius: 10px;
+}
+
+.project-detail-right::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 240, 255, 0.4);
+}
+
+#project-detail-title {
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    letter-spacing: 1px;
+}
+
+.project-detail-desc {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+.project-detail-highlights-wrapper h4 {
+    font-size: 0.85rem;
+    color: var(--primary);
+    letter-spacing: 1.5px;
+    margin-bottom: 1rem;
+    font-weight: 800;
+}
+
+.project-detail-highlights {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.project-detail-highlights li {
+    font-size: 0.88rem;
+    line-height: 1.5;
+    color: var(--text-main);
+    position: relative;
+    padding-left: 20px;
+}
+
+.project-detail-highlights li::before {
+    content: '▶';
+    position: absolute;
+    left: 0;
+    top: 3px;
+    font-size: 0.7rem;
+    color: var(--primary);
+    text-shadow: 0 0 8px var(--primary-glow);
+}
+
+#close-project-modal {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    z-index: 10;
+    font-size: 2rem;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+#close-project-modal:hover {
+    color: #ff2d55;
+    transform: rotate(90deg);
+}
+
+/* 详情弹窗手机端响应式 */
+@media (max-width: 768px) {
+    .project-detail-content {
+        max-height: 90vh !important;
+        margin: 10px !important;
+        overflow-y: auto !important;
+    }
+    
+    .project-detail-body {
+        flex-direction: column;
+        max-height: none;
+    }
+
+    .project-detail-left {
+        padding: 0 !important;
+        border-right: none;
+        border-bottom: 1px solid var(--glass-border);
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+        border-bottom-left-radius: 0;
+        height: 300px; /* 锁定高度，让 cover 图片在里面完美展示 */
+        display: flex; /* 确保 display */
+    }
+
+    .project-detail-right {
+        padding: 1.5rem;
+        overflow-y: visible;
+    }
+    
+    #project-detail-title {
+        font-size: 1.3rem;
+    }
+}
+
 

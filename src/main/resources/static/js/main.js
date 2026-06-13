@@ -880,8 +880,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderProjects() {
         const container = document.getElementById('projects-container');
-        container.innerHTML = RESUME_DATA.projects.map(pj => `
-            <div class="project-card glass">
+        if (!container) return;
+
+        container.innerHTML = RESUME_DATA.projects.map((pj, index) => `
+            <div class="project-card glass" data-index="${index}">
                 <div class="project-img">
                     <img src="${pj.img}" alt="${pj.title}" loading="lazy">
                 </div>
@@ -891,10 +893,87 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="tags">
                         ${pj.tags.map(t => `<span>${t}</span>`).join('')}
                     </div>
-                    <a href="${pj.link}" class="project-link">查看详情 <i class="ri-external-link-line"></i></a>
+                    <a href="javascript:void(0);" class="project-link view-detail-btn" data-index="${index}">查看详情 <i class="ri-external-link-line"></i></a>
                 </div>
             </div>
         `).join('');
+
+        // 初始化项目详情弹窗
+        initProjectModal();
+    }
+
+    function initProjectModal() {
+        const modal = document.getElementById('project-detail-modal');
+        const closeBtn = document.getElementById('close-project-modal');
+        const detailImg = document.getElementById('project-detail-img');
+        const detailTitle = document.getElementById('project-detail-title');
+        const detailDesc = document.getElementById('project-detail-desc');
+        const detailHighlights = document.getElementById('project-detail-highlights');
+
+        if (!modal) return;
+
+        // 监听所有“查看详情”按钮
+        document.querySelectorAll('.view-detail-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const index = parseInt(btn.getAttribute('data-index'));
+                const project = RESUME_DATA.projects[index];
+
+                if (project) {
+                    // 填充模态框内容
+                    detailImg.src = project.detailImg;
+                    detailImg.alt = project.detailTitle;
+                    detailTitle.textContent = project.detailTitle;
+                    detailDesc.textContent = project.detailDesc;
+                    
+                    // 特事特办：白底小程序图配纯白底以消灭黑边，暗色图配暗灰底以消灭白边，视觉完美融合！
+                    const detailLeft = modal.querySelector('.project-detail-left');
+                    if (detailLeft) {
+                        if (project.id === 'larou' || project.id === 'meishi') {
+                            detailLeft.style.background = '#ffffff';
+                        } else {
+                            detailLeft.style.background = 'rgba(0, 0, 0, 0.4)';
+                        }
+                    }
+                    
+                    // 填充技术亮点
+                    detailHighlights.innerHTML = project.highlights.map(hl => `
+                        <li>${hl}</li>
+                    `).join('');
+
+                    // 激活弹窗
+                    modal.classList.add('show');
+
+                    // 成就解锁联动：项目探索者
+                    if (window.unlockAchievement) {
+                        window.unlockAchievement('EXPLORER');
+                    }
+                }
+            });
+        });
+
+        // 关闭弹窗
+        const closeModal = () => {
+            modal.classList.remove('show');
+        };
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closeModal);
+        }
+
+        // 点击背景遮罩关闭
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        // ESC 按键关闭
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal.classList.contains('show')) {
+                closeModal();
+            }
+        });
     }
 
     function renderContact() {
@@ -2266,11 +2345,11 @@ function initStarshipGame() {
     // 成就系统核心逻辑 (Achievement System)
     // ============================================
     const ACHIEVEMENTS = {
-        WELCOME: { id: 'welcome', title: '初次降临', desc: '欢迎来到炫技空间，开启你的极客之旅。', icon: '🚀' },
+        WELCOME: { id: 'welcome', title: '初次降临', desc: '欢迎来到我的空间，开启你的极客之旅。', icon: '🚀' },
         EXPLORER: { id: 'explorer', title: '深度探索', desc: '阅读完所有简历内容，求知欲拉满！', icon: '📖' },
         PILOT: { id: 'pilot', title: '代码卫士', desc: '在星舰防御战中成功击退 10 个 Bug。', icon: '🛡️' },
         GLOBE_TROTTER: { id: 'globe', title: '环球旅行者', desc: '深度观察 3D 地球，视野已跨越国界。', icon: '🌍' },
-        THE_ARCHITECT: { id: 'architect', title: '代码建筑师', desc: '击败终极实体 ROOT_ENTITY，掌控了炫技空间的底层逻辑。', icon: '👑' }
+        THE_ARCHITECT: { id: 'architect', title: '代码建筑师', desc: '击败终极实体 ROOT_ENTITY，掌控了我的空间的底层逻辑。', icon: '👑' }
     };
 
     class AchievementManager {
