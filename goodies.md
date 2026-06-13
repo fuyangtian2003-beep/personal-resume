@@ -208,8 +208,9 @@
 - **状态**：✅ 已实装 (2026-06-14)
 - **描述**：解决在频繁切换查看不同项目详情时，新图正在下载的过程中弹窗内突兀残留并显示“上一个项目的历史图片”的闪烁缺陷，以及新图加载慢导致版面空缺的问题。
 - **技术点**：
-  - **1px 透明 GIF 强力擦除**：点击时立即给 `detailImg.src` 赋予 `data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7`，零延迟清除上个项目的旧缓存，保证旧图片物理隐身。
+  - **1px 透明 GIF 强力擦除与解耦抢跑**：点击时立即给 `detailImg.src` 赋予 `data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7`。**为防 Base64 极速同步触发 onload 抢跑隐藏真正的 loader，在赋值 src 前先行将 `detailImg.onload = null` 解绑**！擦除残留并成功规避抢跑后，再绑定针对真实大图请求的 onload 监听，确保 loading 效果完好。
   - **科幻青色呼吸点 Loading (GPU 加速)**：在图片区域绝对定位三个极客青色（Cyan）发光的微缩呼吸圆点 loading。利用 CSS `@keyframes` 触发三点依次缩放脉冲，以最轻的 DOM 架构提供满血科技感。
-  - **Onload 监听平滑淡入**：大图绑定 `onload` 事件，触发后移除 `loading` 类并隐藏 loader。结合 `transition: opacity 0.3s ease`，实现大图的高保真平滑淡入，彻底消灭渲染白屏和残留。
+  - **Onload 监听平滑淡入**：大图真正下载并就绪时，触发新绑定的 `onload` 事件，移除 `loading` 类并隐藏 loader。结合 `transition: opacity 0.3s ease`，实现大图的高保真平滑淡入，彻底消灭渲染白屏和残留。
+  - **页面 onload 1.5s 后静默流式预载**：在 `main.js` 页面完全加载且首屏 3D 渲染就绪后的 1.5 秒空闲时间，使用 `new Image()` 静默拉取那两张 1MB+ 的大图缓存，彻底避开首屏和大模型下载拥塞，达成 100% 缓存命中，实现真正意义上的秒开。
 
 

@@ -127,9 +127,7 @@
   1. 浏览器执行 `detailImg.src = project.detailImg` 时，图片下载属于异步请求。在新图流未完全解码前，`detailImg` DOM 元素保留了旧图的 src 渲染状态，导致旧图残留。
   2. 1MB+ 的大 PNG 在非 prefetch 覆盖的其他网络环境下仍需要时间载入，由于没有 Loading 占位，导致排版发生“文字已就绪、图片白屏慢半拍”的割裂感。
 - **解决办法**：
-  1. **图片状态原子重置**：在赋值新 src 前，立刻将 `detailImg.src` 改为 1px 的极简透明 Base64 GIF 占位 (`data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7`)，彻底擦除上一张图片的痕迹。
-  2. **三点发光骨架预载与淡入**：在 `project-detail-img-wrapper` 中置入绝对定位的科幻青色发光呼吸圆点加载器，并为 `detailImg` 默认挂载 `.loading` 类（设置 `opacity: 0`）。通过 `detailImg.onload` 事件触发时再移除 `.loading` 并将加载器设为 `.hidden`，利用 CSS `transition: opacity 0.3s ease` 达成高清原图的无缝平滑淡入。
-- **教训**：在设计带有动态图片内容更替的模态窗交互时，必须遵守“先清空旧图、加装骨架占位、监听 onload 渐现”的黄金法则，彻底绝杀旧缓存残留与异步加载的闪烁缺陷。
-
-
-
+  1. **图片状态原子重置与解绑抢跑**：为防止 1px 透明 Base64 GIF 瞬间同步/极速触发 `onload` 导致真实图片的 loader 提前被强制关闭隐藏，**在给 `src` 赋 Base64 占位之前，先将 `detailImg.onload` 设为 `null` 临时解绑**！擦除上张图痕迹并安全忽略 Base64 的极速 onload 抢跑后，再绑定针对真实大图请求的 onload/onerror 监听器，随后才赋上 `project.detailImg`。
+  2. **三点发光骨架预载与淡入**：在 `project-detail-img-wrapper` 中置入绝对定位的科幻青色发光呼吸圆点加载器，并为 `detailImg` 默认挂载 `.loading` 类（设置 `opacity: 0`）。通过 `detailImg.onload` 真实大图加载就绪触发时再移除 `.loading` 并将加载器设为 `.hidden`，利用 CSS `transition: opacity 0.3s ease` 达成高清原图的无缝平滑淡入。
+  3. **空闲信道 JS 流式静默预载**：为了从物理上加速 1MB+ 详情大图的载入，除 HTML 的 prefetch 外，在 `main.js` 的 window `load` 触发 1.5 秒空闲后，使用 `new Image()` 主动在后台拉取缓存，避开首屏和 3D 巨无霸大模型的网络拥塞高峰，保证 100% 缓存就绪。
+- **教训**：在设计带有动态图片内容更替的模态窗交互时，必须遵守“先清空旧图（注意解除抢跑）、加装骨架占位、空闲期流式预载、监听真实 onload 渐现”的黄金法则，彻底绝杀旧缓存残留与异步加载的闪烁缺陷。

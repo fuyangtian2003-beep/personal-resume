@@ -128,6 +128,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             // 初始化 Hover-based 菜单悬停感知瞬时预拉取
             initHoverPreload();
+
+            // 静默预加载项目详情高清大图，避开首屏与 3D 地球高峰，达成极致秒开缓存命中
+            const detailImagesToPreload = ['img/larou_demo.png', 'img/meishi_demo.png'];
+            detailImagesToPreload.forEach(src => {
+                const img = new Image();
+                img.src = src;
+            });
         }, 1500); // 延迟 1.5 秒避开首屏交互网络和 CPU 峰值
     });
 
@@ -920,15 +927,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 const project = RESUME_DATA.projects[index];
 
                 if (project) {
-                    // 1. 瞬间重置大图状态并显现 Loading，彻底斩断上一个项目的图片残留 Bug
+                    // 1. 显现 Loading 动画，并在大图未完成前彻底擦除旧图残留
                     const loader = document.getElementById('project-detail-loader');
                     if (loader) loader.classList.remove('hidden');
                     
                     detailImg.classList.add('loading');
-                    // 使用 1px 极简透明 GIF 占位，确保旧图立刻在视口中消失
+                    
+                    // 2. 瞬间解绑并赋予 Base64 占位。在此期间 Base64 触发的同步/极速 onload 会被忽略，防止抢跑隐藏 loader
+                    detailImg.onload = null;
+                    detailImg.onerror = null;
                     detailImg.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
                     
-                    // 2. 绑定高优先级 onload/onerror 事件以控制平滑淡入
+                    // 3. 此时再绑定针对真图请求的高优先级 onload/onerror 事件以控制平滑淡入
                     detailImg.onload = () => {
                         detailImg.classList.remove('loading');
                         if (loader) loader.classList.add('hidden');
@@ -938,7 +948,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (loader) loader.classList.add('hidden');
                     };
 
-                    // 3. 填充模态框内容并开始载入真图
+                    // 4. 填充模态框内容并正式发起真实大图异步载入
                     detailImg.src = project.detailImg;
                     detailImg.alt = project.detailTitle;
                     detailTitle.textContent = project.detailTitle;
