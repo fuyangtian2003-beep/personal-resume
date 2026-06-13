@@ -123,78 +123,8 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
 
-    // 容错守护：10秒加载超时检测器
-    let loadingTimeout = null;
-    function startLoadingWatchdog() {
-        loadingTimeout = setTimeout(() => {
-            if (!isLoaded) {
-                triggerLoaderFallback("TIMEOUT");
-            }
-        }, 10000); // 10秒超时
-    }
-
-    function triggerLoaderFallback(status = "ERROR") {
-        if (loadingTimeout) clearTimeout(loadingTimeout);
-        
-        if (progressEl) progressEl.innerText = status;
-        
-        const errorTip = document.getElementById('loader-error-tip');
-        if (errorTip) {
-            errorTip.classList.remove('hidden');
-            setTimeout(() => {
-                errorTip.style.opacity = '1';
-            }, 50);
-        }
-
-        // 自动复制链接
-        try {
-            navigator.clipboard.writeText(window.location.href).then(() => {
-                updateCopyStatus(true);
-            }).catch(() => {
-                updateCopyStatus(false);
-            });
-        } catch (err) {
-            updateCopyStatus(false);
-        }
-
-        // 绑定手动复制按钮
-        const copyBtn = document.getElementById('btn-copy-link');
-        if (copyBtn) {
-            copyBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                navigator.clipboard.writeText(window.location.href).then(() => {
-                    const statusText = document.getElementById('copy-status-text');
-                    if (statusText) {
-                        statusText.innerHTML = `<i class="ri-checkbox-circle-line"></i> 链接复制成功！已可去电脑粘贴`;
-                        statusText.style.color = "#10b981";
-                    }
-                }).catch(() => {
-                    const statusText = document.getElementById('copy-status-text');
-                    if (statusText) {
-                        statusText.innerHTML = `<i class="ri-close-circle-line"></i> 复制失败，请手动选择地址栏复制`;
-                        statusText.style.color = "#ef4444";
-                    }
-                });
-            });
-        }
-    }
-
-    function updateCopyStatus(success) {
-        const statusText = document.getElementById('copy-status-text');
-        if (statusText) {
-            if (success) {
-                statusText.innerHTML = `<i class="ri-checkbox-circle-line"></i> 页面链接已自动复制至剪贴板`;
-                statusText.style.color = "#10b981";
-            } else {
-                statusText.innerHTML = `<i class="ri-alert-line"></i> 自动复制受阻，请点击手动复制`;
-                statusText.style.color = "#eab308";
-            }
-        }
-    }
-
     // 5. 并行异步预加载：WebP 序列帧 + Three.js 本地/在线依赖
     async function initPreloader() {
-        startLoadingWatchdog(); // 启动看门狗守护
         try {
             // 依赖链并行加载
             const dependencyPromise = (async () => {
@@ -230,7 +160,9 @@ document.addEventListener('DOMContentLoaded', () => {
             initThreeScene();
         } catch (e) {
             console.error("加载核心依赖或序列帧遇到致命错误，初始化中止：", e);
-            triggerLoaderFallback("ERROR");
+            if (typeof window.triggerLoaderFallback === 'function') {
+                window.triggerLoaderFallback("ERROR");
+            }
         }
     }
 
@@ -372,7 +304,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 // 全面加载结束！
                 isLoaded = true;
                 isThreeReady = true;
-                if (loadingTimeout) clearTimeout(loadingTimeout); // 成功装载，清除超时守护
+                window.isChip3DReady = true;
+                if (typeof window.clearWatchdog === 'function') {
+                    window.clearWatchdog(); // 成功装载，清除行内超时守护
+                }
 
                 if (progressEl) progressEl.innerText = "100%";
                 if (progressBar) progressBar.style.width = "100%";
@@ -401,9 +336,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 requestAnimationFrame(renderLoop);
             }, (error) => {
                 console.error("Three.js 内存解析模型失败：", error);
+                if (typeof window.triggerLoaderFallback === 'function') {
+                    window.triggerLoaderFallback("ERROR");
+                }
             });
         } catch (e) {
             console.error("模型解码异常：", e);
+            if (typeof window.triggerLoaderFallback === 'function') {
+                window.triggerLoaderFallback("ERROR");
+            }
         }
     }
 

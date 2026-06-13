@@ -31,6 +31,156 @@
 </head>
 
 <body>
+    <!-- 智能行内超时看门狗：在大模型文件 model_data.js 阻塞页面解析时即时运行，为弱网/手机端提供超强兜底保障 -->
+    <script>
+        (function() {
+            var watchdogTimer = setTimeout(function() {
+                if (!window.isChip3DReady) {
+                    window.triggerLoaderFallback("TIMEOUT");
+                }
+            }, 10000); // 10秒超时守护
+
+            window.triggerLoaderFallback = function(type) {
+                if (window.isChip3DReady && type !== "ERROR") return;
+                
+                if (watchdogTimer) {
+                    clearTimeout(watchdogTimer);
+                    watchdogTimer = null;
+                }
+
+                // 进度值强显
+                var progressText = document.getElementById("loading-progress");
+                if (progressText) {
+                    progressText.innerText = type === "TIMEOUT" ? "TIMEOUT" : "ERROR";
+                    progressText.style.color = "#ef4444";
+                }
+
+                // 核心防溢出设计：隐藏旋转动画、进度条和副文本，为警告面板腾出高度
+                var spinner = document.querySelector(".loader-spinner");
+                if (spinner) spinner.style.display = "none";
+                var progressBar = document.querySelector(".loader-progress-bar-container");
+                if (progressBar) progressBar.style.display = "none";
+                var subText = document.querySelector(".loader-subtext");
+                if (subText) subText.style.display = "none";
+
+                // 显示橙红色警告面板
+                var errorTip = document.getElementById("loader-error-tip");
+                if (errorTip) {
+                    errorTip.classList.remove("hidden");
+                    errorTip.offsetHeight; // 强制重绘
+                    errorTip.style.opacity = "1";
+                }
+
+                // 标题修改为对应类型
+                var tipTitle = errorTip ? errorTip.querySelector("div") : null;
+                if (tipTitle) {
+                    if (type === "TIMEOUT") {
+                        tipTitle.innerHTML = '<i class="ri-alert-line"></i> SYSTEM LATENCY DETECTED // 链路响应异常';
+                    } else {
+                        tipTitle.innerHTML = '<i class="ri-error-warning-line"></i> SYSTEM ERROR DETECTED // 核心装载异常';
+                    }
+                }
+
+                // 自动复制链接
+                var currentUrl = window.location.href;
+                var statusText = document.getElementById("copy-status-text");
+                
+                function showCopySuccess() {
+                    if (statusText) {
+                        statusText.innerHTML = '<i class="ri-checkbox-circle-line"></i> 页面链接已自动复制至剪贴板';
+                        statusText.style.color = "#10b981";
+                    }
+                }
+
+                function showCopyFail() {
+                    if (statusText) {
+                        statusText.innerHTML = '<i class="ri-close-circle-line"></i> 自动复制失败，请手动复制';
+                        statusText.style.color = "#f59e0b";
+                    }
+                }
+
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(currentUrl)
+                        .then(showCopySuccess)
+                        .catch(function() {
+                            fallbackCopy(currentUrl) ? showCopySuccess() : showCopyFail();
+                        });
+                } else {
+                    fallbackCopy(currentUrl) ? showCopySuccess() : showCopyFail();
+                }
+
+                function fallbackCopy(text) {
+                    var textarea = document.createElement("textarea");
+                    textarea.value = text;
+                    textarea.style.position = "fixed";
+                    textarea.style.opacity = "0";
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    try {
+                        var successful = document.execCommand("copy");
+                        document.body.removeChild(textarea);
+                        return successful;
+                    } catch (err) {
+                        document.body.removeChild(textarea);
+                        return false;
+                    }
+                }
+            };
+
+            // 事件委托处理手动复制，彻底脱离外部 js 的运行依赖
+            document.addEventListener("click", function(e) {
+                if (e.target && e.target.id === "btn-copy-link") {
+                    var currentUrl = window.location.href;
+                    var statusText = document.getElementById("copy-status-text");
+                    
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(currentUrl)
+                            .then(function() {
+                                if (statusText) {
+                                    statusText.innerHTML = '<i class="ri-checkbox-circle-line"></i> 手动复制成功！';
+                                    statusText.style.color = "#10b981";
+                                }
+                            })
+                            .catch(function() {
+                                fallbackManualCopy();
+                            });
+                    } else {
+                        fallbackManualCopy();
+                    }
+
+                    function fallbackManualCopy() {
+                        var textarea = document.createElement("textarea");
+                        textarea.value = currentUrl;
+                        textarea.style.position = "fixed";
+                        textarea.style.opacity = "0";
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        try {
+                            document.execCommand("copy");
+                            if (statusText) {
+                                statusText.innerHTML = '<i class="ri-checkbox-circle-line"></i> 手动复制成功！';
+                                statusText.style.color = "#10b981";
+                            }
+                        } catch (err) {
+                            if (statusText) {
+                                statusText.innerHTML = '<i class="ri-close-circle-line"></i> 复制失败，请选择地址栏复制';
+                                statusText.style.color = "#ef4444";
+                            }
+                        }
+                        document.body.removeChild(textarea);
+                    }
+                }
+            });
+
+            window.clearWatchdog = function() {
+                if (watchdogTimer) {
+                    clearTimeout(watchdogTimer);
+                    watchdogTimer = null;
+                }
+            };
+        })();
+    </script>
+
     <!-- 极简预加载进度层 -->
     <div id="loading-screen" class="loading-screen">
         <div class="loader-content">

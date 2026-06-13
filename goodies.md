@@ -188,3 +188,19 @@
 - **技术点**：
   - **首页静默预温（Prefetch）**：在 `index.html` 的头部中注入 `<link rel="prefetch" href="assets/video/guanwangyans.mp4" as="video">`。当用户在主页看简历时，浏览器会偷偷用空闲信道把 2.9MB 的视频文件加载进本地磁盘缓存。
   - **实验室零延迟接力（Preload Auto）**：在 `chip_test.html` 中将视频元素的属性改为 `preload="auto"`。一旦用户划进实验室页面，播放器不用等待网络握手，直接从本地极速拉取缓存，达到毫秒级瞬间秒开，彻底告别播放黑屏，完美配合一镜到底 3D 轨迹。
+
+## 22. 静态项目详情大图空闲 Prefetch 预热机制 (2026-06-14)
+- **状态**：✅ 已实装 (2026-06-14)
+- **描述**：解决主页项目详情弹窗中，两张 1MB+ 的高分辨率项目演示大图（`larou_demo.png` 和 `meishi_demo.png`）在点击时才发起请求导致弹窗弹出慢半拍、图片缓慢刷出的白底空档问题。
+- **技术点**：
+  - **空闲预拉取**：在 `index.html` 头部使用 `<link rel="prefetch" href="img/larou_demo.png" as="image">` 与 `<link rel="prefetch" href="img/meishi_demo.png" as="image">`。在用户浏览简历时静默预热至本地缓存。
+  - **零延迟秒开**：点击项目详情弹窗时，浏览器完美命中本地 prefetch 强缓存，实现项目图与详情文字的“零延迟瞬间呈现”，用户体验极其 premium。
+
+## 23. 智能解耦式行内看门狗救场机制 (Inline Watchdog Mechanism) (2026-06-14)
+- **状态**：✅ 已实装 (2026-06-14)
+- **描述**：解决在手机端和弱网环境下，由于 18MB 巨无霸模型数据脚本 `model_data.js` 的下载和解析导致后续交互脚本（如 `chip_fusion_viewer.js`）完全阻塞加载，进而导致 DOMContentLoaded 不触发、外部超时检测及提示 UI 瘫痪的致命缺陷。
+- **技术点**：
+  - **行内脚本顶级优先**：将看门狗守护、超时（10s）倒计时、自动剪贴板复制、以及基于**事件委托**的手动复制按钮监听，全部写在 `<body>` 顶部的行内 `<script>` 中，不依赖任何外部 JS 文件的成功下载和 DOMContentLoaded。
+  - **高度防溢出防截断**：一旦触发超时或 ERROR，行内脚本立即将进度条容器 `.loader-progress-bar-container`、旋转动画 `.loader-spinner` 以及副文本 `.loader-subtext` 设置为 `display: none`。彻底清空多余高度，为橙红色警告提示面板腾出垂直高度，确保在所有小屏手机视口内 100% 完整展示，绝不发生物理截断。
+  - **极简化解耦联动**：外部 JS 加载并渲染就绪时，只需将 `window.isChip3DReady` 置为 `true` 并调用 `window.clearWatchdog()` 即可。而在依赖抛错或 model parse 异常时，可直接呼叫 `window.triggerLoaderFallback("ERROR")`，实现双路无缝闭环。
+
