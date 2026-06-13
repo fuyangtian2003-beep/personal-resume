@@ -133,3 +133,13 @@
   3. **空闲信道 JS 流式静默预载**：为了从物理上加速 1MB+ 详情大图的载入，除 HTML 的 prefetch 外，在 `main.js` 的 window `load` 触发 1.5 秒空闲后，使用 `new Image()` 主动在后台拉取缓存，避开首屏和 3D 巨无霸大模型的网络拥塞高峰，保证 100% 缓存就绪。
   4. **Loader 级别提升与弹性拉伸**：将 `#project-detail-loader` 提升为 `.project-detail-left` 的直接子元素，并将 `.project-detail-left` 设为 `position: relative` 作为绝对定位锚点。同时为 `.project-detail-img-wrapper` 挂载 `flex-grow: 1` 弹性拉伸，确保在手机端大图未载入前也有稳健的 300px 背景占位区，且 Loader 在其中央完美居中显现，永不塌陷。
 - **教训**：在设计带有动态图片内容更替的模态窗交互时，必须遵守“先清空旧图（注意解除抢跑）、加装骨架占位（确保定位源稳健且不被 flex 塌陷拦截）、空闲期流式预载、监听真实 onload 渐现”的黄金法则，彻底绝杀旧缓存残留与异步加载的闪烁缺陷。
+
+### 18. 移动端 Flex 容器内大图加载前高度塌陷与 flex-shrink 压缩 (2026-06-14)
+- **问题描述**：在移动端竖屏下，点开第一个项目大图未就绪（无缓存）时，详情弹窗顶部的图片容器高度直接塌陷成 0px，导致 Loading 动画被彻底隐藏；而一旦有大图成功加载一次后，后续即使是未就绪图片也恢复正常展示。
+- **原因分析**：
+  1. 移动端竖屏将 `.project-detail-body` 设为 `flex-direction: column`。
+  2. 左侧图片容器 `.project-detail-left` 从桌面端继承了 `flex: 1.2` 弹性声明（等价于 `flex: 1.2 1 0%`，即允许 `flex-shrink` 压缩，且 `flex-basis` 默认为 `0%`）。
+  3. 首张图加载前，JS 用 1x1 的 Base64 GIF 占位，容器内部缺乏物理尺寸支撑。由于没有锁定压缩，Flex 引擎在分配空间时判定该元素可压缩且基础高度为 0，便将其高度直接压瘪为 0px。当有真实大图加载完后，浏览器记录了图片的物理高宽，便不再将其压扁。
+- **解决办法**：在 `@media (max-width: 768px)` 媒体查询下为 `.project-detail-left` 添加 `flex: none;`（即 `flex-grow: 0; flex-shrink: 0; flex-basis: auto;`）。彻底脱离 Flex 弹性压缩机制，强行锁死 `height: 300px` 刚性绝对高度，从而保证首次大图加载时 loading 动画依然完美居中。
+- **教训**：在 Flex 容器中，如果子元素拥有明确定义的物理宽高（如 `height: 300px`），但容器可能触发 `flex-direction` 变更或在特定状态下内部无流式内容支撑，务必显式声明 `flex-shrink: 0` 或 `flex: none` 强行锁定尺寸，防止被 Flex 布局引擎无情压缩为 0px。
+

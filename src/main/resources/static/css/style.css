@@ -2923,6 +2923,7 @@ body .galaxy-container .showcase-header .subtitle {
         border-bottom-left-radius: 0;
         height: 300px; /* 锁定高度，让 cover 图片在里面完美展示 */
         display: flex; /* 确保 display */
+        flex: none; /* 彻底阻止 flex 压缩导致的图片高度塌陷 */
     }
 
     .project-detail-right {
