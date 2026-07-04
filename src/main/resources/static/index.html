@@ -137,18 +137,43 @@
         window.isMainScriptLoaded = false;
         console.log("[Watchdog] Initialized at", window.startTime);
         
-        // 开启 10 秒看门狗定时器。如果页面核心逻辑在 10 秒内未加载完，则展示诊断横幅
+        // 开启 10 秒看门狗定时器。如果页面核心逻辑在 10 秒内未加载完，则直接动态创建并展示诊断横幅
         window.networkWatchdog = setTimeout(function() {
             var timePassed = Date.now() - window.startTime;
             console.log("[Watchdog] 10s timer fired after " + timePassed + "ms. isMainScriptLoaded:", window.isMainScriptLoaded);
             if (!window.isMainScriptLoaded) {
                 var banner = document.getElementById('network-diagnosis-banner');
-                console.log("[Watchdog] Banner element found:", banner);
+                if (!banner) {
+                    console.log("[Watchdog] DOM not ready at 10s. Creating banner dynamically...");
+                    banner = document.createElement('div');
+                    banner.id = 'network-diagnosis-banner';
+                    banner.className = 'network-diag-banner';
+                    banner.innerHTML = 
+                        '<div class="diag-header">' +
+                            '<div class="diag-pulse-dot"></div>' +
+                            '<div class="diag-title">SYSTEM LATENCY WARNING // 系统加载缓慢诊断</div>' +
+                        '</div>' +
+                        '<div class="diag-body">' +
+                            '检测到当前网络连接建立缓慢（Cloudflare 免费节点丢包或延迟较高）。本站托管于全球分发平台，由于国内高峰期路由拥堵或运营商 QoS 策略限制，直连访问可能会出现加载挂起。' +
+                            '<br><br>' +
+                            '🚀 <strong>自修复方案</strong>：如果您拥有代理工具（梯子），建议<strong>开启代理（如选择香港/新加坡/日本节点）并刷新本页</strong>，即可获得极致秒开体验。' +
+                        '</div>' +
+                        '<div class="diag-actions">' +
+                            '<button onclick="window.closeNetworkBanner()" class="diag-btn">继续等待</button>' +
+                            '<button onclick="location.reload()" class="diag-btn primary">刷新页面</button>' +
+                        '</div>';
+                    
+                    var targetParent = document.body || document.documentElement;
+                    if (targetParent) {
+                        targetParent.insertBefore(banner, targetParent.firstChild);
+                        console.log("[Watchdog] Dynamic banner appended to DOM.");
+                    }
+                }
+                
                 if (banner) {
+                    banner.offsetHeight; // 强制触发重绘，使 slide 下滑动画生效
                     banner.classList.add('show');
-                    console.log("[Watchdog] Banner class 'show' added successfully.");
-                } else {
-                    console.error("[Watchdog] Banner element is NULL at 10s! DOM not ready?");
+                    console.log("[Watchdog] Banner shown successfully.");
                 }
             }
         }, 10000);
@@ -195,22 +220,6 @@
 </head>
 
 <body>
-    <!-- 智能 Cloudflare 网络加载自诊断横幅 -->
-    <div id="network-diagnosis-banner" class="network-diag-banner">
-        <div class="diag-header">
-            <div class="diag-pulse-dot"></div>
-            <div class="diag-title">SYSTEM LATENCY WARNING // 系统加载缓慢诊断</div>
-        </div>
-        <div class="diag-body">
-            检测到当前网络连接建立缓慢（Cloudflare 免费节点丢包或延迟较高）。本站托管于全球分发平台，由于国内高峰期路由拥堵或运营商 QoS 策略限制，直连访问可能会出现加载挂起。
-            <br><br>
-            🚀 <strong>自修复方案</strong>：如果您拥有代理工具（梯子），建议<strong>开启代理（如选择香港/新加坡/日本节点）并刷新本页</strong>，即可获得极致秒开体验。
-        </div>
-        <div class="diag-actions">
-            <button onclick="window.closeNetworkBanner()" class="diag-btn">继续等待</button>
-            <button onclick="location.reload()" class="diag-btn primary">刷新页面</button>
-        </div>
-    </div>
 
     <!-- 成就系统容器 -->
     <div id="achievement-container"></div>
