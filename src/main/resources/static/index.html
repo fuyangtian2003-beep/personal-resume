@@ -172,6 +172,21 @@
             }
         }, 10000);
 
+        // 专门供用户手动关闭 Banner 的函数
+        window.closeNetworkBanner = function() {
+            var banner = document.getElementById('network-diagnosis-banner');
+            if (banner) {
+                banner.classList.remove('show');
+                console.log("[Watchdog] Banner closed manually by user.");
+                setTimeout(function() {
+                    if (banner.parentNode) {
+                        banner.parentNode.removeChild(banner);
+                        console.log("[Watchdog] Banner DOM removed after manual close.");
+                    }
+                }, 600);
+            }
+        };
+
         // 主逻辑加载成功时的清理函数
         window.clearNetworkWatchdog = function() {
             var timePassed = Date.now() - window.startTime;
@@ -183,15 +198,16 @@
             }
             var banner = document.getElementById('network-diagnosis-banner');
             if (banner) {
-                banner.classList.remove('show');
-                console.log("[Watchdog] Banner class 'show' removed.");
-                // 延迟移除，保证滑出过渡动画自然播放
-                setTimeout(function() {
+                // 如果此时横幅还没有显示（说明在 10s 内秒开了），我们直接静默销毁它，用户无感
+                if (!banner.classList.contains('show')) {
                     if (banner.parentNode) {
                         banner.parentNode.removeChild(banner);
-                        console.log("[Watchdog] Banner DOM removed.");
+                        console.log("[Watchdog] Banner destroyed silently (loaded within 10s).");
                     }
-                }, 600);
+                } else {
+                    // 如果此时横幅已经显示在界面上了，我们不做任何干涉，保留它让用户看清楚并手动关闭
+                    console.log("[Watchdog] Banner is already showing, keep it on screen for user reading.");
+                }
             }
         };
     </script>
@@ -210,7 +226,7 @@
             🚀 <strong>自修复方案</strong>：如果您拥有代理工具（梯子），建议<strong>开启代理（如选择香港/新加坡/日本节点）并刷新本页</strong>，即可获得极致秒开体验。
         </div>
         <div class="diag-actions">
-            <button onclick="window.clearNetworkWatchdog()" class="diag-btn">继续等待</button>
+            <button onclick="window.closeNetworkBanner()" class="diag-btn">继续等待</button>
             <button onclick="location.reload()" class="diag-btn primary">刷新页面</button>
         </div>
     </div>
