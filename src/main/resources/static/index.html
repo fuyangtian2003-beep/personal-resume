@@ -154,30 +154,42 @@
     <script>
         window.startTime = Date.now();
         window.isMainScriptLoaded = false;
+        console.log("[Watchdog] Initialized at", window.startTime);
         
         // 开启 6.5 秒看门狗定时器。如果页面核心逻辑在 6.5 秒内未加载完，则展示诊断横幅
         window.networkWatchdog = setTimeout(function() {
+            var timePassed = Date.now() - window.startTime;
+            console.log("[Watchdog] 6.5s timer fired after " + timePassed + "ms. isMainScriptLoaded:", window.isMainScriptLoaded);
             if (!window.isMainScriptLoaded) {
                 var banner = document.getElementById('network-diagnosis-banner');
+                console.log("[Watchdog] Banner element found:", banner);
                 if (banner) {
                     banner.classList.add('show');
+                    console.log("[Watchdog] Banner class 'show' added successfully.");
+                } else {
+                    console.error("[Watchdog] Banner element is NULL at 6.5s! DOM not ready?");
                 }
             }
         }, 6500);
 
         // 主逻辑加载成功时的清理函数
         window.clearNetworkWatchdog = function() {
+            var timePassed = Date.now() - window.startTime;
+            console.log("[Watchdog] clearNetworkWatchdog called at " + timePassed + "ms. isMainScriptLoaded was:", window.isMainScriptLoaded);
             window.isMainScriptLoaded = true;
             if (window.networkWatchdog) {
                 clearTimeout(window.networkWatchdog);
+                console.log("[Watchdog] Timer cleared.");
             }
             var banner = document.getElementById('network-diagnosis-banner');
             if (banner) {
                 banner.classList.remove('show');
+                console.log("[Watchdog] Banner class 'show' removed.");
                 // 延迟移除，保证滑出过渡动画自然播放
                 setTimeout(function() {
                     if (banner.parentNode) {
                         banner.parentNode.removeChild(banner);
+                        console.log("[Watchdog] Banner DOM removed.");
                     }
                 }, 600);
             }
