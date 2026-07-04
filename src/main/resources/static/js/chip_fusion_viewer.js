@@ -89,21 +89,23 @@ document.addEventListener('DOMContentLoaded', () => {
             setVideoLoaded();
         }
 
-        // 解锁移动端静音自动播放限制（触屏/滚动交互时触发一次静默播放解锁）
-        const unlockMobileVideo = () => {
-            // 解锁成功后直接保持播放状态，不需要暂停它
-            casesVideo.play().then(() => {
-                console.log("[Video] Mobile autoplay restriction successfully unlocked.");
-            }).catch(err => {
-                console.log("[Video] Mobile autoplay unlock attempted:", err.message);
-            });
-            window.removeEventListener('touchstart', unlockMobileVideo);
-            window.removeEventListener('mousedown', unlockMobileVideo);
-            window.removeEventListener('scroll', unlockMobileVideo);
+        // 移动端常驻解锁与后台长播容灾：在用户触屏、划屏、点击或滚动时常驻监测视频状态，未播放则顺手激活
+        const triggerAutoplayUnlock = () => {
+            if (isMobileDevice && casesVideo && casesVideo.paused) {
+                casesVideo.play().then(() => {
+                    console.log("[Video] Mobile video active play success / Autoplay restriction bypassed.");
+                }).catch(err => {
+                    console.log("[Video] Mobile video active play attempt failed (waiting for buffer):", err.message);
+                });
+            }
         };
-        window.addEventListener('touchstart', unlockMobileVideo, { passive: true });
-        window.addEventListener('mousedown', unlockMobileVideo, { passive: true });
-        window.addEventListener('scroll', unlockMobileVideo, { passive: true });
+
+        // 注册常驻监听器，防范“缓冲未完即解锁”导致失效的尴尬，不再执行 removeEventListener
+        window.addEventListener('touchstart', triggerAutoplayUnlock, { passive: true });
+        window.addEventListener('touchmove', triggerAutoplayUnlock, { passive: true });
+        window.addEventListener('mousedown', triggerAutoplayUnlock, { passive: true });
+        window.addEventListener('click', triggerAutoplayUnlock, { passive: true });
+        window.addEventListener('scroll', triggerAutoplayUnlock, { passive: true });
 
         // 针对切后台、锁屏等场景切回前台后的移动端视频重启容灾
         document.addEventListener('visibilitychange', () => {
@@ -111,13 +113,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 casesVideo.play().catch(() => {});
             }
         });
-
-        // 每次用户触屏移动端时，若视频因异常暂停，则静默尝试重新播放
-        window.addEventListener('touchstart', () => {
-            if (isMobileDevice && casesVideo && casesVideo.paused) {
-                casesVideo.play().catch(() => {});
-            }
-        }, { passive: true });
     }
 
 
