@@ -30,10 +30,9 @@ document.addEventListener('DOMContentLoaded', () => {
         window.hasStartedPrefetch = true;
         console.log("%c📡 [Lazy Prefetch] User approaching Skills section. Summoning heavy assets...", "color: #0ea5e9; font-weight: bold;");
         
-        // 预加载的 11 个大体积资源定义
+        // 预加载的 10 个大体积资源定义
         const resources = [
             { href: 'https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg', as: 'image', crossorigin: 'anonymous' },
-            { href: 'https://cdn.bootcdn.net/ajax/libs/three.js/0.160.0/three.min.js', as: 'script' },
             { href: 'https://cdn.bootcdn.net/ajax/libs/three.js/r128/three.min.js', as: 'script' },
             { href: 'https://cdn.jsdmirror.com/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js', as: 'script' },
             { href: 'https://cdn.jsdmirror.com/npm/three@0.128.0/examples/js/controls/OrbitControls.js', as: 'script' },
@@ -135,8 +134,8 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("%c📦 Summoning Three.js Engine...", "color: #3b82f6; font-weight: bold;");
         const script = document.createElement('script');
 
-        // 首选国内极速镜像源（换用稳定的 BootCDN）
-        script.src = 'https://cdn.bootcdn.net/ajax/libs/three.js/0.160.0/three.min.js';
+        // 首选国内极速镜像源（换用稳定的 BootCDN，统一为 r128 版本）
+        script.src = 'https://cdn.bootcdn.net/ajax/libs/three.js/r128/three.min.js';
 
         // 容灾降级核心函数
         let isFallbackTriggered = false;
@@ -148,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
             script.remove(); // 清理失效标签
 
             const backupScript = document.createElement('script');
-            backupScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js';
+            backupScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
             backupScript.onload = () => {
                 if (window.THREE) {
                     callback();
