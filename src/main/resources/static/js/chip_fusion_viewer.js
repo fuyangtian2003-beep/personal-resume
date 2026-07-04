@@ -31,10 +31,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const appleCaseTitle = document.getElementById('apple-case-title');
     const appleCaseSubtitle = document.getElementById('apple-case-subtitle');
     const casesVideo = document.getElementById('cases-video');
+    const isMobileDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
     // 2.8 异步视频播放排队与状态防抖函数（解决滚动时高频 play/pause 触发的 AbortError 黑屏卡死 Bug）
     function safePlayVideo(video) {
         if (!video) return;
+        if (isMobileDevice) {
+            // 移动端在解锁后保持背景播放，无需频繁触发 play/pause 以避开浏览器安全限制
+            if (video.paused) {
+                video.play().catch(() => {});
+            }
+            return;
+        }
         if (video.dataset.playState === 'playing') return;
 
         video.dataset.playState = 'playing';
@@ -56,6 +64,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function safePauseVideo(video) {
         if (!video) return;
+        if (isMobileDevice) {
+            // 移动端保持后台播放，依靠外层 container 的 CSS 显隐来控制展示
+            return;
+        }
         if (video.dataset.playState === 'paused') return;
 
         video.dataset.playState = 'paused';
@@ -79,11 +91,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 解锁移动端静音自动播放限制（触屏/滚动交互时触发一次静默播放解锁）
         const unlockMobileVideo = () => {
+            // 解锁成功后直接保持播放状态，不需要暂停它
             casesVideo.play().then(() => {
-                // 如果当前滚动帧还未到视频播放区间，则立刻暂停，配合原有防抖机制
-                if (casesVideo.dataset.playState !== 'playing') {
-                    casesVideo.pause();
-                }
                 console.log("[Video] Mobile autoplay restriction successfully unlocked.");
             }).catch(err => {
                 console.log("[Video] Mobile autoplay unlock attempted:", err.message);
@@ -95,6 +104,20 @@ document.addEventListener('DOMContentLoaded', () => {
         window.addEventListener('touchstart', unlockMobileVideo, { passive: true });
         window.addEventListener('mousedown', unlockMobileVideo, { passive: true });
         window.addEventListener('scroll', unlockMobileVideo, { passive: true });
+
+        // 针对切后台、锁屏等场景切回前台后的移动端视频重启容灾
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && isMobileDevice && casesVideo && casesVideo.paused) {
+                casesVideo.play().catch(() => {});
+            }
+        });
+
+        // 每次用户触屏移动端时，若视频因异常暂停，则静默尝试重新播放
+        window.addEventListener('touchstart', () => {
+            if (isMobileDevice && casesVideo && casesVideo.paused) {
+                casesVideo.play().catch(() => {});
+            }
+        }, { passive: true });
     }
 
 
