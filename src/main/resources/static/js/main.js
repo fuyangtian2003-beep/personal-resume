@@ -11,6 +11,50 @@ document.addEventListener('DOMContentLoaded', () => {
     renderProjects();
     renderContact();
 
+    // 1.8 智能延迟预加载大体积资源 (当用户向下滚动接近 "核心技能" #skills 时才触发 prefetch)
+    const skillsSection = document.getElementById('skills');
+    if (skillsSection) {
+        const prefetchObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    startLazyPrefetch();
+                    prefetchObserver.disconnect(); // 触发后立即销毁监听器，防止重复加载
+                }
+            });
+        }, { rootMargin: '200px' }); // 提前 200px 触发，让后台加载有一定超前量
+        prefetchObserver.observe(skillsSection);
+    }
+
+    function startLazyPrefetch() {
+        if (window.hasStartedPrefetch) return;
+        window.hasStartedPrefetch = true;
+        console.log("%c📡 [Lazy Prefetch] User approaching Skills section. Summoning heavy assets...", "color: #0ea5e9; font-weight: bold;");
+        
+        // 预加载的 11 个大体积资源定义
+        const resources = [
+            { href: 'https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg', as: 'image', crossorigin: 'anonymous' },
+            { href: 'https://cdn.bootcdn.net/ajax/libs/three.js/0.160.0/three.min.js', as: 'script' },
+            { href: 'https://cdn.bootcdn.net/ajax/libs/three.js/r128/three.min.js', as: 'script' },
+            { href: 'https://cdn.jsdmirror.com/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js', as: 'script' },
+            { href: 'https://cdn.jsdmirror.com/npm/three@0.128.0/examples/js/controls/OrbitControls.js', as: 'script' },
+            { href: 'js/model_data.js', as: 'script' },
+            { href: 'assets/bgm.mp3', as: 'audio' },
+            { href: 'assets/audio/v1.mp3', as: 'audio' },
+            { href: 'assets/video/guanwangyans.mp4', as: 'video' },
+            { href: 'img/larou_demo.png', as: 'image' },
+            { href: 'img/meishi_demo.png', as: 'image' }
+        ];
+
+        resources.forEach(res => {
+            const link = document.createElement('link');
+            link.rel = 'prefetch';
+            link.href = res.href;
+            if (res.as) link.as = res.as;
+            if (res.crossorigin) link.crossOrigin = res.crossorigin;
+            document.head.appendChild(link);
+        });
+    }
+
     // 1.5 高性能鼠标跟随光效 (使用 rAF 和 transform)
     const glow = document.getElementById('cursor-glow');
     let mouseX = 0;
