@@ -51,9 +51,158 @@
 
     <!-- 预留 Favicon -->
     <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
+
+    <!-- 智能 Cloudflare 网络加载自诊断系统 -->
+    <style>
+        .network-diag-banner {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-180px);
+            width: 90%;
+            max-width: 580px;
+            background: rgba(10, 15, 26, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(14, 165, 233, 0.4);
+            box-shadow: 0 0 25px rgba(14, 165, 233, 0.25), inset 0 0 15px rgba(14, 165, 233, 0.05);
+            border-radius: 12px;
+            padding: 20px 24px;
+            z-index: 999999;
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease;
+            opacity: 0;
+            color: #f8fafc;
+            font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+            pointer-events: auto;
+        }
+        .network-diag-banner.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        .diag-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 8px;
+        }
+        .diag-title {
+            font-weight: 800;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #0ea5e9;
+            text-shadow: 0 0 10px rgba(14, 165, 233, 0.3);
+        }
+        .diag-pulse-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #f43f5e;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #f43f5e;
+            animation: diag-pulse 1.5s infinite;
+        }
+        @keyframes diag-pulse {
+            0% { transform: scale(0.9); opacity: 0.6; }
+            50% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 14px #f43f5e; }
+            100% { transform: scale(0.9); opacity: 0.6; }
+        }
+        .diag-body {
+            font-size: 0.88rem;
+            line-height: 1.6;
+            color: #94a3b8;
+            margin-bottom: 16px;
+        }
+        .diag-body strong {
+            color: #f8fafc;
+        }
+        .diag-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        .diag-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #f8fafc;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .diag-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        .diag-btn.primary {
+            background: #0ea5e9;
+            border-color: #0ea5e9;
+            color: #05070a;
+            box-shadow: 0 0 10px rgba(14, 165, 233, 0.2);
+        }
+        .diag-btn.primary:hover {
+            background: #38bdf8;
+            border-color: #38bdf8;
+            box-shadow: 0 0 15px rgba(14, 165, 233, 0.4);
+        }
+    </style>
+    <script>
+        window.startTime = Date.now();
+        window.isMainScriptLoaded = false;
+        
+        // 开启 6.5 秒看门狗定时器。如果页面核心逻辑在 6.5 秒内未加载完，则展示诊断横幅
+        window.networkWatchdog = setTimeout(function() {
+            if (!window.isMainScriptLoaded) {
+                var banner = document.getElementById('network-diagnosis-banner');
+                if (banner) {
+                    banner.classList.add('show');
+                }
+            }
+        }, 6500);
+
+        // 主逻辑加载成功时的清理函数
+        window.clearNetworkWatchdog = function() {
+            window.isMainScriptLoaded = true;
+            if (window.networkWatchdog) {
+                clearTimeout(window.networkWatchdog);
+            }
+            var banner = document.getElementById('network-diagnosis-banner');
+            if (banner) {
+                banner.classList.remove('show');
+                // 延迟移除，保证滑出过渡动画自然播放
+                setTimeout(function() {
+                    if (banner.parentNode) {
+                        banner.parentNode.removeChild(banner);
+                    }
+                }, 600);
+            }
+        };
+    </script>
 </head>
 
 <body>
+    <!-- 智能 Cloudflare 网络加载自诊断横幅 -->
+    <div id="network-diagnosis-banner" class="network-diag-banner">
+        <div class="diag-header">
+            <div class="diag-pulse-dot"></div>
+            <div class="diag-title">SYSTEM LATENCY WARNING // 系统加载缓慢诊断</div>
+        </div>
+        <div class="diag-body">
+            检测到当前网络连接建立缓慢（Cloudflare 免费节点丢包或延迟较高）。本站托管于全球分发平台，由于国内高峰期路由拥堵或运营商 QoS 策略限制，直连访问可能会出现加载挂起。
+            <br><br>
+            🚀 <strong>自修复方案</strong>：如果您拥有代理工具（梯子），建议<strong>开启代理（如选择香港/新加坡/日本节点）并刷新本页</strong>，即可获得极致秒开体验。
+        </div>
+        <div class="diag-actions">
+            <button onclick="window.clearNetworkWatchdog()" class="diag-btn">继续等待</button>
+            <button onclick="location.reload()" class="diag-btn primary">刷新页面</button>
+        </div>
+    </div>
+
     <!-- 成就系统容器 -->
     <div id="achievement-container"></div>
     <!-- 鼠标跟随光效 -->

@@ -2643,4 +2643,9 @@ function initStarshipGame() {
             `;
         }).join('');
     }
+
+    // 清除 Cloudflare 网络加载自诊断定时器
+    if (window.clearNetworkWatchdog) {
+        window.clearNetworkWatchdog();
+    }
 }
