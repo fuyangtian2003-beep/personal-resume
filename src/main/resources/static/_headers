@@ -21,3 +21,7 @@
 
 /img/meishi_demo.png
   Cache-Control: public, max-age=31536000, immutable
+
+/img/earth-blue-marble.jpg
+  Cache-Control: public, max-age=31536000, immutable
+

@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // 预加载的 11 个大体积资源定义
         const resources = [
-            { href: 'https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg', as: 'image', crossorigin: 'anonymous' },
+            { href: 'img/earth-blue-marble.jpg', as: 'image' },
             { href: 'https://cdn.bootcdn.net/ajax/libs/three.js/0.160.0/three.min.js', as: 'script' },
             { href: 'https://cdn.bootcdn.net/ajax/libs/three.js/r128/three.min.js', as: 'script' },
             { href: 'https://cdn.jsdmirror.com/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js', as: 'script' },
@@ -573,8 +573,8 @@ document.addEventListener('DOMContentLoaded', () => {
             opacity: 0.98
         });
 
-        // 换回鲜艳的高饱和度贴图
-        const texture = loader.load('https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg');
+        // 换回鲜艳的高饱和度贴图（本地化强缓存版，复用 prefetch）
+        const texture = loader.load('img/earth-blue-marble.jpg');
         material.map = texture; // 绑定初始加载中的 texture
         threeEngine.earth = new THREE.Mesh(geometry, material);
         threeEngine.earth.rotation.y = Math.PI * 0.6; // 初始朝向：亚洲/中国方向
