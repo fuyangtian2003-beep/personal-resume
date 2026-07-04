@@ -156,10 +156,10 @@
         window.isMainScriptLoaded = false;
         console.log("[Watchdog] Initialized at", window.startTime);
         
-        // 开启 6.5 秒看门狗定时器。如果页面核心逻辑在 6.5 秒内未加载完，则展示诊断横幅
+        // 开启 10 秒看门狗定时器。如果页面核心逻辑在 10 秒内未加载完，则展示诊断横幅
         window.networkWatchdog = setTimeout(function() {
             var timePassed = Date.now() - window.startTime;
-            console.log("[Watchdog] 6.5s timer fired after " + timePassed + "ms. isMainScriptLoaded:", window.isMainScriptLoaded);
+            console.log("[Watchdog] 10s timer fired after " + timePassed + "ms. isMainScriptLoaded:", window.isMainScriptLoaded);
             if (!window.isMainScriptLoaded) {
                 var banner = document.getElementById('network-diagnosis-banner');
                 console.log("[Watchdog] Banner element found:", banner);
@@ -167,10 +167,10 @@
                     banner.classList.add('show');
                     console.log("[Watchdog] Banner class 'show' added successfully.");
                 } else {
-                    console.error("[Watchdog] Banner element is NULL at 6.5s! DOM not ready?");
+                    console.error("[Watchdog] Banner element is NULL at 10s! DOM not ready?");
                 }
             }
-        }, 6500);
+        }, 10000);
 
         // 主逻辑加载成功时的清理函数
         window.clearNetworkWatchdog = function() {
