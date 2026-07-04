@@ -1,0 +1,23 @@
+# Cloudflare Pages 自定义 HTTP 响应头配置
+# 为不经常变动的静态重资源设定 Immutable 强缓存，彻底达成跨页面预加载 0 握手本地复用
+
+/assets/xinpian/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/js/model_data.js
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/bgm.mp3
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/audio/v1.mp3
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/video/guanwangyans.mp4
+  Cache-Control: public, max-age=31536000, immutable
+
+/img/larou_demo.png
+  Cache-Control: public, max-age=31536000, immutable
+
+/img/meishi_demo.png
+  Cache-Control: public, max-age=31536000, immutable
