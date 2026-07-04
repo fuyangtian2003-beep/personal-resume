@@ -176,8 +176,12 @@ document.addEventListener('DOMContentLoaded', () => {
         document.head.appendChild(script);
     }
 
-    // 页面空闲时初始化轻量级导航 Hover 感知智能预拉取
+    // 页面完全加载时，注销看门狗并初始化轻量级导航 Hover 感知智能预拉取
     window.addEventListener('load', () => {
+        // 整个页面（包含 CSS、字体、重图片等）完全装载完毕，安全解除自检测定时器
+        if (window.clearNetworkWatchdog) {
+            window.clearNetworkWatchdog();
+        }
         setTimeout(() => {
             // 初始化 Hover-based 菜单悬停感知瞬时预拉取
             initHoverPreload();
@@ -2690,8 +2694,4 @@ function initStarshipGame() {
         }).join('');
     }
 
-    // 清除 Cloudflare 网络加载自诊断定时器
-    if (window.clearNetworkWatchdog) {
-        window.clearNetworkWatchdog();
-    }
 }
