@@ -53,6 +53,33 @@ document.addEventListener('DOMContentLoaded', () => {
             if (res.crossorigin) link.crossOrigin = res.crossorigin;
             document.head.appendChild(link);
         });
+
+        // 2. 静默载入并挂载 Three.js 引擎，挂载完成后触发 WebP 225帧序列图的流式下载
+        if (typeof window.THREE === 'undefined') {
+            loadThreeJS(() => {
+                console.log("%c📦 Three.js Engine Preloaded silently in background.", "color: #10b981; font-weight: bold;");
+                // 引擎挂载完后，低优先级流式拉取 225 帧 WebP 序列帧
+                if ('requestIdleCallback' in window) {
+                    requestIdleCallback(preloadWebPFrames);
+                } else {
+                    setTimeout(preloadWebPFrames, 1000);
+                }
+            });
+        } else {
+            // 如果已经有 window.THREE，直接开启流式图片预加载
+            if ('requestIdleCallback' in window) {
+                requestIdleCallback(preloadWebPFrames);
+            } else {
+                setTimeout(preloadWebPFrames, 1000);
+            }
+        }
+
+        // 3. 静默加载项目详情高清大图，避开首屏，达成极致秒开缓存命中
+        const detailImagesToPreload = ['img/larou_demo.png', 'img/meishi_demo.png'];
+        detailImagesToPreload.forEach(src => {
+            const img = new Image();
+            img.src = src;
+        });
     }
 
     // 1.5 高性能鼠标跟随光效 (使用 rAF 和 transform)
@@ -149,36 +176,11 @@ document.addEventListener('DOMContentLoaded', () => {
         document.head.appendChild(script);
     }
 
-    // 页面空闲时静默预加载并挂载 Three.js 引擎，并启动 WebP 序列帧后台流式下载
+    // 页面空闲时初始化轻量级导航 Hover 感知智能预拉取
     window.addEventListener('load', () => {
         setTimeout(() => {
-            if (typeof window.THREE === 'undefined') {
-                loadThreeJS(() => {
-                    console.log("%c📦 Three.js Engine Preloaded silently in background.", "color: #10b981; font-weight: bold;");
-                    // 引擎预加载完后，低优先级流式拉取 225 帧 WebP 序列帧
-                    if ('requestIdleCallback' in window) {
-                        requestIdleCallback(preloadWebPFrames);
-                    } else {
-                        setTimeout(preloadWebPFrames, 1000);
-                    }
-                });
-            } else {
-                // 如果已经有 window.THREE，直接开启流式图片预加载
-                if ('requestIdleCallback' in window) {
-                    requestIdleCallback(preloadWebPFrames);
-                } else {
-                    setTimeout(preloadWebPFrames, 1000);
-                }
-            }
             // 初始化 Hover-based 菜单悬停感知瞬时预拉取
             initHoverPreload();
-
-            // 静默预加载项目详情高清大图，避开首屏与 3D 地球高峰，达成极致秒开缓存命中
-            const detailImagesToPreload = ['img/larou_demo.png', 'img/meishi_demo.png'];
-            detailImagesToPreload.forEach(src => {
-                const img = new Image();
-                img.src = src;
-            });
         }, 1500); // 延迟 1.5 秒避开首屏交互网络和 CPU 峰值
     });
 
