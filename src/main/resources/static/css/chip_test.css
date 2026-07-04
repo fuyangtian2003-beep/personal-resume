@@ -852,12 +852,24 @@ body {
 }
 
 /* 苹果风视网膜悬浮视频卡 */
+/* 闪烁流光背景，做骨架屏 loading 效果 */
+@keyframes skeleton-shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
 .apple-theater-card {
     width: 100%;
     aspect-ratio: 16 / 9;
     border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(10, 12, 18, 0.45);
+    background: linear-gradient(90deg, rgba(10, 12, 18, 0.45) 25%, rgba(20, 24, 35, 0.6) 37%, rgba(10, 12, 18, 0.45) 63%);
+    background-size: 400% 100%;
+    animation: skeleton-shimmer 2.5s infinite linear;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     box-shadow: 0 40px 100px rgba(0, 0, 0, 0.7);
@@ -868,6 +880,7 @@ body {
     position: relative;
     transition: border-color 0.4s ease, box-shadow 0.4s ease;
 }
+
 
 .apple-theater-card:hover {
     border-color: rgba(255, 255, 255, 0.15);
@@ -884,6 +897,12 @@ body {
     height: 100%;
     object-fit: cover;
     display: block;
+    opacity: 0;
+    transition: opacity 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.theater-border-effect video.loaded {
+    opacity: 1;
 }
 
 /* 3D 案例阶段背景动态降噪：隐去网格线，将光斑平滑降亮并加深模糊 */

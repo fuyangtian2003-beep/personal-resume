@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const audioControl = document.getElementById('audio-control');
     const audioText = audioControl ? audioControl.querySelector('.audio-text') : null;
     const scrollDownHint = document.getElementById('scroll-down-hint');
-    
+
     // 3D 苹果级大荧幕 DOM 节点
     const cyberTheater = document.getElementById('cyber-theater-container');
     const appleCaseTitle = document.getElementById('apple-case-title');
@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function safePlayVideo(video) {
         if (!video) return;
         if (video.dataset.playState === 'playing') return;
-        
+
         video.dataset.playState = 'playing';
         video.play().then(() => {
             if (video.dataset.playState === 'paused') {
@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (video.dataset.playState === 'playing') {
                 setTimeout(() => {
                     if (video.dataset.playState === 'playing' && video.paused) {
-                        video.play().catch(() => {});
+                        video.play().catch(() => { });
                     }
                 }, 150);
             }
@@ -57,9 +57,44 @@ document.addEventListener('DOMContentLoaded', () => {
     function safePauseVideo(video) {
         if (!video) return;
         if (video.dataset.playState === 'paused') return;
-        
+
         video.dataset.playState = 'paused';
         video.pause();
+    }
+
+    // 2.9 移动端视频加载状态监听与自动播放限制解锁
+    if (casesVideo) {
+        const setVideoLoaded = () => {
+            casesVideo.classList.add('loaded');
+            console.log("[Video] First frame loaded, video element visual activated.");
+        };
+        casesVideo.addEventListener('loadeddata', setVideoLoaded);
+        casesVideo.addEventListener('canplay', setVideoLoaded);
+        casesVideo.addEventListener('playing', setVideoLoaded);
+
+        // 如果浏览器早已准备好视频，直接激活
+        if (casesVideo.readyState >= 2) {
+            setVideoLoaded();
+        }
+
+        // 解锁移动端静音自动播放限制（触屏/滚动交互时触发一次静默播放解锁）
+        const unlockMobileVideo = () => {
+            casesVideo.play().then(() => {
+                // 如果当前滚动帧还未到视频播放区间，则立刻暂停，配合原有防抖机制
+                if (casesVideo.dataset.playState !== 'playing') {
+                    casesVideo.pause();
+                }
+                console.log("[Video] Mobile autoplay restriction successfully unlocked.");
+            }).catch(err => {
+                console.log("[Video] Mobile autoplay unlock attempted:", err.message);
+            });
+            window.removeEventListener('touchstart', unlockMobileVideo);
+            window.removeEventListener('mousedown', unlockMobileVideo);
+            window.removeEventListener('scroll', unlockMobileVideo);
+        };
+        window.addEventListener('touchstart', unlockMobileVideo, { passive: true });
+        window.addEventListener('mousedown', unlockMobileVideo, { passive: true });
+        window.addEventListener('scroll', unlockMobileVideo, { passive: true });
     }
 
 
@@ -170,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const img = new Image();
                     const frameStr = String(i).padStart(3, '0');
                     img.src = `assets/xinpian/frame_${frameStr}_delay-0.041s.webp`;
-                    
+
                     img.onload = () => {
                         loadedImagesCount++;
                         checkOverallProgress(resolve);
@@ -186,7 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 等待图片和 3D 引擎全部就绪
             await Promise.all([dependencyPromise, imagesPromise]);
-            
+
             // 初始化 Three.js 场景并解析 3D 模型
             initThreeScene();
         } catch (e) {
@@ -330,7 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 loadedModel = model;
 
                 // 强制将芯片 Y 坐标挂载到高处，准备空降
-                loadedModel.position.y = targetModelY; 
+                loadedModel.position.y = targetModelY;
 
                 // 全面加载结束！
                 isLoaded = true;
@@ -520,7 +555,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (cyberTheater) cyberTheater.classList.remove('active');
                 safePauseVideo(casesVideo);
                 if (bgEl) bgEl.classList.remove('state-case-study');
-            } 
+            }
             else if (frameIndex >= 245 && frameIndex < 280) {
                 // B2. 官网大荧幕展示段 (245 - 279) —— 飞入右上方，侧偏慢转
                 targetModelX = 1.8;
@@ -536,12 +571,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (cyberTheater) cyberTheater.classList.add('active');
                 if (appleCaseTitle) appleCaseTitle.innerText = "开发官网。";
                 if (appleCaseSubtitle) appleCaseSubtitle.innerText = "极速响应，一镜到底。";
-                
+
                 safePlayVideo(casesVideo);
 
                 // 注入背景降噪类
                 if (bgEl) bgEl.classList.add('state-case-study');
-            } 
+            }
             else if (frameIndex >= 280 && frameIndex < 315) {
                 // B3. 小程序大荧幕展示段 (280 - 314) —— 划抛物线下弧线穿梭至左侧
                 targetModelX = -1.8;
@@ -557,12 +592,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (cyberTheater) cyberTheater.classList.add('active');
                 if (appleCaseTitle) appleCaseTitle.innerText = "微信小程序。";
                 if (appleCaseSubtitle) appleCaseSubtitle.innerText = "极致加载，安全稳健。";
-                
+
                 safePlayVideo(casesVideo);
 
                 // 保持背景降噪
                 if (bgEl) bgEl.classList.add('state-case-study');
-            } 
+            }
             else {
                 // B4. 最终就绪段 (315 - 320) —— 芯片冲向前台归位，大荧幕淡出，激活 3D 自由把玩
                 targetModelX = 0.0;
@@ -686,7 +721,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isAutoPlaying = true;
         if (playIcon) playIcon.className = 'ri-pause-circle-line';
         if (playText) playText.innerText = 'PLAYING DEMO // 点击暂停演示';
-        
+
         if (fadeOutTimer) {
             clearInterval(fadeOutTimer);
             fadeOutTimer = null;
@@ -721,7 +756,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         isWaitingAtEnd = false;
         isRewinding = false;
-        
+
         if (fadeOutTimer) {
             clearInterval(fadeOutTimer);
             fadeOutTimer = null;
@@ -824,7 +859,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (playText) playText.innerText = 'PLAYING DEMO // 点击暂停演示';
                         demoAudio.currentTime = 0;
                         demoAudio.volume = 1.0;
-                        demoAudio.play().then(() => updateAudioControlUI()).catch(() => {});
+                        demoAudio.play().then(() => updateAudioControlUI()).catch(() => { });
                     }
                 } else {
                     targetFrame = Math.max(0, targetFrame - REWIND_SPEED * dt);
@@ -879,11 +914,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!userInteracting) {
                 const k = 1 - Math.exp(-3.5 * dt);
-                
+
                 // 模型旋转 Lerp 逼近
                 loadedModel.rotation.y += (targetRotationY - loadedModel.rotation.y) * k;
                 loadedModel.rotation.x += (targetRotationX - loadedModel.rotation.x) * k;
-                
+
                 // 模型缩放 Lerp 逼近
                 const scaleTarget = baseScale * targetScale;
                 loadedModel.scale.x += (scaleTarget - loadedModel.scale.x) * k;
@@ -972,7 +1007,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 首次点击任意位置激活音频播放（解禁浏览器安全政策）
     document.addEventListener('click', () => {
         if (demoAudio.paused && !demoAudio.muted) {
-            demoAudio.play().catch(() => {});
+            demoAudio.play().catch(() => { });
         }
     }, { once: true });
 

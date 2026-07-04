@@ -33,16 +33,16 @@
 <body>
     <!-- 智能行内超时看门狗：在大模型文件 model_data.js 阻塞页面解析时即时运行，为弱网/手机端提供超强兜底保障 -->
     <script>
-        (function() {
-            var watchdogTimer = setTimeout(function() {
+        (function () {
+            var watchdogTimer = setTimeout(function () {
                 if (!window.isChip3DReady) {
                     window.triggerLoaderFallback("TIMEOUT");
                 }
             }, 10000); // 10秒超时守护
 
-            window.triggerLoaderFallback = function(type) {
+            window.triggerLoaderFallback = function (type) {
                 if (window.isChip3DReady && type !== "ERROR") return;
-                
+
                 if (watchdogTimer) {
                     clearTimeout(watchdogTimer);
                     watchdogTimer = null;
@@ -84,7 +84,7 @@
                 // 自动复制链接
                 var currentUrl = window.location.href;
                 var statusText = document.getElementById("copy-status-text");
-                
+
                 function showCopySuccess() {
                     if (statusText) {
                         statusText.innerHTML = '<i class="ri-checkbox-circle-line"></i> 页面链接已自动复制至剪贴板';
@@ -102,7 +102,7 @@
                 if (navigator.clipboard && navigator.clipboard.writeText) {
                     navigator.clipboard.writeText(currentUrl)
                         .then(showCopySuccess)
-                        .catch(function() {
+                        .catch(function () {
                             fallbackCopy(currentUrl) ? showCopySuccess() : showCopyFail();
                         });
                 } else {
@@ -128,20 +128,20 @@
             };
 
             // 事件委托处理手动复制，彻底脱离外部 js 的运行依赖
-            document.addEventListener("click", function(e) {
+            document.addEventListener("click", function (e) {
                 if (e.target && e.target.id === "btn-copy-link") {
                     var currentUrl = window.location.href;
                     var statusText = document.getElementById("copy-status-text");
-                    
+
                     if (navigator.clipboard && navigator.clipboard.writeText) {
                         navigator.clipboard.writeText(currentUrl)
-                            .then(function() {
+                            .then(function () {
                                 if (statusText) {
                                     statusText.innerHTML = '<i class="ri-checkbox-circle-line"></i> 手动复制成功！';
                                     statusText.style.color = "#10b981";
                                 }
                             })
-                            .catch(function() {
+                            .catch(function () {
                                 fallbackManualCopy();
                             });
                     } else {
@@ -172,7 +172,7 @@
                 }
             });
 
-            window.clearWatchdog = function() {
+            window.clearWatchdog = function () {
                 if (watchdogTimer) {
                     clearTimeout(watchdogTimer);
                     watchdogTimer = null;
@@ -191,18 +191,24 @@
             </div>
             <p class="loader-subtext">正在静默构建芯片三维神经元映射，请稍候...</p>
             <!-- 容错机制：加载超时与移动端防卡死提示面板 -->
-            <div id="loader-error-tip" class="loader-error-tip hidden" style="margin-top: 2rem; color: #ef4444; font-size: 0.85rem; max-width: 450px; margin-left: auto; margin-right: auto; text-align: left; background: rgba(239, 68, 68, 0.05); border: 1px dashed rgba(239, 68, 68, 0.3); padding: 1.2rem; border-radius: 8px; font-family: var(--font-body); opacity: 0; transition: opacity 0.5s ease;">
-                <div style="font-weight: 800; font-family: var(--font-heading); margin-bottom: 0.5rem; letter-spacing: 1.5px; display: flex; align-items: center; gap: 6px;">
+            <div id="loader-error-tip" class="loader-error-tip hidden"
+                style="margin-top: 2rem; color: #ef4444; font-size: 0.85rem; max-width: 450px; margin-left: auto; margin-right: auto; text-align: left; background: rgba(239, 68, 68, 0.05); border: 1px dashed rgba(239, 68, 68, 0.3); padding: 1.2rem; border-radius: 8px; font-family: var(--font-body); opacity: 0; transition: opacity 0.5s ease;">
+                <div
+                    style="font-weight: 800; font-family: var(--font-heading); margin-bottom: 0.5rem; letter-spacing: 1.5px; display: flex; align-items: center; gap: 6px;">
                     <i class="ri-alert-line"></i> SYSTEM LATENCY DETECTED // 链路响应异常
                 </div>
                 <p style="color: #94a3b8; font-size: 0.8rem; line-height: 1.6; margin-bottom: 1rem;">
                     检测到三维量子网络装载异常或延迟。部分移动端/手机端浏览器对 WebGL 核心与大体积模型存在强烈的内存及缓存限制，可能导致加载中断。
                 </p>
-                <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; border-top: 1px dashed rgba(255,255,255,0.05); padding-top: 0.8rem; font-size: 0.75rem;">
-                    <span id="copy-status-text" style="color: #10b981; font-weight: 600;"><i class="ri-checkbox-circle-line"></i> 页面链接已自动复制至剪贴板</span>
-                    <button id="btn-copy-link" style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.4); color: #10b981; padding: 4px 10px; border-radius: 4px; cursor: pointer; transition: all 0.3s; font-size: 0.75rem; pointer-events: auto;">手动复制</button>
+                <div
+                    style="display: flex; align-items: center; justify-content: space-between; gap: 10px; border-top: 1px dashed rgba(255,255,255,0.05); padding-top: 0.8rem; font-size: 0.75rem;">
+                    <span id="copy-status-text" style="color: #10b981; font-weight: 600;"><i
+                            class="ri-checkbox-circle-line"></i> 页面链接已自动复制至剪贴板</span>
+                    <button id="btn-copy-link"
+                        style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.4); color: #10b981; padding: 4px 10px; border-radius: 4px; cursor: pointer; transition: all 0.3s; font-size: 0.75rem; pointer-events: auto;">手动复制</button>
                 </div>
-                <p style="color: #64748b; font-size: 0.72rem; margin-top: 0.8rem; border-top: 1px dashed rgba(255,255,255,0.05); padding-top: 0.6rem; text-align: center;">
+                <p
+                    style="color: #64748b; font-size: 0.72rem; margin-top: 0.8rem; border-top: 1px dashed rgba(255,255,255,0.05); padding-top: 0.6rem; text-align: center;">
                     📌 推荐使用电脑端现代浏览器（如 Chrome / Edge）打开，以解锁极致的一镜到底体验。
                 </p>
             </div>
@@ -246,13 +252,15 @@
             </div>
             <p class="panel-desc">这是集成了个人全栈技术栈的量子级超导处理器芯片。向下滚动滚轮，探索芯片在前端交互、后端超频引擎与安全存储底座中的爆炸式一镜到底拆解与聚合重组过程。</p>
             <div class="action-hint" id="btn-auto-demo" style="cursor: pointer; pointer-events: auto;">
-                <i class="ri-play-circle-line" id="play-icon"></i> <span id="play-text">CLICK TO PLAY DEMO // 点击开启演示</span>
+                <i class="ri-play-circle-line" id="play-icon"></i> <span id="play-text">CLICK TO PLAY DEMO //
+                    点击开启演示</span>
             </div>
         </div>
 
         <!-- 面板 1：顶层前端设计 (88-119帧) -->
         <div class="info-panel" id="panel-frontend">
-            <span class="panel-tag" style="color: #00fff9; border-color: rgba(0,255,249,0.3);">// LAYER_01 : FRONTEND VISUAL</span>
+            <span class="panel-tag" style="color: #00fff9; border-color: rgba(0,255,249,0.3);">// LAYER_01 : FRONTEND
+                VISUAL</span>
             <h2 class="section-title">顶层：前端交互视界层</h2>
             <div class="line-guide" style="background-color: #00fff9; box-shadow: 0 0 10px #00fff9;"></div>
             <p class="panel-desc">采用超高折射率的<strong class="highlight-cyan">幻彩全息玻璃盖板</strong>。表层蚀刻亮青色发光电路，专为 <strong
@@ -268,7 +276,8 @@
 
         <!-- 面板 2：中层后端核心 (120-154帧) -->
         <div class="info-panel" id="panel-backend">
-            <span class="panel-tag" style="color: #8b5cf6; border-color: rgba(139,92,246,0.3);">// LAYER_02 : BACKEND CORE ENGINE</span>
+            <span class="panel-tag" style="color: #8b5cf6; border-color: rgba(139,92,246,0.3);">// LAYER_02 : BACKEND
+                CORE ENGINE</span>
             <h2 class="section-title">中层：后端性能超频引擎</h2>
             <div class="line-guide" style="background-color: #8b5cf6; box-shadow: 0 0 10px #8b5cf6;"></div>
             <p class="panel-desc">深空灰超导晶圆基板。核心搭载亮紫色光芒闪烁的 <strong class="highlight-purple">Java 21 与 Spring Boot
@@ -284,7 +293,8 @@
 
         <!-- 面板 3：底层安全数据库 (155-191帧) -->
         <div class="info-panel" id="panel-database">
-            <span class="panel-tag" style="color: #f59e0b; border-color: rgba(245,158,11,0.3);">// LAYER_03 : SECURE DATA SUBSTRATE</span>
+            <span class="panel-tag" style="color: #f59e0b; border-color: rgba(245,158,11,0.3);">// LAYER_03 : SECURE
+                DATA SUBSTRATE</span>
             <h2 class="section-title">底层：安全数据库存储基底</h2>
             <div class="line-guide" style="background-color: #f59e0b; box-shadow: 0 0 10px #f59e0b;"></div>
             <p class="panel-desc"><strong class="highlight-gold">超强防爆钛合金装甲护罩</strong>。芯片最底层敷设一层<strong
@@ -300,7 +310,8 @@
 
         <!-- 面板 4：搞怪动作招募面板 (192-224帧) -->
         <div class="info-panel" id="panel-action">
-            <span class="panel-tag" style="color: #ef4444; border-color: rgba(239,68,68,0.3);">// SYSTEM : REASSEMBLY COMPLETE</span>
+            <span class="panel-tag" style="color: #ef4444; border-color: rgba(239,68,68,0.3);">// SYSTEM : REASSEMBLY
+                COMPLETE</span>
             <h2 class="section-title" style="color: #fff; text-shadow: 0 0 15px rgba(239,68,68,0.25);">核心就绪！立即装配？</h2>
             <div class="line-guide" style="background-color: #ef4444; box-shadow: 0 0 10px #ef4444;"></div>
             <p class="panel-desc">检测到全栈超导芯片已完成重组复位，全系统量子回路全线贯通！现在就将这枚拥有 300% 动力的全栈芯片安装 to 你的技术团队中吗？</p>
@@ -313,10 +324,14 @@
 
         <!-- 面板 5：3D专属苹果风购买/咨询面板 (315-320帧) -->
         <div class="info-panel" id="panel-action-3d">
-            <span class="panel-tag" style="color: #ffffff; border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.02);">// SYSTEM : ARCHITECTURE DEPLOYED</span>
+            <span class="panel-tag"
+                style="color: #ffffff; border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.02);">//
+                SYSTEM : ARCHITECTURE DEPLOYED</span>
             <h2 class="section-title" style="color: #fff; text-shadow: 0 2px 20px rgba(0,0,0,0.5);">立即购买？</h2>
-            <div class="line-guide" style="background-color: #ffffff; box-shadow: 0 0 10px rgba(255,255,255,0.3);"></div>
-            <p class="panel-desc">全栈技术芯片已完全合体并测试就绪。无论是像素级还原的 3D 交互官网，还是高吞吐的 Spring Boot 微服务架构，核心随时等待装载。现在就将它带入您的技术团队中吗？</p>
+            <div class="line-guide" style="background-color: #ffffff; box-shadow: 0 0 10px rgba(255,255,255,0.3);">
+            </div>
+            <p class="panel-desc">全栈技术芯片已完全合体并测试就绪。无论是像素级还原的 3D 交互官网，还是高吞吐的 Spring Boot 微服务架构，核心随时等待装载。现在就将它带入您的技术团队中吗？
+            </p>
             <div class="action-buttons-wrapper">
                 <a href="index.html#contact" class="btn-action-buy btn-apple-buy">
                     <i class="ri-shopping-bag-line"></i> 立即咨询 / BUY NOW
@@ -334,7 +349,7 @@
         </div>
         <div id="cyber-theater-slot" class="apple-theater-card">
             <div class="theater-border-effect">
-                <video id="cases-video" src="assets/video/guanwangyans.mp4" loop muted playsinline preload="auto"></video>
+                <video id="cases-video" src="assets/video/guanwangyans.mp4#t=0.1" loop muted playsinline webkit-playsinline="true" x5-playsinline="true" x5-video-player-type="h5-page" preload="auto"></video>
             </div>
         </div>
     </div>
