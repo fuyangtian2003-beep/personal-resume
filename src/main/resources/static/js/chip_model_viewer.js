@@ -3,8 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // CDN 双路加速与容灾配置 (首选本地离线包保证秒开，备选国内高速镜像源容灾)
     const LIBS = {
         three: {
-            primary: "https://cdn.bootcdn.net/ajax/libs/three.js/r128/three.min.js",
-            fallback: "js/lib/three.min.js"
+            primary: "js/lib/three_r128.min.js",
+            fallback: "https://cdn.bootcdn.net/ajax/libs/three.js/r128/three.min.js"
         },
         gltf: {
             primary: "https://cdn.jsdmirror.com/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js",

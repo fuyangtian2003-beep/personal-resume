@@ -2,8 +2,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. 3D 核心依赖本地包及 CDN 容灾降级配置
     const LIBS = {
         three: {
-            primary: "https://cdn.bootcdn.net/ajax/libs/three.js/r128/three.min.js",
-            fallback: "js/lib/three.min.js"
+            primary: "js/lib/three_r128.min.js",
+            fallback: "https://cdn.bootcdn.net/ajax/libs/three.js/r128/three.min.js"
         },
         gltf: {
             primary: "https://cdn.jsdmirror.com/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js",
@@ -31,6 +31,37 @@ document.addEventListener('DOMContentLoaded', () => {
     const appleCaseTitle = document.getElementById('apple-case-title');
     const appleCaseSubtitle = document.getElementById('apple-case-subtitle');
     const casesVideo = document.getElementById('cases-video');
+
+    // 2.8 异步视频播放排队与状态防抖函数（解决滚动时高频 play/pause 触发的 AbortError 黑屏卡死 Bug）
+    function safePlayVideo(video) {
+        if (!video) return;
+        if (video.dataset.playState === 'playing') return;
+        
+        video.dataset.playState = 'playing';
+        video.play().then(() => {
+            if (video.dataset.playState === 'paused') {
+                video.pause();
+            }
+        }).catch(err => {
+            console.log("[Video] safePlayVideo promise interrupted:", err.message);
+            if (video.dataset.playState === 'playing') {
+                setTimeout(() => {
+                    if (video.dataset.playState === 'playing' && video.paused) {
+                        video.play().catch(() => {});
+                    }
+                }, 150);
+            }
+        });
+    }
+
+    function safePauseVideo(video) {
+        if (!video) return;
+        if (video.dataset.playState === 'paused') return;
+        
+        video.dataset.playState = 'paused';
+        video.pause();
+    }
+
 
     // HUD 调试节点
     const hudProgress = document.getElementById('hud-progress');
@@ -487,7 +518,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // 隐藏大荧幕
                 if (cyberTheater) cyberTheater.classList.remove('active');
-                if (casesVideo) casesVideo.pause();
+                safePauseVideo(casesVideo);
                 if (bgEl) bgEl.classList.remove('state-case-study');
             } 
             else if (frameIndex >= 245 && frameIndex < 280) {
@@ -506,11 +537,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (appleCaseTitle) appleCaseTitle.innerText = "开发官网。";
                 if (appleCaseSubtitle) appleCaseSubtitle.innerText = "极速响应，一镜到底。";
                 
-                if (casesVideo) {
-                    if (casesVideo.paused) {
-                        casesVideo.play().catch(e => console.log("视频播放受阻:", e));
-                    }
-                }
+                safePlayVideo(casesVideo);
 
                 // 注入背景降噪类
                 if (bgEl) bgEl.classList.add('state-case-study');
@@ -531,11 +558,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (appleCaseTitle) appleCaseTitle.innerText = "微信小程序。";
                 if (appleCaseSubtitle) appleCaseSubtitle.innerText = "极致加载，安全稳健。";
                 
-                if (casesVideo) {
-                    if (casesVideo.paused) {
-                        casesVideo.play().catch(e => console.log("视频播放受阻:", e));
-                    }
-                }
+                safePlayVideo(casesVideo);
 
                 // 保持背景降噪
                 if (bgEl) bgEl.classList.add('state-case-study');
@@ -551,9 +574,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // 大荧幕淡出，视频重置
                 if (cyberTheater) cyberTheater.classList.remove('active');
-                if (casesVideo) {
-                    casesVideo.pause();
-                }
+                safePauseVideo(casesVideo);
 
                 // 背景恢复，网格显现
                 if (bgEl) bgEl.classList.remove('state-case-study');

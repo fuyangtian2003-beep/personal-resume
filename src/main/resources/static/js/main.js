@@ -33,8 +33,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // 预加载的 11 个大体积资源定义
         const resources = [
             { href: 'https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg', as: 'image', crossorigin: 'anonymous' },
-            { href: 'https://cdn.bootcdn.net/ajax/libs/three.js/0.160.0/three.min.js', as: 'script' },
-            { href: 'https://cdn.bootcdn.net/ajax/libs/three.js/r128/three.min.js', as: 'script' },
+            { href: 'js/lib/three_0.160.0.min.js', as: 'script' },
+            { href: 'js/lib/three_r128.min.js', as: 'script' },
             { href: 'https://cdn.jsdmirror.com/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js', as: 'script' },
             { href: 'https://cdn.jsdmirror.com/npm/three@0.128.0/examples/js/controls/OrbitControls.js', as: 'script' },
             { href: 'js/model_data.js', as: 'script' },
@@ -46,6 +46,10 @@ document.addEventListener('DOMContentLoaded', () => {
         ];
 
         resources.forEach(res => {
+            // 本地 file: 协议环境下无法预拉取本地相对路径资源，直接跳过以防控制台报错
+            if (window.location.protocol === 'file:' && !res.href.startsWith('http')) {
+                return;
+            }
             const link = document.createElement('link');
             link.rel = 'prefetch';
             link.href = res.href;
@@ -135,8 +139,8 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("%c📦 Summoning Three.js Engine...", "color: #3b82f6; font-weight: bold;");
         const script = document.createElement('script');
 
-        // 首选国内极速镜像源（换用稳定的 BootCDN）
-        script.src = 'https://cdn.bootcdn.net/ajax/libs/three.js/0.160.0/three.min.js';
+        // 首选本地强缓存源（降级使用 BootCDN 镜像）
+        script.src = 'js/lib/three_0.160.0.min.js';
 
         // 容灾降级核心函数
         let isFallbackTriggered = false;
@@ -148,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
             script.remove(); // 清理失效标签
 
             const backupScript = document.createElement('script');
-            backupScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js';
+            backupScript.src = 'https://cdn.bootcdn.net/ajax/libs/three.js/0.160.0/three.min.js';
             backupScript.onload = () => {
                 if (window.THREE) {
                     callback();
@@ -218,6 +222,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 导航菜单 Hover 感知智能预拉取
     function initHoverPreload() {
+        if (window.location.protocol === 'file:') {
+            console.log("%c📡 [Hover Preload] Skipped prefetching in local file:// environment to keep console clean.", "color: #94a3b8;");
+            return;
+        }
+
         const hoverTargets = [
             { selector: 'a[href="lab.html"]', resources: ['lab.html', 'js/lab.js'] },
             { selector: 'a[href="chip_test.html"]', resources: ['chip_test.html', 'js/chip_fusion_viewer.js'] },
